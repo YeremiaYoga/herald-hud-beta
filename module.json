@@ -1,0 +1,20 @@
+{
+  "name": "herald-hud-beta",
+  "title": "Herald HUD Beta",
+  "description": "Herald Beta Testing",
+  "version": "1.0.0",
+  "author": ["Herald of Memory", "CandleNote"],
+  "manifest": "https://raw.githubusercontent.com/YeremiaYoga/herald-hud-beta/main/module.json",
+  "download": "https://github.com/YeremiaYoga/herald-hud-beta/archive/refs/heads/main.zip",
+  "esmodules": ["scripts/main.js"],
+  "styles": ["styles/style.css"],
+  "persistentStorage": true,
+  "socket": true,
+  "dependencies": [],
+  "languages": [],
+  "packs": [],
+  "compatibility": {
+    "minimum": "12",
+    "verified": "12"
+  }
+}

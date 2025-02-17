@@ -1,0 +1,546 @@
+.heraldHud {
+    position: fixed;
+    bottom: 7%;
+    left: 40%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+}
+
+.heraldHud-container {
+    position: relative;
+}
+
+.heraldHud-topContainer {
+    position: relative;
+    left: 65%;
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: -10px;
+    gap: 10px;
+    width: 265px;
+}
+
+.heraldHud-listEffectContainer {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 5px;
+    max-width: calc(7 * (25px + 5px));
+    flex-wrap: wrap-reverse;
+
+
+}
+
+.heraldHud-effectContainer {
+    width: 25px;
+    height: 25px;
+    background-color: gray;
+    border: 2px solid black;
+}
+
+.heraldHud-addSummonContainer {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+
+}
+
+.heraldHud-addSummonerButton {
+    width: 40px;
+    height: 40px;
+    align-items: center;
+    border: 2px dashed black;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    -ms-border-radius: 50%;
+    -o-border-radius: 50%;
+}
+
+.heraldHud-middleContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+
+
+.heraldHud-barContainer {
+    position: absolute;
+    left: 40%;
+    transform: translateX(-50%);
+    z-index: 6;
+    -webkit-transform: translateX(-50%);
+    -moz-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    -o-transform: translateX(-50%);
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
+.heraldHud-actorHpSvg {
+    transform: rotate(110deg);
+    z-index: 6;
+    -webkit-transform: rotate(110deg);
+    -moz-transform: rotate(110deg);
+    -ms-transform: rotate(110deg);
+    -o-transform: rotate(110deg);
+}
+
+.heraldHud-actorHpBackground {
+    fill: none;
+    stroke: rgb(46, 46, 46);
+    stroke-width: 10;
+
+}
+
+.heraldHud-actorHpBar {
+    fill: none;
+    stroke: #4caf50;
+    stroke-width: 10;
+    /* transition: stroke-dashoffset 0.5s ease; */
+}
+
+.heraldHud-actorTempHpSvg {
+    transform: rotate(110deg);
+}
+
+.heraldHud-tempHpBarLeft {
+    position: absolute;
+    top: -8%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 11;
+    -webkit-transform: translateX(-50%);
+    -moz-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    -o-transform: translateX(-50%);
+}
+
+.heraldHud-tempHpLeft {
+    fill: none;
+    stroke: rgb(26, 209, 255);
+    stroke-width: 3;
+    pointer-events: none;
+    z-index: 6;
+    /* transition: stroke-dashoffset 0.5s ease; */
+}
+
+.heraldHud-tempHpBarRight {
+    position: absolute;
+    top: 7%;
+    left: 49%;
+    transform: translateX(-50%);
+    z-index: 11;
+    -webkit-transform: translateX(-50%);
+    -moz-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    -o-transform: translateX(-50%);
+}
+
+.heraldHud-tempHpRight {
+    fill: none;
+    stroke: rgb(26, 209, 255);
+    stroke-width: 3;
+    pointer-events: none;
+    z-index: 6;
+    /* transition: stroke-dashoffset 0.5s ease; */
+}
+
+
+
+
+.heraldHud-imageValueDiv {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-color: #363636;
+    border: 2px solid #d4af37;
+    z-index: 8;
+    cursor: pointer;
+}
+
+.heraldHud-imageView {
+    width: 99%;
+    height: 99%;
+    border: none;
+    object-fit: cover;
+    object-position: center;
+    z-index: 8;
+    border-radius: 50%;
+}
+
+
+.heraldHud-hudContainer {
+    position: absolute;
+    display: flex;
+    width: 300px;
+    height: 70px;
+    border: 3px solid black;
+    top: 20%;
+    left: 60%;
+    border-radius: 0 20% 20% 0;
+    background-color: rgb(0, 0, 0, 0.7);
+}
+
+.heraldHud-hudBoxleft,
+.heraldHud-hudBoxMiddle,
+.heraldHud-hudBoxRight {
+    flex: 1;
+    height: 100%;
+}
+
+.heraldHud-hudBoxleft {
+
+    justify-content: center;
+}
+
+.heraldHud-walkSpeedContainer {
+    text-align: center;
+    color: white;
+}
+
+.heraldHud-walkSpeedName {
+    font-size: 14px;
+}
+
+.heraldHud-walkSpeedValue {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.heraldHud-speedIconContainer {
+    display: flex;
+    margin-left: 19%;
+    gap: 1px;
+}
+
+.heraldHud-burrowSpeedContainer {}
+
+.heraldHud-burrowSpeedWrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.heraldHud-burrowSpeedIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+}
+
+
+.heraldHud-burrowSpeedIcon i {
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgb(26, 209, 255);
+    opacity: 0.5;
+}
+
+.heraldHud-burrowSpeedValue {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 10px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px black;
+}
+
+.heraldHud-burrowSpeedHover {
+    color: white;
+    font-size: 10px;
+}
+
+.heraldHud-climbSpeedWrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.heraldHud-climbSpeedIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+}
+
+.heraldHud-climbSpeedIcon i {
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgb(26, 209, 255);
+    opacity: 0.5;
+}
+
+.heraldHud-climbSpeedValue {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 10px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px black;
+}
+
+.heraldHud-flySpeedWrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.heraldHud-flySpeedIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+}
+
+.heraldHud-flySpeedIcon i {
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgb(26, 209, 255);
+    opacity: 0.5;
+}
+
+.heraldHud-flySpeedValue {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 10px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px black;
+}
+
+.heraldHud-swimSpeedWrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.heraldHud-swimSpeedIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+}
+
+.heraldHud-swimSpeedIcon i {
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgb(26, 209, 255);
+    opacity: 0.5;
+}
+
+.heraldHud-swimSpeedValue {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 10px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px black;
+}
+
+
+
+.heraldHud-hudBoxMiddle {
+    position: relative;
+}
+
+.heraldHud-hudBoxMiddle::before,
+.heraldHud-hudBoxMiddle::after {
+    content: "";
+    position: absolute;
+    width: 2px;
+    height: 80%;
+    background-color: rgb(0, 203, 253);
+    top: 10%;
+
+}
+
+.heraldHud-hudBoxMiddle::before {
+    left: 0;
+}
+
+.heraldHud-hudBoxMiddle::after {
+    right: 0;
+}
+
+.heraldHud-inventoryShortcutContainer {
+    display: grid;
+    grid-template-columns: repeat(2, 29px);
+    grid-template-rows: repeat(2, 29px);
+    gap: 3px;
+    width: max-content;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.heraldHud-inventoryShortcutContainer>div {
+    width: 29px;
+    height: 29px;
+    background-color: black;
+}
+
+.heraldHud-hudBoxRight {
+    /* display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative; */
+    height: 100%;
+}
+
+.heraldHud-consumableShortcutContainer {
+    padding: 2px;
+    display: grid;
+    grid-template-columns: repeat(2, 29px);
+    grid-template-rows: repeat(2, 29px);
+    gap: 3px;
+    max-height: 97%;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.heraldHud-consumableItemContainer {
+    width: 29px;
+    height: 29px;
+    background-color: red;
+}
+
+
+/* bottom container */
+.heraldHud-bottomContainer {
+    position: absolute;
+    width: 300px;
+    display: flex;
+    left: 40%;
+    gap: 20px;
+}
+
+.heraldHud-barValueContainer {
+    position: absolute;
+    margin-top: 6px;
+    color: white;
+    font-size: 12px;
+}
+
+.heraldHud-hpValueContainer {
+    display: flex;
+    gap: 5px;
+}
+
+.heraldHud-hpValue {
+    color: white;
+}
+
+.heraldHud-tempHpMaxValue {
+    font-size: 12px;
+    font-weight: bold;
+    pointer-events: none;
+}
+
+.heraldHud-tempHpValue {
+    color: rgb(0, 204, 255);
+}
+
+.heraldHud-actionContainer {
+    position: absolute;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    left: 27%;
+}
+
+.heraldHud-actionContainer div {
+    cursor: pointer; 
+}
+
+.heraldHud-acContainer {
+    position: absolute;
+    top: -30px;
+    left: 12%;
+    z-index: 10;
+}
+
+.heraldHud-acIconWrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.heraldHud-acIcon {
+    display: block;
+    width: 35px;
+    height: 35px;
+    border: none;
+}
+
+.heraldHud-acValue {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px black;
+}
+
+
+.heraldHud-actionContainer>div {
+    background-color: rgb(0, 0, 0, 0.7);
+    border: 2px solid black;
+    color: white;
+    padding: 5px 7px 5px 7px;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+
+.heraldHud-shortcutActionContainer {
+    position: absolute;
+    bottom: 80%;
+    right: -25%;
+    z-index: 10;
+}
+
+.heraldHud-shortcutActionIconWrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.heraldHud-shortcutActionIcon {
+    display: block;
+    width: 35px;
+    height: auto;
+    border: none;
+}
