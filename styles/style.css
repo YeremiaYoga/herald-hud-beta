@@ -376,14 +376,14 @@
     transform: translateX(-50%);
     z-index: 14;
     white-space: nowrap;
-  }
-  
-  .heraldHud-burrowSpeedWrapper:hover .heraldHud-speedTooltip,
-  .heraldHud-climbSpeedWrapper:hover .heraldHud-speedTooltip,
-  .heraldHud-flySpeedWrapper:hover .heraldHud-speedTooltip,
-  .heraldHud-swimSpeedWrapper:hover .heraldHud-speedTooltip {
+}
+
+.heraldHud-burrowSpeedWrapper:hover .heraldHud-speedTooltip,
+.heraldHud-climbSpeedWrapper:hover .heraldHud-speedTooltip,
+.heraldHud-flySpeedWrapper:hover .heraldHud-speedTooltip,
+.heraldHud-swimSpeedWrapper:hover .heraldHud-speedTooltip {
     visibility: visible;
-  }
+}
 
 
 
@@ -479,6 +479,7 @@
 
 .heraldHud-hpValue {
     width: 30px;
+
     text-align: center;
     display: flex;
     align-items: center;
@@ -506,6 +507,7 @@
 
 .heraldHud-tempHpValue {
     width: 30px;
+    height: 10px;
     text-align: center;
     display: flex;
     align-items: center;

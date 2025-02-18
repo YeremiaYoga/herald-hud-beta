@@ -149,13 +149,9 @@ async function heraldHud_updateDataActor() {
 
   if (hpBarDiv) {
     if (hp >= 0) {
-      let actorhpvaluebar = 0;
-      actorhpvaluebar = 300 - hpPercent;
-      hpBarDiv.style.strokeDashoffset = actorhpvaluebar;
+      let strokeValue = 310 - hpPercent * 1.1;
 
-      // let strokeValue = 310 - hpPercent * 1.1;
-
-      // hpBarDiv.style.strokeDashoffset = Math.max(strokeValue, 200);
+      hpBarDiv.style.strokeDashoffset = Math.max(strokeValue, 200);
 
       if (hpPercent < 0) {
         hpBarDiv.style.stroke = hp0;
@@ -182,13 +178,10 @@ async function heraldHud_updateDataActor() {
         });
       }
       const negativeHpPercent = (temphpValue / totalMaxHp) * -100;
-      let actorhpvaluebar = 0;
-      actorhpvaluebar = 300 - negativeHpPercent;
-      hpBarDiv.style.strokeDashoffset = actorhpvaluebar;
 
-      // let strokeValue = 310 - negativeHpPercent * 1.1;
+      let strokeValue = 310 - negativeHpPercent * 1.1;
 
-      // hpBarDiv.style.strokeDashoffset = Math.max(strokeValue, 200);
+      hpBarDiv.style.strokeDashoffset = Math.max(strokeValue, 200);
       if (negativeHpPercent > 0) {
         hpBarDiv.style.stroke = hp0;
       }
@@ -375,7 +368,7 @@ async function heraldHud_updateMovementsActor() {
      <div id="heraldHud-flySpeedContainer" class="heraldHud-flySpeedContainer">
         <div id="heraldHud-flySpeedWrapper" class="heraldHud-flySpeedWrapper">
           <div id="heraldHud-flySpeedIcon" class="heraldHud-flySpeedIcon"> 
-            <i class="fa-brands fa-fly"></i>
+            <i class="fa-solid fa-dove"></i>
             <div class="heraldHud-speedTooltip">Fly</div>
           </div>
           <div id="heraldHud-flySpeedValue" class="heraldHud-flySpeedValue">${actor.system.attributes.movement.fly}</div>
