@@ -31,20 +31,16 @@ async function heraldHud_renderHeraldHud() {
     await heraldHud_updateDataActor();
     await heraldHud_updateMovementsActor();
   }, 1000);
-
-  console.log(heraldHud_actorSelected);
 }
 
 async function heraldHud_getActorData() {
   const user = game.user;
-  console.log(user);
   let sceneListActor = game.scenes.viewed.tokens
     .filter((t) => t.actor.type === "character")
     .map((t) => t.actor);
   for (let actor of sceneListActor) {
     if (actor.ownership[user.id]) {
       if (actor.ownership[user.id] == 3) {
-        console.log(actor);
         heraldHud_actorSelected = actor;
         break;
       }
@@ -101,7 +97,6 @@ async function heraldHud_updateDataActor() {
 
   let hpValueInput = document.getElementById("heraldHud-hpValueInput");
   let tempHpValueInput = document.getElementById("heraldHud-tempHpValueInput");
-  console.log(tempHpValueInput);
   hpValueInput.addEventListener("input", function () {
     clearTimeout(hpValueInput.delayTimer);
     hpValueInput.delayTimer = setTimeout(async function () {
@@ -132,6 +127,7 @@ async function heraldHud_updateDataActor() {
       }
     }, 500);
   });
+
   const hp = actor.system.attributes.hp.value;
   const maxHp = actor.system.attributes.hp.max;
   let tempHp = actor.system.attributes.hp.temp || 0;
@@ -222,17 +218,16 @@ async function heraldHud_updateDataActor() {
     }
   }
   let tempPlusIconDiv = document.getElementById("heraldHud-tempPlusIcon");
+  let tempHpBarLeftDiv = document.querySelector(`.heraldHud-tempHpBarLeft`);
+
+  let tempHpBarRightDiv = document.querySelector(`.heraldHud-tempHpBarLeft`);
+  let tempHpCircleLeftDiv = document.getElementById("heraldHud-tempHpLeft");
+  let tempHpCircleRightDiv = document.getElementById("heraldHud-tempHpRight");
   if (tempHp > 0 || tempHp != "") {
     let tempHpBarContainerDiv = document.getElementById(
       "heraldHud-tempHpBarContainer"
     );
 
-    let tempHpBarLeftDiv = document.querySelector(`.heraldHud-tempHpBarLeft`);
-
-    let tempHpBarRightDiv = document.querySelector(`.heraldHud-tempHpBarLeft`);
-
-    let tempHpCircleLeftDiv = document.getElementById("heraldHud-tempHpLeft");
-    let tempHpCircleRightDiv = document.getElementById("heraldHud-tempHpRight");
     if (tempPlusIconDiv) {
       tempPlusIconDiv.innerText = `+`;
     }
@@ -241,6 +236,7 @@ async function heraldHud_updateDataActor() {
     }
     let actorTempValuebar = 0;
     actorTempValuebar = 300 - tempPercent;
+
     if (!tempHpBarLeftDiv && !tempHpBarRightDiv) {
       if (tempHpBarContainerDiv) {
         tempHpBarContainerDiv.innerHTML = `
@@ -293,6 +289,13 @@ async function heraldHud_updateDataActor() {
   } else {
     if (tempPlusIconDiv) {
       tempPlusIconDiv.innerText = ``;
+    }
+
+    if (tempHpCircleLeftDiv) {
+      tempHpCircleLeftDiv.style.strokeDashoffset = 310;
+    }
+    if (tempHpCircleRightDiv) {
+      tempHpCircleRightDiv.style.strokeDashoffset = 310;
     }
   }
 
@@ -353,7 +356,6 @@ async function heraldHud_updateMovementsActor() {
     `;
   }
 
-  // Climb speed
   if (actor.system.attributes.movement.climb) {
     climbSpeedValue = `
      <div id="heraldHud-climbSpeedContainer" class="heraldHud-climbSpeedContainer">
@@ -368,7 +370,6 @@ async function heraldHud_updateMovementsActor() {
     `;
   }
 
-  // Fly speed
   if (actor.system.attributes.movement.fly) {
     flySpeedValue = `
      <div id="heraldHud-flySpeedContainer" class="heraldHud-flySpeedContainer">
@@ -383,7 +384,6 @@ async function heraldHud_updateMovementsActor() {
     `;
   }
 
-  // Swim speed
   if (actor.system.attributes.movement.swim) {
     swimSpeedValue = `
      <div id="heraldHud-swimSpeedContainer" class="heraldHud-swimSpeedContainer">
