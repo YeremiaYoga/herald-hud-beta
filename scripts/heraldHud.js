@@ -1,5 +1,11 @@
 let heraldHud_actorSelected = null;
 
+let hp0 = "#8B0000";
+let hp25 = "#bc3c04";
+let hp50 = "#c47404";
+let hp75 = "#8c9c04";
+let hp100 = "#389454";
+
 async function heraldHud_renderHtml() {
   try {
     const response = await fetch(
@@ -92,6 +98,40 @@ async function heraldHud_renderActorData() {
 
 async function heraldHud_updateDataActor() {
   let actor = heraldHud_actorSelected;
+
+  let hpValueInput = document.getElementById("heraldHud-hpValueInput");
+  let tempHpValueInput = document.getElementById("heraldHud-tempHpValueInput");
+  console.log(tempHpValueInput);
+  hpValueInput.addEventListener("input", function () {
+    clearTimeout(hpValueInput.delayTimer);
+    hpValueInput.delayTimer = setTimeout(async function () {
+      let newHp = parseInt(hpValueInput.value);
+      if (!isNaN(newHp)) {
+        if (newHp > totalMaxHp) {
+          newHp = totalMaxHp;
+        }
+        await actor.update({ "system.attributes.hp.value": newHp });
+        hpValueInput.value = newHp;
+      }
+    }, 500);
+  });
+
+  tempHpValueInput.addEventListener("input", function () {
+    clearTimeout(tempHpValueInput.delayTimer);
+    tempHpValueInput.delayTimer = setTimeout(async function () {
+      let newTempHp = tempHpValueInput.value;
+      if (newTempHp === "" || newTempHp === "0") {
+        tempHpValueInput.value = "";
+        await actor.update({ "system.attributes.hp.temp": "" });
+      } else if (!isNaN(newTempHp)) {
+        if (newTempHp > totalMaxHp) {
+          newTempHp = totalMaxHp;
+        }
+        await actor.update({ "system.attributes.hp.temp": newTempHp });
+        tempHpValueInput.value = newTempHp;
+      }
+    }, 500);
+  });
   const hp = actor.system.attributes.hp.value;
   const maxHp = actor.system.attributes.hp.max;
   let tempHp = actor.system.attributes.hp.temp || 0;
@@ -112,16 +152,61 @@ async function heraldHud_updateDataActor() {
   let hpBarDiv = document.getElementById("heraldHud-actorHpBar");
 
   if (hpBarDiv) {
-    let actorhpvaluebar = 0;
+    if (hp >= 0) {
+      let actorhpvaluebar = 0;
+      actorhpvaluebar = 300 - hpPercent;
+      hpBarDiv.style.strokeDashoffset = actorhpvaluebar;
 
-    actorhpvaluebar = 310 - hpPercent;
+      // let strokeValue = 310 - hpPercent * 1.1;
 
-    hpBarDiv.style.strokeDashoffset = actorhpvaluebar;
+      // hpBarDiv.style.strokeDashoffset = Math.max(strokeValue, 200);
+
+      if (hpPercent < 0) {
+        hpBarDiv.style.stroke = hp0;
+      } else if (hpPercent <= 25) {
+        hpBarDiv.style.stroke = hp25;
+      } else if (hpPercent <= 50) {
+        hpBarDiv.style.stroke = hp50;
+      } else if (hpPercent <= 75) {
+        hpBarDiv.style.stroke = hp75;
+      } else {
+        hpBarDiv.style.stroke = hp100;
+      }
+      if (hpValueInput) {
+        hpValueInput.value = hp;
+      }
+    } else {
+      let temphpValue = hp;
+      let negativeBlockMax = hp + totalMaxHp;
+      if (negativeBlockMax < 0) {
+        temphpValue = totalMaxHp * -1;
+
+        await actor.data.update({
+          "system.attributes.hp.value": temphpValue,
+        });
+      }
+      const negativeHpPercent = (temphpValue / totalMaxHp) * -100;
+      let actorhpvaluebar = 0;
+      actorhpvaluebar = 300 - negativeHpPercent;
+      hpBarDiv.style.strokeDashoffset = actorhpvaluebar;
+
+      // let strokeValue = 310 - negativeHpPercent * 1.1;
+
+      // hpBarDiv.style.strokeDashoffset = Math.max(strokeValue, 200);
+      if (negativeHpPercent > 0) {
+        hpBarDiv.style.stroke = hp0;
+      }
+
+      if (hpValueInput) {
+        hpValueInput.value = temphpValue;
+      }
+    }
   }
-  let hpValueDiv = document.getElementById("heraldHud-hpValue");
 
-  if (hpValueDiv) {
-    hpValueDiv.innerText = hp + "/" + totalMaxHp;
+  let hpMaxValueDiv = document.getElementById("heraldHud-hpMaxValue");
+
+  if (hpMaxValueDiv) {
+    hpMaxValueDiv.innerText = "/ " + totalMaxHp;
   }
 
   if (tempmaxhp) {
@@ -136,9 +221,8 @@ async function heraldHud_updateDataActor() {
       }
     }
   }
-
-  if (tempHp) {
-    let tempHpValueDiv = document.getElementById("heraldHud-tempHpValue");
+  let tempPlusIconDiv = document.getElementById("heraldHud-tempPlusIcon");
+  if (tempHp > 0 || tempHp != "") {
     let tempHpBarContainerDiv = document.getElementById(
       "heraldHud-tempHpBarContainer"
     );
@@ -149,8 +233,11 @@ async function heraldHud_updateDataActor() {
 
     let tempHpCircleLeftDiv = document.getElementById("heraldHud-tempHpLeft");
     let tempHpCircleRightDiv = document.getElementById("heraldHud-tempHpRight");
-    if (tempHpValueDiv) {
-      tempHpValueDiv.innerText = `+${tempHp}`;
+    if (tempPlusIconDiv) {
+      tempPlusIconDiv.innerText = `+`;
+    }
+    if (tempHpValueInput) {
+      tempHpValueInput.value = tempHp;
     }
     let actorTempValuebar = 0;
     actorTempValuebar = 300 - tempPercent;
@@ -203,6 +290,10 @@ async function heraldHud_updateDataActor() {
         tempHpCircleRightDiv.style.strokeDashoffset = actorTempValuebar;
       }
     }
+  } else {
+    if (tempPlusIconDiv) {
+      tempPlusIconDiv.innerText = ``;
+    }
   }
 
   let acValueDiv = document.getElementById("heraldHud-acValue");
@@ -252,37 +343,55 @@ async function heraldHud_updateMovementsActor() {
     burrowSpeedValue = `
       <div id="heraldHud-burrowSpeedContainer" class="heraldHud-burrowSpeedContainer">
         <div id="heraldHud-burrowSpeedWrapper" class="heraldHud-burrowSpeedWrapper">
-          <div id="heraldHud-burrowSpeedIcon" class="heraldHud-burrowSpeedIcon"><i class="fa-solid fa-shovel" ></i></div>
+          <div id="heraldHud-burrowSpeedIcon" class="heraldHud-burrowSpeedIcon">
+            <i class="fa-solid fa-shovel"></i>
+            <div class="heraldHud-speedTooltip">Burrow</div>
+          </div>
           <div id="heraldHud-burrowSpeedValue" class="heraldHud-burrowSpeedValue">${actor.system.attributes.movement.burrow}</div>
         </div>
       </div>
     `;
   }
+
+  // Climb speed
   if (actor.system.attributes.movement.climb) {
     climbSpeedValue = `
      <div id="heraldHud-climbSpeedContainer" class="heraldHud-climbSpeedContainer">
         <div id="heraldHud-climbSpeedWrapper" class="heraldHud-climbSpeedWrapper">
-          <div id="heraldHud-climbSpeedIcon" class="heraldHud-climbSpeedIcon"> <i class="fa-solid fa-hill-rockslide" ></i></div>
+          <div id="heraldHud-climbSpeedIcon" class="heraldHud-climbSpeedIcon"> 
+            <i class="fa-solid fa-hill-rockslide"></i>
+            <div class="heraldHud-speedTooltip">Climb</div>
+          </div>
           <div id="heraldHud-climbSpeedValue" class="heraldHud-climbSpeedValue">${actor.system.attributes.movement.climb}</div>
         </div>
       </div>
     `;
   }
+
+  // Fly speed
   if (actor.system.attributes.movement.fly) {
     flySpeedValue = `
      <div id="heraldHud-flySpeedContainer" class="heraldHud-flySpeedContainer">
         <div id="heraldHud-flySpeedWrapper" class="heraldHud-flySpeedWrapper">
-          <div id="heraldHud-flySpeedIcon" class="heraldHud-flySpeedIcon"> <i class="fa-solid fa-dove" ></i></div>
+          <div id="heraldHud-flySpeedIcon" class="heraldHud-flySpeedIcon"> 
+            <i class="fa-brands fa-fly"></i>
+            <div class="heraldHud-speedTooltip">Fly</div>
+          </div>
           <div id="heraldHud-flySpeedValue" class="heraldHud-flySpeedValue">${actor.system.attributes.movement.fly}</div>
         </div>
       </div>
     `;
   }
+
+  // Swim speed
   if (actor.system.attributes.movement.swim) {
     swimSpeedValue = `
      <div id="heraldHud-swimSpeedContainer" class="heraldHud-swimSpeedContainer">
         <div id="heraldHud-swimSpeedWrapper" class="heraldHud-swimSpeedWrapper">
-          <div id="heraldHud-swimSpeedIcon" class="heraldHud-swimSpeedIcon"> <i class="fa-brands fa-fly" ></i></div>
+          <div id="heraldHud-swimSpeedIcon" class="heraldHud-swimSpeedIcon"> 
+            <i class="fa-solid fa-person-swimming"></i>
+            <div class="heraldHud-speedTooltip">Swim</div>
+          </div>
           <div id="heraldHud-swimSpeedValue" class="heraldHud-swimSpeedValue">${actor.system.attributes.movement.swim}</div>
         </div>
       </div>
