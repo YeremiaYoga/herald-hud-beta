@@ -79,6 +79,15 @@
             viewBox="0 0 100 100"
             class="heraldHud-actorHpSvg"
           >
+            <defs>
+              <linearGradient
+                id="heraldHud_hpGradient"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="0%"
+              ></linearGradient>
+            </defs>
             <circle
               cx="50"
               cy="50"
@@ -92,8 +101,18 @@
               cx="50"
               cy="50"
               r="45"
+              id="heraldHud-actorHpBarDelay"
+              class="heraldHud-actorHpBarDelay"
+              stroke-dasharray="310"
+              stroke-dashoffset="200"
+            />
+            <circle
+              cx="50"
+              cy="50"
+              r="45"
               id="heraldHud-actorHpBar"
               class="heraldHud-actorHpBar"
+              stroke="url(#heraldHud_hpGradient)"
               stroke-dasharray="310"
               stroke-dashoffset="200"
             />
@@ -126,83 +145,7 @@
           <div
             id="heraldHud-speedIconContainer"
             class="heraldHud-speedIconContainer"
-          >
-            <div
-              id="heraldHud-climbIconContainer"
-              class="heraldHud-climbIconContainer"
-            >
-              <div
-                id="heraldHud-climbSpeedContainer"
-                class="heraldHud-climbSpeedContainer"
-              >
-                <div
-                  id="heraldHud-climbSpeedWrapper"
-                  class="heraldHud-climbSpeedWrapper"
-                >
-                  <div
-                    id="heraldHud-climbSpeedIcon"
-                    class="heraldHud-climbSpeedIcon"
-                  ></div>
-                  <div
-                    id="heraldHud-climbSpeedValue"
-                    class="heraldHud-climbSpeedValue"
-                  >
-                    30
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div
-              id="heraldHud-flyIconContainer"
-              class="heraldHud-flyIconContainer"
-            >
-              <div
-                id="heraldHud-flySpeedContainer"
-                class="heraldHud-flySpeedContainer"
-              >
-                <div
-                  id="heraldHud-flySpeedWrapper"
-                  class="heraldHud-flySpeedWrapper"
-                >
-                  <div
-                    id="heraldHud-flySpeedIcon"
-                    class="heraldHud-flySpeedIcon"
-                  ></div>
-                  <div
-                    id="heraldHud-flySpeedValue"
-                    class="heraldHud-flySpeedValue"
-                  >
-                    30
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div
-              id="heraldHud-swimIconContainer"
-              class="heraldHud-swimIconContainer"
-            >
-              <div
-                id="heraldHud-swimSpeedContainer"
-                class="heraldHud-swimSpeedContainer"
-              >
-                <div
-                  id="heraldHud-swimSpeedWrapper"
-                  class="heraldHud-swimSpeedWrapper"
-                >
-                  <div
-                    id="heraldHud-swimSpeedIcon"
-                    class="heraldHud-swimSpeedIcon"
-                  ></div>
-                  <div
-                    id="heraldHud-swimSpeedValue"
-                    class="heraldHud-climbSpeedValue"
-                  >
-                    30
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          ></div>
         </div>
         <div id="heraldHud-hudBoxMiddle" class="heraldHud-hudBoxMiddle">
           <div
@@ -288,9 +231,14 @@
       <div id="heraldHud-barValueContainer" class="heraldHud-barValueContainer">
         <div id="heraldHud-hpValueContainer" class="heraldHud-hpValueContainer">
           <div id="heraldHud-hpValue" class="heraldHud-hpValue">
-            <input id="heraldHud-hpValueInput" class="heraldHud-hpValueInput" type="number" value="" />
+            <input
+              id="heraldHud-hpValueInput"
+              class="heraldHud-hpValueInput"
+              type="text"
+              value=""
+            />
           </div>
-        
+
           <div id="heraldHud-hpMaxValue" class="heraldHud-hpMaxValue"></div>
           <div
             id="heraldHud-tempHpMaxValue"
@@ -299,7 +247,12 @@
         </div>
         <div id="heraldHud-tempHpValue" class="heraldHud-tempHpValue">
           <div id="heraldHud-tempPlusIcon" class="heraldHud-tempPlusIcon"></div>
-          <input id="heraldHud-tempHpValueInput" class="heraldHud-tempHpValueInput" type="number" value="" />
+          <input
+            id="heraldHud-tempHpValueInput"
+            class="heraldHud-tempHpValueInput"
+            type="number"
+            value=""
+          />
         </div>
       </div>
       <div
@@ -314,6 +267,7 @@
             class="heraldHud-acIcon"
           />
           <div id="heraldHud-acValue" class="heraldHud-acValue"></div>
+          <div class="heraldHud-acTooltip">Armor Class</div>
         </div>
       </div>
       <div
@@ -321,18 +275,23 @@
         class="heraldHud-actionContainer"
       ></div>
       <div
-        id="heraldHud-shortcutActionContainer"
-        class="heraldHud-shortcutActionContainer"
+        id="heraldHud-initiativeContainer"
+        class="heraldHud-initiativeContainer"
       >
         <div
-          id="heraldHud-shortcutActionIconWrapper"
-          class="heraldHud-shortcutActionIconWrapper"
+          id="heraldHud-initiativeIconWrapper"
+          class="heraldHud-initiativeIconWrapper"
         >
           <img
             src="/modules/herald-hud-beta/assets/shortcut_icon.png"
             alt="Shortcut Icon"
-            class="heraldHud-shortcutActionIcon"
+            class="heraldHud-initiativeIcon"
           />
+          <div
+            id="heraldHud-initiativeValue"
+            class="heraldHud-initiativeValue"
+          ></div>
+          <div class="heraldHud-initiativeTooltip">Initiative</div>
         </div>
       </div>
     </div>

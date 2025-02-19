@@ -5,6 +5,7 @@ let hp25 = "#bc3c04";
 let hp50 = "#c47404";
 let hp75 = "#8c9c04";
 let hp100 = "#389454";
+let hpgradient = "rgb(34, 34, 34)";
 
 async function heraldHud_renderHtml() {
   try {
@@ -35,18 +36,29 @@ async function heraldHud_renderHeraldHud() {
 
 async function heraldHud_getActorData() {
   const user = game.user;
+  let selectedActor = user.character;
+
   let sceneListActor = game.scenes.viewed.tokens
     .filter((t) => t.actor.type === "character")
     .map((t) => t.actor);
-  for (let actor of sceneListActor) {
-    if (actor.ownership[user.id]) {
-      if (actor.ownership[user.id] == 3) {
+
+  if (selectedActor) {
+    heraldHud_actorSelected = selectedActor;
+  } else {
+    for (let actor of sceneListActor) {
+      if (actor.ownership[user.id] === 3) {
         heraldHud_actorSelected = actor;
         break;
       }
     }
   }
 }
+
+Hooks.on("updateUser", async (user, data) => {
+  if (data.character) {
+    await heraldHud_renderHeraldHud();
+  }
+});
 
 async function heraldHud_renderActorData() {
   let actor = heraldHud_actorSelected;
@@ -59,7 +71,29 @@ async function heraldHud_renderActorData() {
   `;
   }
 
+  imageActorDiv.addEventListener("dblclick", async (event) => {
+    const token = await fromUuid(actor.uuid);
+    if (token) {
+      token.sheet.render(true);
+    } else {
+      console.warn("Token not found on the current scene.");
+    }
+  });
+  imageActorDiv.addEventListener("click", async (event) => {
+    let targetTokens = canvas.tokens.placeables.filter(
+      (t) => t.actor?.uuid === actor.uuid
+    );
+
+    if (targetTokens.length > 0) {
+      let targetToken = targetTokens[0]; // Ambil token pertama
+
+      targetToken.control({ releaseOthers: true });
+      canvas.pan({ x: targetToken.x, y: targetToken.y });
+    }
+  });
+
   let actionContainerDiv = document.getElementById("heraldHud-actionContainer");
+  actionContainerDiv.innerHTML = "";
   const actions = [
     { id: "inventory", text: "Inventory" },
     { id: "features", text: "Features" },
@@ -97,20 +131,40 @@ async function heraldHud_updateDataActor() {
 
   let hpValueInput = document.getElementById("heraldHud-hpValueInput");
   let tempHpValueInput = document.getElementById("heraldHud-tempHpValueInput");
-  hpValueInput.addEventListener("input", function () {
+  function updateHpValue() {
+    let inputValue = hpValueInput.value.trim();
+    if (inputValue === "") return;
+
+    let newHp = parseInt(actor.system.attributes.hp.value) || 0;
+    let changeValue = parseInt(inputValue);
+
+    if (!isNaN(changeValue)) {
+      newHp =
+        inputValue.startsWith("+") || inputValue.startsWith("-")
+          ? newHp + changeValue
+          : changeValue;
+
+      newHp = Math.min(newHp, totalMaxHp);
+
+      actor.update({ "system.attributes.hp.value": newHp });
+      hpValueInput.value = newHp;
+    }
+  }
+
+  function delayedUpdate() {
     clearTimeout(hpValueInput.delayTimer);
-    hpValueInput.delayTimer = setTimeout(async function () {
-      let newHp = parseInt(hpValueInput.value);
-      if (!isNaN(newHp)) {
-        if (newHp > totalMaxHp) {
-          newHp = totalMaxHp;
-        }
-        await actor.update({ "system.attributes.hp.value": newHp });
-        hpValueInput.value = newHp;
-      }
-    }, 500);
+    hpValueInput.delayTimer = setTimeout(updateHpValue, 500);
+  }
+
+  hpValueInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      delayedUpdate();
+    }
   });
 
+  hpValueInput.addEventListener("blur", delayedUpdate);
+  //  temp input
   tempHpValueInput.addEventListener("input", function () {
     clearTimeout(tempHpValueInput.delayTimer);
     tempHpValueInput.delayTimer = setTimeout(async function () {
@@ -146,6 +200,8 @@ async function heraldHud_updateDataActor() {
   }
 
   let hpBarDiv = document.getElementById("heraldHud-actorHpBar");
+  let hpBarDelayDiv = document.getElementById("heraldHud-actorHpBarDelay");
+  let hpGradientColor = document.getElementById("heraldHud_hpGradient");
 
   if (hpBarDiv) {
     if (hp >= 0) {
@@ -153,16 +209,30 @@ async function heraldHud_updateDataActor() {
 
       hpBarDiv.style.strokeDashoffset = Math.max(strokeValue, 200);
 
+      setTimeout(() => {
+        hpBarDelayDiv.style.strokeDashoffset = Math.max(strokeValue, 200);
+      }, 500);
+
       if (hpPercent < 0) {
-        hpBarDiv.style.stroke = hp0;
+        hpGradientColor.innerHTML = `
+        <stop offset="70%" stop-color="${hp0}" />
+        <stop offset="100%" stop-color="${hpgradient}"/>`;
       } else if (hpPercent <= 25) {
-        hpBarDiv.style.stroke = hp25;
+        hpGradientColor.innerHTML = `
+        <stop offset="70%" stop-color="${hp25}" />
+        <stop offset="100%" stop-color="${hpgradient}"/>`;
       } else if (hpPercent <= 50) {
-        hpBarDiv.style.stroke = hp50;
+        hpGradientColor.innerHTML = `
+        <stop offset="70%" stop-color="${hp50}" />
+        <stop offset="100%" stop-color="${hpgradient}"/>`;
       } else if (hpPercent <= 75) {
-        hpBarDiv.style.stroke = hp75;
+        hpGradientColor.innerHTML = `
+        <stop offset="70%" stop-color="${hp75}" />
+        <stop offset="100%" stop-color="${hpgradient}"/>`;
       } else {
-        hpBarDiv.style.stroke = hp100;
+        hpGradientColor.innerHTML = `
+        <stop offset="70%" stop-color="${hp100}" />
+        <stop offset="100%" stop-color="${hpgradient}"/>`;
       }
       if (hpValueInput) {
         hpValueInput.value = hp;
@@ -183,7 +253,9 @@ async function heraldHud_updateDataActor() {
 
       hpBarDiv.style.strokeDashoffset = Math.max(strokeValue, 200);
       if (negativeHpPercent > 0) {
-        hpBarDiv.style.stroke = hp0;
+        hpGradientColor.innerHTML = `
+        <stop offset="70%" stop-color="${hp0}" />
+        <stop offset="100%" stop-color="${hpgradient}"/>`;
       }
 
       if (hpValueInput) {
@@ -240,12 +312,19 @@ async function heraldHud_updateDataActor() {
                 viewBox="0 0 100 100"
                 class="heraldHud-actorTempHpSvg"
               >
+                <defs>
+                  <linearGradient id="heraldHud_tempHpGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="60%" stop-color="rgb(26, 209, 255)" />
+                     <stop offset="100%" stop-color="rgb(199, 244, 255)"/>
+                  </linearGradient>
+                </defs>
                 <circle
                   cx="50"
                   cy="50"
                   r="45"
                   id="heraldHud-tempHpLeft"
                   class="heraldHud-tempHpLeft"
+                  stroke="url(#heraldHud_tempHpGradient)"
                   stroke-dasharray="310"
                   stroke-dashoffset="${actorTempValuebar}"
                 />
@@ -258,12 +337,21 @@ async function heraldHud_updateDataActor() {
                 viewBox="0 0 100 100"
                 class="heraldHud-actorTempHpSvg"
               >
+
+                 <defs>
+                  <linearGradient id="heraldHud_tempHpGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="60%" stop-color="rgb(26, 209, 255)" />
+                     <stop offset="100%" stop-color="rgb(199, 244, 255)"/>
+                  </linearGradient>
+                </defs>
+
                 <circle
                   cx="50"
                   cy="50"
                   r="45"
                   id="heraldHud-tempHpRight"
                   class="heraldHud-tempHpRight"
+                  stroke="url(#heraldHud_tempHpGradient)"
                   stroke-dasharray="310"
                   stroke-dashoffset="${actorTempValuebar}"
                 />
@@ -295,6 +383,19 @@ async function heraldHud_updateDataActor() {
   let acValueDiv = document.getElementById("heraldHud-acValue");
   if (acValueDiv) {
     acValueDiv.innerText = acValue;
+  }
+
+  let initiativeContainerDiv = document.getElementById(
+    "heraldHud-initiativeContainer"
+  );
+  let initiativeValueDiv = document.getElementById("heraldHud-initiativeValue");
+  initiativeContainerDiv.addEventListener("click", async () => {
+    if (actor) await actor.rollInitiative();
+  });
+
+  let initiativeValue = actor.system.attributes.init.bonus;
+  if (initiativeValueDiv) {
+    initiativeValueDiv.innerText = `+${initiativeValue || 0}`;
   }
 }
 
@@ -405,6 +506,7 @@ async function heraldHud_updateItemCosumablesActor() {}
 
 Hooks.on("updateActor", async (actor, data) => {
   await heraldHud_updateDataActor();
+  await heraldHud_updateMovementsActor();
 });
 
 export { heraldHud_renderHtml, heraldHud_renderHeraldHud };
