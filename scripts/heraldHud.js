@@ -52,9 +52,16 @@ async function heraldHud_getActorData() {
       }
     }
   }
+
+  let heraldHudDiv = document.getElementById("heraldHud");
+  console.log(heraldHudDiv);
+  if (heraldHudDiv) {
+    heraldHudDiv.style.display = heraldHud_actorSelected ? "block" : "none";
+  }
 }
 
 Hooks.on("updateUser", async (user, data) => {
+  console.log(data.character);
   if (data.character) {
     await heraldHud_renderHeraldHud();
   }
@@ -215,24 +222,24 @@ async function heraldHud_updateDataActor() {
 
       if (hpPercent < 0) {
         hpGradientColor.innerHTML = `
-        <stop offset="70%" stop-color="${hp0}" />
-        <stop offset="100%" stop-color="${hpgradient}"/>`;
+        <stop offset="75%" stop-color="${hp0}" />
+        <stop offset="100%" stop-color="${darkenHex(hp0, 40)}"/>`;
       } else if (hpPercent <= 25) {
         hpGradientColor.innerHTML = `
-        <stop offset="70%" stop-color="${hp25}" />
-        <stop offset="100%" stop-color="${hpgradient}"/>`;
+        <stop offset="75%" stop-color="${hp25}" />
+        <stop offset="100%" stop-color="${darkenHex(hp25, 40)}"/>`;
       } else if (hpPercent <= 50) {
         hpGradientColor.innerHTML = `
-        <stop offset="70%" stop-color="${hp50}" />
-        <stop offset="100%" stop-color="${hpgradient}"/>`;
+        <stop offset="75%" stop-color="${hp50}" />
+        <stop offset="100%" stop-color="${darkenHex(hp50, 40)}"/>`;
       } else if (hpPercent <= 75) {
         hpGradientColor.innerHTML = `
-        <stop offset="70%" stop-color="${hp75}" />
-        <stop offset="100%" stop-color="${hpgradient}"/>`;
+        <stop offset="75%" stop-color="${hp75}" />
+        <stop offset="100%" stop-color="${darkenHex(hp75, 40)}"/>`;
       } else {
         hpGradientColor.innerHTML = `
-        <stop offset="70%" stop-color="${hp100}" />
-        <stop offset="100%" stop-color="${hpgradient}"/>`;
+        <stop offset="75%" stop-color="${hp100}" />
+        <stop offset="100%" stop-color="${darkenHex(hp100, 40)}"/>`;
       }
       if (hpValueInput) {
         hpValueInput.value = hp;
@@ -269,9 +276,8 @@ async function heraldHud_updateDataActor() {
   if (hpMaxValueDiv) {
     hpMaxValueDiv.innerText = "/ " + totalMaxHp;
   }
-
+  let tempMaxHpValueDiv = document.getElementById("heraldHud-tempHpMaxValue");
   if (tempmaxhp) {
-    let tempMaxHpValueDiv = document.getElementById("heraldHud-tempHpMaxValue");
     if (tempMaxHpValueDiv) {
       if (tempmaxhp > 0) {
         tempMaxHpValueDiv.innerText = `(+${tempmaxhp})`;
@@ -280,6 +286,10 @@ async function heraldHud_updateDataActor() {
         tempMaxHpValueDiv.innerText = `(${tempmaxhp})`;
         tempMaxHpValueDiv.style.color = "#b0001d";
       }
+    }
+  } else {
+    if (tempMaxHpValueDiv) {
+      tempMaxHpValueDiv.innerText = "";
     }
   }
   let tempPlusIconDiv = document.getElementById("heraldHud-tempPlusIcon");
@@ -393,9 +403,14 @@ async function heraldHud_updateDataActor() {
     if (actor) await actor.rollInitiative();
   });
 
-  let initiativeValue = actor.system.attributes.init.bonus;
+  let initiativeValue = actor.system.attributes.init.total;
+
   if (initiativeValueDiv) {
-    initiativeValueDiv.innerText = `+${initiativeValue || 0}`;
+    if (initiativeValue >= 0) {
+      initiativeValueDiv.innerText = `+${initiativeValue}`;
+    } else {
+      initiativeValueDiv.innerText = `${initiativeValue}`;
+    }
   }
 }
 
@@ -508,5 +523,22 @@ Hooks.on("updateActor", async (actor, data) => {
   await heraldHud_updateDataActor();
   await heraldHud_updateMovementsActor();
 });
+
+function darkenHex(hex, percent) {
+  // Convert hex to RGB
+  let r = parseInt(hex.substring(1, 3), 16);
+  let g = parseInt(hex.substring(3, 5), 16);
+  let b = parseInt(hex.substring(5, 7), 16);
+
+  // Darken by reducing brightness
+  r = Math.max(0, Math.floor(r * (1 - percent / 100)));
+  g = Math.max(0, Math.floor(g * (1 - percent / 100)));
+  b = Math.max(0, Math.floor(b * (1 - percent / 100)));
+
+  // Convert back to hex
+  return `#${r.toString(16).padStart(2, "0")}${g
+    .toString(16)
+    .padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+}
 
 export { heraldHud_renderHtml, heraldHud_renderHeraldHud };

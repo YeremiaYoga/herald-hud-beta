@@ -1,8 +1,8 @@
 import * as herald_hud from "./heraldHud.js";
 
 Hooks.on("ready", () => {
-  setTimeout(() => {
-    herald_hud.heraldHud_renderHtml();
-    herald_hud.heraldHud_renderHeraldHud();
+  setTimeout(async () => {
+    await herald_hud.heraldHud_renderHtml();
+    await herald_hud.heraldHud_renderHeraldHud();
   }, 1000);
 });
