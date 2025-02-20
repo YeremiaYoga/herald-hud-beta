@@ -1,4 +1,5 @@
 let heraldHud_actorSelected = null;
+let heraldHud_checkerValue = null;
 
 let hp0 = "#8B0000";
 let hp25 = "#bc3c04";
@@ -31,6 +32,7 @@ async function heraldHud_renderHeraldHud() {
     await heraldHud_renderActorData();
     await heraldHud_updateDataActor();
     await heraldHud_updateMovementsActor();
+    await heraldHud_universalChecker();
   }, 1000);
 }
 
@@ -131,6 +133,51 @@ async function heraldHud_renderActorData() {
 
     actionContainerDiv.appendChild(container);
   });
+
+  let restShortcutContainerDiv = document.getElementById(
+    "heraldHud-restShortcutContainer"
+  );
+
+  if (restShortcutContainerDiv) {
+    restShortcutContainerDiv.innerHTML = `
+    <div id="heraldHud-shortRestContainer" class="heraldHud-shortRestContainer" >
+      <div id="heraldHud-shortRestButton" class="heraldHud-shortRestButton">
+        <i class="fa-solid fa-utensils"></i>
+      </div>
+      <div class="heraldHud-shortRestTooltip">Short Rest</div>
+    </div>
+    <div id="heraldHud-longRestContainer" class="heraldHud-longRestContainer">
+      <div id="heraldHud-longRestButton" class="heraldHud-longRestButton">
+        <i class="fa-solid fa-tent"></i>
+      </div>
+      <div class="heraldHud-longRestTooltip">Long Rest</div>
+    </div>`;
+  }
+
+  setTimeout(() => {
+    const shortRestButton = document.getElementById(
+      "heraldHud-shortRestContainer"
+    );
+    const longRestButton = document.getElementById(
+      "heraldHud-longRestContainer"
+    );
+
+    if (shortRestButton) {
+      shortRestButton.addEventListener("click", async () => {
+        if (heraldHud_actorSelected) {
+          await heraldHud_actorSelected.shortRest();
+        }
+      });
+    }
+
+    if (longRestButton) {
+      longRestButton.addEventListener("click", async () => {
+        if (heraldHud_actorSelected) {
+          await heraldHud_actorSelected.longRest();
+        }
+      });
+    }
+  }, 500);
 }
 
 async function heraldHud_updateDataActor() {
@@ -250,7 +297,7 @@ async function heraldHud_updateDataActor() {
       if (negativeBlockMax < 0) {
         temphpValue = totalMaxHp * -1;
 
-        await actor.data.update({
+        await actor.update({
           "system.attributes.hp.value": temphpValue,
         });
       }
@@ -388,6 +435,10 @@ async function heraldHud_updateDataActor() {
     if (tempHpCircleRightDiv) {
       tempHpCircleRightDiv.style.strokeDashoffset = 310;
     }
+
+    if (tempHpValueInput) {
+      tempHpValueInput.value = "";
+    }
   }
 
   let acValueDiv = document.getElementById("heraldHud-acValue");
@@ -413,16 +464,24 @@ async function heraldHud_updateDataActor() {
     }
   }
 }
-
+async function heraldHud_universalChecker() {
+  if (heraldHud_checkerValue) {
+    clearInterval(heraldHud_checkerValue);
+  }
+  await heraldHud_updateEffectActor();
+  heraldHud_checkerValue = setInterval(async () => {
+    await heraldHud_updateEffectActor();
+  }, 1000);
+}
 async function heraldHud_updateEffectActor() {
   let actor = heraldHud_actorSelected;
   let effectlist = ``;
   let arrEffect = [];
 
-  for (let effect of actor.data.effects) {
+  for (let effect of actor.effects) {
     arrEffect.push(effect);
   }
-  for (let item of actor.data.items) {
+  for (let item of actor.items) {
     if (item.effects) {
       for (let effect of item.effects) {
         arrEffect.push(effect);
@@ -432,6 +491,119 @@ async function heraldHud_updateEffectActor() {
 
   let activeEffect = ``;
   let disableEffect = ``;
+
+  arrEffect.forEach((effect) => {
+    if (effect.target !== actor) {
+      return;
+    }
+    let stackDiv = "";
+    if (/\(\d+\)/.test(effect.name)) {
+      const match = effect.name.match(/\((\d+)\)/);
+      if (match) {
+        const number = parseInt(match[1], 10);
+        stackDiv = `<div class="heraldHud-stackEffect">${number}</div>`;
+      }
+    }
+
+    let durationDiv = "";
+    if (effect.duration.rounds > 0) {
+      durationDiv = `
+            <div class="heraldHud-detailEffectDuration">
+              ${effect.duration.rounds} rounds
+            </div>`;
+    }
+    let effectDisabled = "";
+
+    if (effect.disabled) {
+      effectDisabled = `<div class="heraldHud-detailEffectDisable">Disabled</div>`;
+    }
+
+    const effectDetailDiv = `
+      <div class="heraldHud-effectTooltip" style="display: none;">
+        <h3>${effect.name}</h3>
+        <div>
+          <div>${effect.description}</div>
+        </div>
+        <div id="heraldHud-detailEffectBottom" class="heraldHud-detailEffectBottom">
+          <div id="heraldHud-detailEffectType" class="heraldHud-detailEffectType">
+            ${effect.isTemporary ? "Temporary" : "Passive"}
+          </div>
+          ${durationDiv}
+          ${effectDisabled}
+        </div>
+      </div>`;
+
+    if (!effect.disabled) {
+      activeEffect += `
+         <div id="heraldHud-effectContainer" class="heraldHud-effectContainer">
+          <div class="heraldHud-effectItem">
+            <img src="${effect.img}" alt="${effect.name}" 
+            class="heraldHud-playerEffect" ${
+              effect.disabled
+                ? 'style="filter: brightness(85%); opacity: 0.7;"'
+                : ""
+            } />
+            ${stackDiv}
+          </div>
+          ${effectDetailDiv}
+        </div>`;
+    } else {
+      disableEffect += `
+        <div id="heraldHud-effectContainer" data-effect-id="${
+          effect.id
+        }" class="heraldHud-effectContainer">
+          <div class="heraldHud-effectItem">
+            <img src="${effect.img}" alt="${effect.name}" 
+            class="heraldHud-playerEffect" ${
+              effect.disabled
+                ? 'style="filter: brightness(85%); opacity: 0.7;"'
+                : ""
+            } />
+            ${stackDiv}
+          </div>
+          ${effectDetailDiv}
+        </div>
+      `;
+    }
+  });
+  effectlist = activeEffect + disableEffect;
+
+  if (effectlist == ``) {
+    effectlist = `
+      <div>
+        <div class="heraldHud-playerEffect" style="opacity: 0;"></div>
+      </div>`;
+  }
+
+  let listEffectDiv = document.getElementById("heraldHud-listEffectContainer");
+
+  if (listEffectDiv) {
+    listEffectDiv.innerHTML = effectlist;
+
+    document.querySelectorAll(".heraldHud-effectContainer").forEach((item) => {
+      const detailDiv = item.querySelector(".heraldHud-effectTooltip");
+
+      if (!item.hasAttribute("data-hover-listener")) {
+        item.addEventListener("mouseenter", () => {
+          if (detailDiv) detailDiv.style.display = "block";
+        });
+        item.addEventListener("mouseleave", () => {
+          if (detailDiv) detailDiv.style.display = "none";
+        });
+        item.setAttribute("data-hover-listener", "true");
+      }
+
+      // if (!item.hasAttribute("data-contextmenu-listener")) {
+      //   item.addEventListener("contextmenu", function (event) {
+      //     event.preventDefault();
+      //     const effectId = this.getAttribute("data-effect-id");
+      //     const actorUuid = this.getAttribute("data-actor-id");
+      //     heraldPlayerlist_deleteEffectActor(effectId, actorUuid);
+      //   });
+      //   item.setAttribute("data-contextmenu-listener", "true");
+      // }
+    });
+  }
 }
 
 async function heraldHud_updateMovementsActor() {
@@ -525,17 +697,14 @@ Hooks.on("updateActor", async (actor, data) => {
 });
 
 function darkenHex(hex, percent) {
-  // Convert hex to RGB
   let r = parseInt(hex.substring(1, 3), 16);
   let g = parseInt(hex.substring(3, 5), 16);
   let b = parseInt(hex.substring(5, 7), 16);
 
-  // Darken by reducing brightness
   r = Math.max(0, Math.floor(r * (1 - percent / 100)));
   g = Math.max(0, Math.floor(g * (1 - percent / 100)));
   b = Math.max(0, Math.floor(b * (1 - percent / 100)));
 
-  // Convert back to hex
   return `#${r.toString(16).padStart(2, "0")}${g
     .toString(16)
     .padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
