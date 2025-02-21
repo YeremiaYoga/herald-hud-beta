@@ -33,6 +33,8 @@ async function heraldHud_renderHeraldHud() {
     await heraldHud_updateDataActor();
     await heraldHud_updateMovementsActor();
     await heraldHud_universalChecker();
+    await heraldHud_updateItemFavoriteActor();
+    await heraldHud_updateItemCosumablesActor();
   }, 1000);
 }
 
@@ -56,7 +58,6 @@ async function heraldHud_getActorData() {
   }
 
   let heraldHudDiv = document.getElementById("heraldHud");
-  console.log(heraldHudDiv);
   if (heraldHudDiv) {
     heraldHudDiv.style.display = heraldHud_actorSelected ? "block" : "none";
   }
@@ -105,6 +106,7 @@ async function heraldHud_renderActorData() {
   actionContainerDiv.innerHTML = "";
   const actions = [
     { id: "inventory", text: "Inventory" },
+    { id: "loot", text: "Loots" },
     { id: "features", text: "Features" },
     { id: "spells", text: "Spells" },
     { id: "stats", text: "Stats" },
@@ -217,7 +219,6 @@ async function heraldHud_updateDataActor() {
     }
   });
 
-  hpValueInput.addEventListener("blur", delayedUpdate);
   //  temp input
   tempHpValueInput.addEventListener("input", function () {
     clearTimeout(tempHpValueInput.delayTimer);
@@ -345,6 +346,10 @@ async function heraldHud_updateDataActor() {
   let tempHpBarRightDiv = document.querySelector(`.heraldHud-tempHpBarLeft`);
   let tempHpCircleLeftDiv = document.getElementById("heraldHud-tempHpLeft");
   let tempHpCircleRightDiv = document.getElementById("heraldHud-tempHpRight");
+
+  let tempShieldContainerDiv = document.getElementById(
+    "heraldHud-tempShieldContainer"
+  );
   if (tempHp > 0 || tempHp != "") {
     let tempHpBarContainerDiv = document.getElementById(
       "heraldHud-tempHpBarContainer"
@@ -358,7 +363,9 @@ async function heraldHud_updateDataActor() {
     }
     let actorTempValuebar = 0;
     actorTempValuebar = 300 - tempPercent;
-
+    if (tempShieldContainerDiv) {
+      tempShieldContainerDiv.innerHTML = `<img src="/modules/herald-hud-beta/assets/tempshield_icon.png" alt="shield" class="heraldHud-tempShieldImage" />`;
+    }
     if (!tempHpBarLeftDiv && !tempHpBarRightDiv) {
       if (tempHpBarContainerDiv) {
         tempHpBarContainerDiv.innerHTML = `
@@ -438,6 +445,9 @@ async function heraldHud_updateDataActor() {
 
     if (tempHpValueInput) {
       tempHpValueInput.value = "";
+    }
+    if (tempShieldContainerDiv) {
+      tempShieldContainerDiv.innerHTML = ``;
     }
   }
 
@@ -535,7 +545,9 @@ async function heraldHud_updateEffectActor() {
 
     if (!effect.disabled) {
       activeEffect += `
-         <div id="heraldHud-effectContainer" class="heraldHud-effectContainer">
+         <div id="heraldHud-effectContainer" data-effect-id="${
+           effect.id
+         }" class="heraldHud-effectContainer">
           <div class="heraldHud-effectItem">
             <img src="${effect.img}" alt="${effect.name}" 
             class="heraldHud-playerEffect" ${
@@ -593,17 +605,108 @@ async function heraldHud_updateEffectActor() {
         item.setAttribute("data-hover-listener", "true");
       }
 
-      // if (!item.hasAttribute("data-contextmenu-listener")) {
-      //   item.addEventListener("contextmenu", function (event) {
-      //     event.preventDefault();
-      //     const effectId = this.getAttribute("data-effect-id");
-      //     const actorUuid = this.getAttribute("data-actor-id");
-      //     heraldPlayerlist_deleteEffectActor(effectId, actorUuid);
-      //   });
-      //   item.setAttribute("data-contextmenu-listener", "true");
-      // }
+      if (!item.hasAttribute("data-contextmenu-listener")) {
+        item.addEventListener("contextmenu", function (event) {
+          event.preventDefault();
+          const actorUuid = actor.uuid;
+          const effectId = this.getAttribute("data-effect-id");
+
+          heraldHud_settingEffect(effectId, actorUuid);
+        });
+        item.setAttribute("data-contextmenu-listener", "true");
+      }
     });
   }
+}
+
+let heraldHud_effectDialog = false;
+async function heraldHud_settingEffect(effectId, actorUuid) {
+  if (heraldHud_effectDialog) {
+    console.log("Dialog already open, preventing duplicate.");
+    return;
+  }
+
+  const actor = canvas.tokens.placeables.find(
+    (token) => token.actor.uuid === actorUuid
+  )?.actor;
+
+  if (!actor) {
+    console.error("Actor not found");
+    return;
+  }
+
+  const arrEffect = [];
+
+  for (let effect of actor.effects) {
+    arrEffect.push(effect);
+  }
+
+  for (let item of actor.items) {
+    if (item.effects) {
+      for (let effect of item.effects) {
+        arrEffect.push(effect);
+      }
+    }
+  }
+
+  const effectToDelete = arrEffect.find((effect) => effect.id === effectId);
+
+  if (!effectToDelete) {
+    console.error("Effect not found");
+    return;
+  }
+
+  heraldHud_effectDialog = true;
+
+  const isDisabled = effectToDelete.disabled;
+  const isTemporary = effectToDelete.isTemporary;
+
+  const dialogContent = `
+    <p>What would you like to do with the effect <b>${effectToDelete.name}</b> on actor <b>${actor.name}</b>?</p>
+  `;
+
+  const buttons = {};
+
+  if (isTemporary) {
+    buttons.delete = {
+      label: "Delete",
+      callback: () => {
+        effectToDelete.delete();
+        heraldHud_updateEffectActor();
+        heraldHud_effectDialog = false;
+      },
+    };
+  }
+
+  buttons.disableEnable = {
+    label: isDisabled ? "Enable" : "Disable",
+    callback: () => {
+      effectToDelete.update({ disabled: !isDisabled });
+      const action = isDisabled ? "enabled" : "disabled";
+      heraldHud_updateEffectActor();
+      heraldHud_effectDialog = false;
+    },
+  };
+
+  buttons.cancel = {
+    label: "Cancel",
+    callback: () => {
+      heraldHud_effectDialog = false;
+    },
+  };
+
+  const dialog = new Dialog({
+    title: "Manage Effect",
+    content: dialogContent,
+    buttons: buttons,
+    default: "cancel",
+    close: () => {
+      heraldHud_effectDialog = false;
+      console.log("Dialog closed");
+    },
+  });
+
+  dialog.render(true);
 }
 
 async function heraldHud_updateMovementsActor() {
@@ -689,11 +792,64 @@ async function heraldHud_updateMovementsActor() {
   }
 }
 
-async function heraldHud_updateItemCosumablesActor() {}
+async function heraldHud_updateItemFavoriteActor() {
+  let actor = heraldHud_actorSelected;
+  let favoritesActor = actor.system?.favorites;
+  let favoritesListDiv = document.getElementById("heraldHud-favoritesListItem");
+  let listFavorites = ``;
+  for (let favorite of favoritesActor) {
+    let rawItemId = favorite.id.replace(".Item.", "");
+    let item =
+      actor.items.get(rawItemId) ||
+      actor.getEmbeddedDocument("Item", rawItemId);
+
+    listFavorites += `
+      <div class="heraldHud-favoriteItem" data-item-id="${item.id}" data-name="${item.name}">
+        <img src="${item.img}" alt="${item.name}" class="heraldHud-favoriteItemImage">
+      </div>`;
+  }
+
+  if (favoritesListDiv) {
+    favoritesListDiv.innerHTML = listFavorites;
+    document.querySelectorAll(".heraldHud-favoriteItem").forEach((favItem) => {
+      favItem.addEventListener("click", async function () {
+        let itemId = this.getAttribute("data-item-id");
+
+        let item =
+          actor.items.get(itemId) || actor.getEmbeddedDocument("Item", itemId);
+
+        if (item) {
+          await item.use();
+        }
+      });
+      const tooltip = document.getElementById("heraldHud-favoriteItemTooltip");
+      favItem.addEventListener("mouseenter", (event) => {
+        let itemName = favItem.getAttribute("data-name");
+        tooltip.innerText = itemName;
+        tooltip.style.opacity = "1";
+        tooltip.style.visibility = "visible";
+      });
+
+      favItem.addEventListener("mouseleave", () => {
+        tooltip.style.opacity = "0";
+        tooltip.style.visibility = "hidden";
+      });
+    });
+  }
+}
+
+async function heraldHud_updateItemCosumablesActor() {
+  let actor = heraldHud_actorSelected;
+  let consumablesItem = actor.items.filter(
+    (item) => item.type === "consumable"
+  );
+  console.log(consumablesItem);
+}
 
 Hooks.on("updateActor", async (actor, data) => {
   await heraldHud_updateDataActor();
   await heraldHud_updateMovementsActor();
+  await heraldHud_updateItemFavoriteActor();
 });
 
 function darkenHex(hex, percent) {
