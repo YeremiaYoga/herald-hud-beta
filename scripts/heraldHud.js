@@ -313,6 +313,10 @@ async function heraldHud_updateDataActor() {
         <stop offset="100%" stop-color="${hpgradient}"/>`;
       }
 
+      setTimeout(() => {
+        hpBarDelayDiv.style.strokeDashoffset = Math.max(strokeValue, 200);
+      }, 500);
+
       if (hpValueInput) {
         hpValueInput.value = temphpValue;
       }
