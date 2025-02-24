@@ -552,30 +552,69 @@
     gap: 10px;
 }
 
-.heraldHud-consumableItemContainer {
-    margin-top: 3px;
-    margin-left: 10px;
-    padding: 2px;
+.heraldHud-consumableItemContainer {}
+
+.heraldHud-listConsumableItem {
     display: grid;
     grid-template-columns: repeat(2, 25px);
     grid-template-rows: repeat(2, 25px);
     gap: 3px;
+    width: max-content;
+    position: absolute;
+    top: 50%;
+    left: 25%;
+    transform: translate(-50%, -50%);
     max-height: 90%;
     overflow-y: auto;
     overflow-x: hidden;
+    scrollbar-width: thin;
+
 }
 
 .heraldHud-consumableItem {
     width: 25px;
     height: 25px;
-    background-color: red;
+    position: relative;
+    cursor: pointer;
 }
 
-.heraldHud-restShortcutContainer {
+.heraldHud-consumableItemImage {
+    width: 100%;
+    height: 100%;
+    border-radius: 3px;
+    transition: transform 0.2s ease-in-out;
+}
+
+.heraldHud-consumableItem:hover .heraldHud-consumableItemImage {
+    transform: scale(1.2);
+}
+
+.heraldHud-consumableItemTooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    white-space: nowrap;
+    left: 20%;
+    bottom: 0;
+    transform: translateX(-50%);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+    pointer-events: none;
+    z-index: 15;
+}
+
+
+.heraldHud-rightHudShortcutContainer {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 5px;
+    left: 50%;
+    position: absolute;
 }
 
 .heraldHud-shortRestButton,
@@ -891,3 +930,98 @@
 /* .heraldHud-equipmentContainer:hover .heraldHud-equipmentTooltip {
     visibility: visible;
 } */
+
+
+
+
+
+
+
+/* Herald Hud Dialog */
+
+.heraldHud-dialogContainer {}
+
+.heraldHud-dialog {
+    position: fixed;
+    bottom: 14%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px;
+    height: 350px;
+    border: 3px solid gold;
+    border-radius: 10px;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 16;
+    padding: 10px;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.heraldHud-dialogItem {
+    width: 100%;
+    max-height: 100%;
+    color: white;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+}
+
+.heraldHud-dialogWeaponItem {
+    display: flex;
+    gap: 10px;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 12px;
+}
+
+.heraldHud-dialogWeaponImage {
+    width: 30px;
+    height: 30px;
+}
+
+.heraldHud-weaponCategory {
+    font-size: 10px;
+    color: rgb(200, 200, 200);
+}
+
+
+.heraldHud-dialogToolItem {
+    display: flex;
+    gap: 10px;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 12px;
+}
+
+.heraldHud-dialogToolImage {
+    width: 30px;
+    height: 30px;
+}
+
+.heraldHud-toolCategory {
+    font-size: 10px;
+    color: rgb(200, 200, 200);
+}
+
+.heraldHud-dialogConsumableItem {
+    display: flex;
+    gap: 10px;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 12px;
+    align-items: center;
+}
+
+.heraldHud-dialogConsumableImage {
+    width: 30px;
+    height: 30px;
+}
+
+.heraldHud-consumableCategory {
+    font-size: 10px;
+    color: rgb(200, 200, 200);
+}
+
+.heraldHud-consumableRight{
+    display: flex;
+    margin-left: auto;
+}
