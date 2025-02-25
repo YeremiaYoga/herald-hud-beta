@@ -855,10 +855,13 @@ async function heraldHud_updateItemCosumablesActor() {
   consumablesItem.forEach((item) => {
     let validTypes = ["potion", "poison", "scroll"];
     if (!validTypes.includes(item.system.type.value)) return;
-
+    let itemName = `${item.name} (x${item.system.quantity})`;
     listConsumableItem += `
-      <div class="heraldHud-consumableItem" data-item-id="${item.id}" data-name="${item.name}">
-        <img src="${item.img}" alt="${item.name}" class="heraldHud-consumableItemImage">
+      <div class="heraldHud-consumableItem" data-item-id="${item.id}" data-name="${itemName}">
+        <div class="heraldHud-consumableItemWrapper">
+         <img src="${item.img}" alt="${item.name}" class="heraldHud-consumableItemImage">
+         <div class="heraldHud-consumableItemQty">${item.system.quantity}</div>
+        </div>
       </div>`;
   });
   if (listConsumableItemDiv) {
@@ -898,10 +901,10 @@ let heraldHud_showDialogValue = false;
 async function heraldHud_showDialog(kategori) {
   let actor = heraldHud_actorSelected;
   if (heraldHud_showDialogValue) {
-    heraldHud_resetDialog();
+    await heraldHud_resetDialog(kategori);
     heraldHud_showDialogValue = false;
   } else {
-    heraldHud_renderDialog();
+    await heraldHud_renderDialog(kategori);
     heraldHud_showDialogValue = true;
   }
 
@@ -909,17 +912,18 @@ async function heraldHud_showDialog(kategori) {
     await heraldHud_renderItemInventory();
   } else if (kategori == "loots") {
   } else if (kategori == "features") {
+    await heraldHud_renderItemFeatures();
   } else if (kategori == "spells") {
   } else if (kategori == "stats") {
   }
 }
-async function heraldHud_renderDialog() {
+async function heraldHud_renderDialog(kategori) {
   let heraldHud_dialogContainerDiv = document.getElementById(
     "heraldHud-dialogContainer"
   );
   if (heraldHud_dialogContainerDiv) {
     heraldHud_dialogContainerDiv.innerHTML = `
-    <div id="heraldHud-dialog" class="heraldHud-dialog"></div>`;
+    <div id="heraldHud-dialog" class="heraldHud-dialog ${kategori}"></div>`;
   }
 }
 
@@ -964,22 +968,22 @@ async function heraldHud_renderItemInventory() {
   let consumableDiv = ``;
   if (heraldHud_dialogDiv) {
     heraldHud_dialogDiv.innerHTML = `
-    <div id="heraldHud-dialogItem" class="heraldHud-dialogItem">
-      <div id="heraldHud-dialogWeaponContainer" class="heraldHud-dialogWeaponContainer">
+    <div id="heraldHud-dialogItemInventory" class="heraldHud-dialogItemInventory">
+      <div id="heraldHud-dialogListWeaponContainer" class="heraldHud-dialogListWeaponContainer">
         <div id="heraldHud-dialogWeaponTitle" class="heraldHud-dialogWeaponTitle">Weapons</div>
         <hr style=" border: 1px solid grey; margin-top: 5px;">
         <div id="heraldHud-dialogListWeapon" class="heraldHud-dialogListWeapon">
       
         </div>
       </div>
-      <div id="heraldHud-dialogToolContainer" class="heraldHud-dialogToolContainer">
+      <div id="heraldHud-dialogListToolContainer" class="heraldHud-dialogListToolContainer">
         <div id="heraldHud-dialogToolTitle" class="heraldHud-dialogToolTitle">Tools</div>
         <hr style=" border: 1px solid grey; margin-top: 5px;">
         <div id="heraldHud-dialogListTool" class="heraldHud-dialogListTool">
       
         </div>
       </div>
-      <div id="heraldHud-dialogConsumableContainer" class="heraldHud-dialogConsumableContainer">
+      <div id="heraldHud-dialogListConsumbleContainer" class="heraldHud-dialogListConsumbleContainer">
         <div id="heraldHud-dialogConsumableTitle" class="heraldHud-dialogConsumableTitle">Consumable</div>
         <hr style=" border: 1px solid grey; margin-top: 5px;">
         <div id="heraldHud-dialogListConsumable" class="heraldHud-dialogListConsumable">
@@ -999,29 +1003,56 @@ async function heraldHud_getDataInventory() {
   let listWeapons = ``;
 
   let weaponsItem = actor.items.filter((item) => item.type === "weapon");
-
+  let favoritesActor = actor.system?.favorites || [];
   weaponsItem.forEach((item) => {
+    let rawItemId = `.Item.${item.id}`;
+
+    let isFavorited = favoritesActor.some(
+      (favorite) => favorite.id === rawItemId
+    )
+      ? "favorited"
+      : "";
+    let isEquipped = item.system.equipped ? "equipped" : "";
+    let htmlDescription = item.system.description.value;
+    let description = htmlDescription.replace(/<\/?[^>]+(>|$)/g, "");
+
     listWeapons += `
-    <div id="heraldHud-dialogWeaponItem" class="heraldHud-dialogWeaponItem" data-item-id="${
-      item.id
-    }">
-        <div id="heraldHud-weaponLeft" class="heraldHud-weaponLeft">
-          <img src="${item.img}" alt="${
+    <div id="heraldHud-dialogWeaponContainer" class="heraldHud-dialogWeaponContainer">
+      <div id="heraldHud-dialogWeaponItem" class="heraldHud-dialogWeaponItem" data-item-id="${
+        item.id
+      }">
+          <div id="heraldHud-weaponLeft" class="heraldHud-weaponLeft">
+            <img src="${item.img}" alt="${
       item.name
     }" class="heraldHud-dialogWeaponImage">
-        </div>
-        <div id="heraldHud-weaponMiddle" class="heraldHud-weaponMiddle">
-          <div id="heraldHud-weaponName" class="heraldHud-weaponName">${
-            item.name
-          }</div>
-          <div id="heraldHud-weaponCategory" class="heraldHud-weaponCategory">${
-            item.system.activation.type === "bonus" ? "Bonus Action" : "Action"
-          }</div>
-        </div>
-         <div id="heraldHud-weaponRight" class="heraldHud-weaponRight">
-      
-        </div>
-    </div>`;
+          </div>
+          <div id="heraldHud-weaponMiddle" class="heraldHud-weaponMiddle">
+            <div id="heraldHud-weaponName" class="heraldHud-weaponName">${
+              item.name
+            }</div>
+            <div id="heraldHud-weaponCategory" class="heraldHud-weaponCategory">${
+              item.system.activation.type === "bonus"
+                ? "Bonus Action"
+                : "Action"
+            }</div>
+          </div>
+          <div id="heraldHud-weaponRight" class="heraldHud-weaponRight">
+              <div class="heraldHud-weaponEquipButton ${isEquipped}" data-item-id="${
+      item.id
+    }">
+                  <i class="fa-solid fa-shield-halved"></i>
+              </div>
+              <div class="heraldHud-weaponFavoriteButton ${isFavorited}" data-item-id="${
+      item.id
+    }">
+                  <i class="fa-solid fa-star"></i>
+              </div>
+          </div>
+      </div>
+      <div id="heraldHud-dialogWeaponTooltip" class="heraldHud-dialogWeaponTooltip">${description}
+      </div>
+    </div>
+    `;
   });
 
   if (heraldHud_listWeaponDiv) {
@@ -1041,6 +1072,54 @@ async function heraldHud_getDataInventory() {
           }
         });
       });
+
+    document.querySelectorAll(".heraldHud-weaponEquipButton").forEach((div) => {
+      div.addEventListener("click", async (event) => {
+        event.stopPropagation();
+        let itemId = div.getAttribute("data-item-id");
+        let item = actor.items.get(itemId);
+
+        if (item) {
+          let equipped = item.system.equipped;
+          await item.update({ "system.equipped": !equipped });
+          div.classList.toggle("equipped", !equipped);
+        }
+      });
+    });
+
+    document
+      .querySelectorAll(".heraldHud-weaponFavoriteButton")
+      .forEach((button) => {
+        button.addEventListener("click", async (event) => {
+          event.stopPropagation();
+          let itemId = button.getAttribute("data-item-id");
+          let rawItemId = `.Item.${itemId}`;
+          let isCurrentlyFavorite = favoritesActor.some(
+            (fav) => fav.id === rawItemId
+          );
+
+          if (isCurrentlyFavorite) {
+            favoritesActor = favoritesActor.filter(
+              (fav) => fav.id !== rawItemId
+            );
+          } else {
+            let maxSort =
+              favoritesActor.length > 0
+                ? Math.max(...favoritesActor.map((fav) => fav.sort))
+                : 0;
+            favoritesActor.push({
+              type: "item",
+              id: rawItemId,
+              sort: maxSort + 100000,
+            });
+          }
+          if (Array.isArray(favoritesActor)) {
+            await actor.update({ "system.favorites": favoritesActor });
+          }
+
+          button.classList.toggle("favorited", !isCurrentlyFavorite);
+        });
+      });
   }
   let heraldHud_listToolDiv = document.getElementById(
     "heraldHud-dialogListTool"
@@ -1049,19 +1128,39 @@ async function heraldHud_getDataInventory() {
   let toolsItem = actor.items.filter((item) => item.type === "tool");
 
   toolsItem.forEach((item) => {
-    listTools += `
-    <div id="heraldHud-dialogToolItem" class="heraldHud-dialogToolItem" data-item-id="${item.id}">
-        <div id="heraldHud-toolLeft" class="heraldHud-toolLeft">
-          <img src="${item.img}" alt="${item.name}" class="heraldHud-dialogToolImage">
+    let rawItemId = `.Item.${item.id}`;
+
+    let isFavorited = favoritesActor.some(
+      (favorite) => favorite.id === rawItemId
+    )
+      ? "favorited"
+      : "";
+    let isEquipped = item.system.equipped ? "equipped" : "";
+    let htmlDescription = item.system.description.value;
+    let description = htmlDescription.replace(/<\/?[^>]+(>|$)/g, "");
+    listTools += ` 
+    <div id="heraldHud-dialogToolContainer" class="heraldHud-dialogToolContainer">
+        <div id="heraldHud-dialogToolItem" class="heraldHud-dialogToolItem" data-item-id="${item.id}">
+          <div id="heraldHud-toolLeft" class="heraldHud-toolLeft">
+            <img src="${item.img}" alt="${item.name}" class="heraldHud-dialogToolImage">
+          </div>
+          <div id="heraldHud-toolMiddle" class="heraldHud-toolMiddle">
+            <div id="heraldHud-toolName" class="heraldHud-toolName">${item.name}</div>
+            <div id="heraldHud-toolCategory" class="heraldHud-toolCategory">${item.system.type.label}</div>
+          </div>
+          <div id="heraldHud-toolRight" class="heraldHud-toolRight">
+        <div class="heraldHud-toolEquipButton ${isEquipped}" data-item-id="${item.id}">
+                  <i class="fa-solid fa-shield-halved"></i>
+              </div>
+              <div class="heraldHud-toolFavoriteButton ${isFavorited}" data-item-id="${item.id}">
+                  <i class="fa-solid fa-star"></i>
+              </div>
+          </div>
         </div>
-        <div id="heraldHud-toolMiddle" class="heraldHud-toolMiddle">
-          <div id="heraldHud-toolName" class="heraldHud-toolName">${item.name}</div>
-           <div id="heraldHud-toolCategory" class="heraldHud-toolCategory">${item.system.type.value}</div>
-        </div>
-         <div id="heraldHud-toolRight" class="heraldHud-toolRight">
-      
-        </div>
-    </div>`;
+      <div id="heraldHud-dialogToolTooltip" class="heraldHud-dialogToolTooltip">${description}
+      </div>
+    </div>
+    `;
   });
 
   if (listTools == "") {
@@ -1089,6 +1188,54 @@ async function heraldHud_getDataInventory() {
           }
         });
       });
+
+    document.querySelectorAll(".heraldHud-toolEquipButton").forEach((div) => {
+      div.addEventListener("click", async (event) => {
+        event.stopPropagation();
+        let itemId = div.getAttribute("data-item-id");
+        let item = actor.items.get(itemId);
+
+        if (item) {
+          let equipped = item.system.equipped;
+          await item.update({ "system.equipped": !equipped });
+          div.classList.toggle("equipped", !equipped);
+        }
+      });
+    });
+
+    document
+      .querySelectorAll(".heraldHud-toolFavoriteButton")
+      .forEach((button) => {
+        button.addEventListener("click", async (event) => {
+          event.stopPropagation();
+          let itemId = button.getAttribute("data-item-id");
+          let rawItemId = `.Item.${itemId}`;
+          let isCurrentlyFavorite = favoritesActor.some(
+            (fav) => fav.id === rawItemId
+          );
+
+          if (isCurrentlyFavorite) {
+            favoritesActor = favoritesActor.filter(
+              (fav) => fav.id !== rawItemId
+            );
+          } else {
+            let maxSort =
+              favoritesActor.length > 0
+                ? Math.max(...favoritesActor.map((fav) => fav.sort))
+                : 0;
+            favoritesActor.push({
+              type: "item",
+              id: rawItemId,
+              sort: maxSort + 100000,
+            });
+          }
+          if (Array.isArray(favoritesActor)) {
+            await actor.update({ "system.favorites": favoritesActor });
+          }
+
+          button.classList.toggle("favorited", !isCurrentlyFavorite);
+        });
+      });
   }
   let heraldHud_listConsumableDiv = document.getElementById(
     "heraldHud-dialogListConsumable"
@@ -1099,29 +1246,27 @@ async function heraldHud_getDataInventory() {
   );
 
   consumablesItem.forEach((item) => {
+    let htmlDescription = item.system.description.value;
+    let description = htmlDescription.replace(/<\/?[^>]+(>|$)/g, "");
     listConsumables += `
-    <div id="heraldHud-dialogConsumableItem" class="heraldHud-dialogConsumableItem" data-item-id="${
-      item.id
-    }">
-        <div id="heraldHud-consumableLeft" class="heraldHud-consumableLeft">
-          <img src="${item.img}" alt="${
-      item.name
-    }" class="heraldHud-dialogConsumableImage">
-        </div>
-        <div id="heraldHud-consumableMiddle" class="heraldHud-consumableMiddle">
-          <div id="heraldHud-consumableName" class="heraldHud-consumableName">${
-            item.name
-          }</div>
-          <div id="heraldHud-consumableCategory" class="heraldHud-consumableCategory">
-  ${
-    item.system.type.value?.[0].toUpperCase() + item.system.type.value?.slice(1)
-  }
-</div>
-        </div>
-         <div id="heraldHud-consumableRight" class="heraldHud-consumableRight">
-          X${item.system.quantity}
-        </div>
-    </div>`;
+    <div id="heraldHud-dialogConsumableContainer" class="heraldHud-dialogConsumableContainer">
+      <div id="heraldHud-dialogConsumableItem" class="heraldHud-dialogConsumableItem" data-item-id="${item.id}">
+          <div id="heraldHud-consumableLeft" class="heraldHud-consumableLeft">
+            <img src="${item.img}" alt="${item.name}" class="heraldHud-dialogConsumableImage">
+          </div>
+          <div id="heraldHud-consumableMiddle" class="heraldHud-consumableMiddle">
+            <div id="heraldHud-consumableName" class="heraldHud-consumableName">${item.name}</div>
+            <div id="heraldHud-consumableCategory" class="heraldHud-consumableCategory">${item.system.type.label}</div>
+          </div>
+          <div id="heraldHud-consumableRight" class="heraldHud-consumableRight">
+            X${item.system.quantity}
+          </div>
+      </div>
+
+      <div id="heraldHud-dialogConsumableTooltip" class="heraldHud-dialogConsumableTooltip">${description}
+      </div>
+    </div>
+    `;
   });
 
   if (heraldHud_listConsumableDiv) {
@@ -1136,7 +1281,7 @@ async function heraldHud_getDataInventory() {
           let item =
             actor.items.get(itemId) ||
             actor.getEmbeddedDocument("Item", itemId);
-          console.log(item);
+
           if (item) {
             await item.use();
           }
@@ -1145,10 +1290,112 @@ async function heraldHud_getDataInventory() {
   }
 }
 
+async function heraldHud_renderItemLoots() {}
+async function heraldHud_getDataLoots() {}
+
+async function heraldHud_renderItemFeatures() {
+  let actor = heraldHud_actorSelected;
+  let heraldHud_dialogDiv = document.getElementById("heraldHud-dialog");
+
+  if (heraldHud_dialogDiv) {
+    heraldHud_dialogDiv.innerHTML = `
+    <div id="heraldHud-dialogItemFeatures" class="heraldHud-dialogItemFeatures">
+      <div id="heraldHud-dialogFeaturesActiveContainer" class="heraldHud-dialogFeaturesActiveContainer">
+        <div id="heraldHud-dialogFeaturesActiveTittle" class="heraldHud-dialogFeaturesActiveTittle">Active</div>
+        <hr style=" width:100%;, border: 1px solid grey; margin-top: 5px;">
+        <div id="heraldHud-dialogListFeaturesActive" class="heraldHud-dialogListFeaturesActive">
+      
+        </div>
+      </div>
+      <div id="heraldHud-dialogFeaturesPassiveContainer" class="heraldHud-dialogFeaturesPassiveContainer">
+        <div id="heraldHud-dialogFeaturesPassiveTittle" class="heraldHud-dialogFeaturesPassiveTittle">Passive</div>
+         <hr style=" width:100%;, border: 1px solid grey; margin-top: 5px;">
+        <div id="heraldHud-dialogListFeaturesPassive" class="heraldHud-dialogListFeaturesPassive">
+      
+        </div>
+      </div>
+    </div>`;
+  }
+  await heraldHud_getDataFeatures();
+}
+async function heraldHud_getDataFeatures() {
+  let actor = heraldHud_actorSelected;
+
+  let featuresActiveDiv = document.getElementById(
+    "heraldHud-dialogListFeaturesActive"
+  );
+  let featuresPassiveDiv = document.getElementById(
+    "heraldHud-dialogListFeaturesPassive"
+  );
+  let featuresItem = actor.items.filter((item) => item.type === "feat");
+
+  let listFeaturesActive = ``;
+  let listFeaturesPassive = ``;
+  featuresItem.forEach((item) => {
+    console.log(item.labels.featType);
+    if (item.system.activation?.type) {
+      let category = ``;
+      if (item.labels.featType == "Action") {
+        category = `<i class="fa-solid fa-circle" style="color:#1f6237;"></i> ${item.labels.featType}`;
+      } else if (item.labels.featType.includes("Bonus")) {
+        category = `<i class="fa-solid fa-square-plus" style="color:#d5530b;"></i> ${item.labels.featType}`;
+      } else if (item.labels.featType.includes("Reaction")) {
+        category = `<i class="fa-solid fa-rotate-right" style="color:#fe85f6;"></i> ${item.labels.featType}`;
+      }
+      listFeaturesActive += `
+        <div id="heraldHud-dialogFeaturesContainer" class="heraldHud-dialogFeaturesContainer">
+          <div id="heraldHud-dialogFeaturesItem" class="heraldHud-dialogFeaturesItem">
+            <div id="heraldHud-dialogFeaturesLeft" class="heraldHud-dialogFeaturesLeft">
+              <div class="heraldHud-dialogFeaturesImageContainer">
+                <img src="${item.img}" alt="${item.name}" class="heraldHud-dialogFeaturesImage">
+              </div>
+            </div>
+            <div id="heraldHud-dialogFeaturesMiddle" class="heraldHud-dialogFeaturesMiddle">
+             <div id="heraldHud-dialogFeaturesName" class="heraldHud-dialogFeaturesName">${item.name}</div>
+             <div id="heraldHud-dialogFeaturesCategory" class="heraldHud-dialogFeaturesCategory">${category}</div>
+            </div>
+            <div id="heraldHud-dialogFeaturesRight" class="heraldHud-dialogActiveFeaturesRight">
+            </div>
+          </div>
+        </div>
+      `;
+    } else {
+      listFeaturesPassive += `
+      <div id="heraldHud-dialogFeaturesContainer" class="heraldHud-dialogFeaturesContainer">
+          <div id="heraldHud-dialogFeaturesItem" class="heraldHud-dialogFeaturesItem">
+            <div id="heraldHud-dialogFeaturesLeft" class="heraldHud-dialogFeaturesLeft">
+              <div class="heraldHud-dialogFeaturesImageContainer">
+                <img src="${item.img}" alt="${item.name}" class="heraldHud-dialogFeaturesImage">
+              </div>
+            </div>
+            <div id="heraldHud-dialogFeaturesMiddle" class="heraldHud-dialogFeaturesMiddle">
+             <div id="heraldHud-dialogFeaturesName" class="heraldHud-dialogFeaturesName">${item.name}</div>
+             <div id="heraldHud-dialogFeaturesCategory" class="heraldHud-dialogFeaturesCategory">${item.labels.featType}</div>
+            </div>
+            <div id="heraldHud-dialogFeaturesRight" class="heraldHud-dialogActiveFeaturesRight">
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  });
+
+  if (featuresActiveDiv) {
+    featuresActiveDiv.innerHTML = listFeaturesActive;
+  }
+
+  if (featuresPassiveDiv) {
+    featuresPassiveDiv.innerHTML = listFeaturesPassive;
+  }
+
+  console.log(featuresItem);
+}
+
 Hooks.on("updateActor", async (actor, data) => {
   await heraldHud_updateDataActor();
   await heraldHud_updateMovementsActor();
   await heraldHud_updateItemFavoriteActor();
+  await heraldHud_updateItemCosumablesActor();
 });
 
 function darkenHex(hex, percent) {
