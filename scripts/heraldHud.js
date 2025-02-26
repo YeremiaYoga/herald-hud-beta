@@ -486,6 +486,7 @@ async function heraldHud_universalChecker() {
   await heraldHud_updateEffectActor();
   heraldHud_checkerValue = setInterval(async () => {
     await heraldHud_updateEffectActor();
+    await heraldHud_updateItemCosumablesActor();
   }, 1000);
 }
 async function heraldHud_updateEffectActor() {
@@ -860,7 +861,7 @@ async function heraldHud_updateItemCosumablesActor() {
       <div class="heraldHud-consumableItem" data-item-id="${item.id}" data-name="${itemName}">
         <div class="heraldHud-consumableItemWrapper">
          <img src="${item.img}" alt="${item.name}" class="heraldHud-consumableItemImage">
-         <div class="heraldHud-consumableItemQty">${item.system.quantity}</div>
+         <div id="heraldHud-consumableItemQty-${item.id}" class="heraldHud-consumableItemQty">${item.system.quantity}</div>
         </div>
       </div>`;
   });
@@ -878,6 +879,17 @@ async function heraldHud_updateItemCosumablesActor() {
 
           if (item) {
             await item.use();
+            let updatedItem =
+              actor.items.get(itemId) ||
+              actor.getEmbeddedDocument("Item", itemId);
+            if (updatedItem) {
+              let qtyConsumableDiv = document.getElementById(
+                `heraldHud-consumableItemQty-${item.id}`
+              );
+              if (qtyConsumableDiv) {
+                qtyConsumableDiv.innerText = `x${updatedItem.system.quantity}`;
+              }
+            }
           }
         });
         const tooltip = document.getElementById(
@@ -997,6 +1009,7 @@ async function heraldHud_renderItemInventory() {
 
 async function heraldHud_getDataInventory() {
   let actor = heraldHud_actorSelected;
+  console.log(actor.system.traits);
   let heraldHud_listWeaponDiv = document.getElementById(
     "heraldHud-dialogListWeapon"
   );
@@ -1014,42 +1027,120 @@ async function heraldHud_getDataInventory() {
       : "";
     let isEquipped = item.system.equipped ? "equipped" : "";
     let htmlDescription = item.system.description.value;
-    let description = htmlDescription.replace(/<\/?[^>]+(>|$)/g, "");
+    let arrProperti = [];
+    let labelProperti = "";
 
+    let abilityMod = item.system.abilityMod
+      ? actor.system.abilities[item.system.abilityMod]?.mod
+      : "";
+    if (item.labels.toHit) {
+      arrProperti.push(`To hit ${item.labels.toHit}`);
+    }
+    if (item.labels.save) {
+      arrProperti.push(item.labels.save);
+    }
+    if (item.labels.damage) {
+      // let damageFormula =
+      //   `${item.labels.damage} ${item.labels.damageTypes}`.replace(
+      //     /@mod/g,
+      //     abilityMod
+      //   );
+      let damageFormula = item.labels.derivedDamage[0].label;
+      arrProperti.push(damageFormula);
+    }
+    if (arrProperti.length > 0) {
+      labelProperti = arrProperti.join(" | ");
+    }
+    let arrPropertiTooltip = [];
+    let labelPropertiTooltip = "";
+
+    if (item.system.type.label) {
+      arrPropertiTooltip.push(item.system.type.label);
+    }
+    if (item.system.equipped) {
+      arrPropertiTooltip.push("Equipped");
+    } else {
+      arrPropertiTooltip.push("Not Equipped");
+    }
+    if (item.system.proficient == 1) {
+      arrPropertiTooltip.push("Proficient");
+    } else if (item.system.proficient == 0) {
+      arrPropertiTooltip.push("Not Proficient");
+    } else {
+      let weaponProficiency = new Set(
+        actor.system.traits.weaponProf?.value || []
+      );
+      if (
+        (item.system.type.value &&
+          weaponProficiency.some(
+            (prof) => item.system.type.value.indexOf(prof) !== -1
+          )) ||
+        (item.system.type.baseItem &&
+          weaponProficiency.some(
+            (prof) => item.system.type.baseItem.indexOf(prof) !== -1
+          ))
+      ) {
+        arrPropertiTooltip.push("Proficient");
+      } else {
+        arrPropertiTooltip.push("Not Proficient");
+      }
+    }
+    if (item.system.activation?.type) {
+      arrPropertiTooltip.push(
+        `${item.system.activation.cost} ${item.system.activation.type}`
+      );
+    }
+    if (item.system.range?.value) {
+      let rangeValue = `${item.system.range.value} ft`;
+      if (item.system.range.long) {
+        rangeValue = `${item.system.range.value} / ${item.system.range.long} ft`;
+      }
+      arrPropertiTooltip.push(rangeValue);
+    }
+
+    if (arrPropertiTooltip.length > 0) {
+      labelPropertiTooltip = arrPropertiTooltip.join(" | ");
+    }
+
+    console.log(item);
+    let category = ``;
+    if (item.system.activation.type == "action") {
+      category = `<i class="fa-solid fa-circle" style="color:#1f6237;"></i> Action`;
+    } else if (item.system.activation.type.includes("bonus")) {
+      category = `<i class="fa-solid fa-square-plus" style="color:#d5530b;"></i> Bonus Action`;
+    } else if (item.system.activation.type.includes("reaction")) {
+      category = `<i class="fa-solid fa-rotate-right" style="color:#fe85f6;"></i> Reaction`;
+    } else if (item.system.activation.type.includes("legendary")) {
+      category = `<i class="fa-solid fa-dragon" style="color:#0a35d1;"></i> Legendary Action`;
+    }
     listWeapons += `
     <div id="heraldHud-dialogWeaponContainer" class="heraldHud-dialogWeaponContainer">
-      <div id="heraldHud-dialogWeaponItem" class="heraldHud-dialogWeaponItem" data-item-id="${
-        item.id
-      }">
+      <div id="heraldHud-dialogWeaponItem" class="heraldHud-dialogWeaponItem" data-item-id="${item.id}">
           <div id="heraldHud-weaponLeft" class="heraldHud-weaponLeft">
-            <img src="${item.img}" alt="${
-      item.name
-    }" class="heraldHud-dialogWeaponImage">
+              <div class="heraldHud-dialogWeaponImageContainer">
+                 <img src="${item.img}" alt="${item.name}" class="heraldHud-dialogWeaponImage">
+              </div>
           </div>
           <div id="heraldHud-weaponMiddle" class="heraldHud-weaponMiddle">
-            <div id="heraldHud-weaponName" class="heraldHud-weaponName">${
-              item.name
-            }</div>
-            <div id="heraldHud-weaponCategory" class="heraldHud-weaponCategory">${
-              item.system.activation.type === "bonus"
-                ? "Bonus Action"
-                : "Action"
-            }</div>
+            <div id="heraldHud-weaponName" class="heraldHud-weaponName">${item.name}</div>
+            <div id="heraldHud-weaponCategory" class="heraldHud-weaponCategory">${category}</div>
+            <div id class="heraldHud-weaponProperti">${labelProperti}</div>
           </div>
           <div id="heraldHud-weaponRight" class="heraldHud-weaponRight">
-              <div class="heraldHud-weaponEquipButton ${isEquipped}" data-item-id="${
-      item.id
-    }">
+              <div class="heraldHud-weaponEquipButton ${isEquipped}" data-item-id="${item.id}">
                   <i class="fa-solid fa-shield-halved"></i>
               </div>
-              <div class="heraldHud-weaponFavoriteButton ${isFavorited}" data-item-id="${
-      item.id
-    }">
+              <div class="heraldHud-weaponFavoriteButton ${isFavorited}" data-item-id="${item.id}">
                   <i class="fa-solid fa-star"></i>
               </div>
           </div>
       </div>
-      <div id="heraldHud-dialogWeaponTooltip" class="heraldHud-dialogWeaponTooltip">${description}
+      <div id="heraldHud-dialogWeaponTooltip" class="heraldHud-dialogWeaponTooltip">
+        <div class="heraldHud-weaponTooltipTop">${item.name}  
+        <hr style=" border: 1px solid grey; margin-top: 5px;"></div>
+        <div class="heraldHud-weaponTooltipMiddle">${htmlDescription} 
+        <hr style=" border: 1px solid grey; margin-top: 5px;"></div>
+        <div class="heraldHud-weaponTooltipBottom">${labelPropertiTooltip}</div>
       </div>
     </div>
     `;
@@ -1137,7 +1228,6 @@ async function heraldHud_getDataInventory() {
       : "";
     let isEquipped = item.system.equipped ? "equipped" : "";
     let htmlDescription = item.system.description.value;
-    let description = htmlDescription.replace(/<\/?[^>]+(>|$)/g, "");
     listTools += ` 
     <div id="heraldHud-dialogToolContainer" class="heraldHud-dialogToolContainer">
         <div id="heraldHud-dialogToolItem" class="heraldHud-dialogToolItem" data-item-id="${item.id}">
@@ -1157,7 +1247,16 @@ async function heraldHud_getDataInventory() {
               </div>
           </div>
         </div>
-      <div id="heraldHud-dialogToolTooltip" class="heraldHud-dialogToolTooltip">${description}
+      <div id="heraldHud-dialogToolTooltip" class="heraldHud-dialogToolTooltip">
+        <div class="heraldHud-toolTooltipTop">
+        ${item.name}  
+        <hr style=" border: 1px solid grey; margin-top: 5px;">
+        </div>
+        <div class="heraldHud-toolTooltipMiddle">
+        ${htmlDescription}
+        <hr style=" border: 1px solid grey; margin-top: 5px;">
+        </div>
+        <div class="heraldHud-toolTooltipBottom"></div>
       </div>
     </div>
     `;
@@ -1247,7 +1346,6 @@ async function heraldHud_getDataInventory() {
 
   consumablesItem.forEach((item) => {
     let htmlDescription = item.system.description.value;
-    let description = htmlDescription.replace(/<\/?[^>]+(>|$)/g, "");
     listConsumables += `
     <div id="heraldHud-dialogConsumableContainer" class="heraldHud-dialogConsumableContainer">
       <div id="heraldHud-dialogConsumableItem" class="heraldHud-dialogConsumableItem" data-item-id="${item.id}">
@@ -1259,11 +1357,22 @@ async function heraldHud_getDataInventory() {
             <div id="heraldHud-consumableCategory" class="heraldHud-consumableCategory">${item.system.type.label}</div>
           </div>
           <div id="heraldHud-consumableRight" class="heraldHud-consumableRight">
-            X${item.system.quantity}
+            <div id="heraldHud-consumableQty-${item.id}">
+                x${item.system.quantity}
+            </div>
           </div>
       </div>
 
-      <div id="heraldHud-dialogConsumableTooltip" class="heraldHud-dialogConsumableTooltip">${description}
+      <div id="heraldHud-dialogConsumableTooltip" class="heraldHud-dialogConsumableTooltip">
+        <div class="heraldHud-consumableTooltipTop">
+        ${item.name}  
+        <hr style=" border: 1px solid grey; margin-top: 5px;">
+        </div>
+        <div class="heraldHud-consumableTooltipMiddle">
+        ${htmlDescription}
+        <hr style=" border: 1px solid grey; margin-top: 5px;">
+        </div>
+        <div class="heraldHud-consumableTooltipBottom"></div>
       </div>
     </div>
     `;
@@ -1284,6 +1393,17 @@ async function heraldHud_getDataInventory() {
 
           if (item) {
             await item.use();
+            let updatedItem =
+              actor.items.get(itemId) ||
+              actor.getEmbeddedDocument("Item", itemId);
+            if (updatedItem) {
+              let qtyConsumableDiv = document.getElementById(
+                `heraldHud-consumableQty-${item.id}`
+              );
+              if (qtyConsumableDiv) {
+                qtyConsumableDiv.innerText = `x${updatedItem.system.quantity}`;
+              }
+            }
           }
         });
       });
@@ -1341,10 +1461,12 @@ async function heraldHud_getDataFeatures() {
         category = `<i class="fa-solid fa-square-plus" style="color:#d5530b;"></i> ${item.labels.featType}`;
       } else if (item.labels.featType.includes("Reaction")) {
         category = `<i class="fa-solid fa-rotate-right" style="color:#fe85f6;"></i> ${item.labels.featType}`;
+      } else if (item.labels.featType.includes("Legendary")) {
+        category = `<i class="fa-solid fa-dragon" style="color:#0a35d1;"></i> ${item.labels.featType}`;
       }
       listFeaturesActive += `
         <div id="heraldHud-dialogFeaturesContainer" class="heraldHud-dialogFeaturesContainer">
-          <div id="heraldHud-dialogFeaturesItem" class="heraldHud-dialogFeaturesItem">
+          <div id="heraldHud-dialogFeaturesItem" class="heraldHud-dialogFeaturesItem" data-item-id="${item.id}">
             <div id="heraldHud-dialogFeaturesLeft" class="heraldHud-dialogFeaturesLeft">
               <div class="heraldHud-dialogFeaturesImageContainer">
                 <img src="${item.img}" alt="${item.name}" class="heraldHud-dialogFeaturesImage">
@@ -1362,7 +1484,7 @@ async function heraldHud_getDataFeatures() {
     } else {
       listFeaturesPassive += `
       <div id="heraldHud-dialogFeaturesContainer" class="heraldHud-dialogFeaturesContainer">
-          <div id="heraldHud-dialogFeaturesItem" class="heraldHud-dialogFeaturesItem">
+          <div id="heraldHud-dialogFeaturesItem" class="heraldHud-dialogFeaturesItem"  data-item-id="${item.id}">
             <div id="heraldHud-dialogFeaturesLeft" class="heraldHud-dialogFeaturesLeft">
               <div class="heraldHud-dialogFeaturesImageContainer">
                 <img src="${item.img}" alt="${item.name}" class="heraldHud-dialogFeaturesImage">
@@ -1382,6 +1504,22 @@ async function heraldHud_getDataFeatures() {
 
   if (featuresActiveDiv) {
     featuresActiveDiv.innerHTML = listFeaturesActive;
+
+    document
+      .querySelectorAll(".heraldHud-dialogFeaturesItem")
+      .forEach((toolItem) => {
+        toolItem.addEventListener("click", async function () {
+          let itemId = this.getAttribute("data-item-id");
+
+          let item =
+            actor.items.get(itemId) ||
+            actor.getEmbeddedDocument("Item", itemId);
+
+          if (item) {
+            await item.use();
+          }
+        });
+      });
   }
 
   if (featuresPassiveDiv) {
@@ -1396,6 +1534,7 @@ Hooks.on("updateActor", async (actor, data) => {
   await heraldHud_updateMovementsActor();
   await heraldHud_updateItemFavoriteActor();
   await heraldHud_updateItemCosumablesActor();
+  console.log("testing consumable");
 });
 
 function darkenHex(hex, percent) {
