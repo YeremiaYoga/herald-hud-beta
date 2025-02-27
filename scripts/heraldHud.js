@@ -922,7 +922,7 @@ async function heraldHud_showDialog(kategori) {
 
   if (kategori == "inventory") {
     await heraldHud_renderItemInventory();
-  } else if (kategori == "loots") {
+  } else if (kategori == "loot") {
   } else if (kategori == "features") {
     await heraldHud_renderItemFeatures();
   } else if (kategori == "spells") {
@@ -934,6 +934,7 @@ async function heraldHud_renderDialog(kategori) {
     "heraldHud-dialogContainer"
   );
   if (heraldHud_dialogContainerDiv) {
+    console.log(kategori);
     heraldHud_dialogContainerDiv.innerHTML = `
     <div id="heraldHud-dialog" class="heraldHud-dialog ${kategori}"></div>`;
   }
@@ -1007,9 +1008,33 @@ async function heraldHud_renderItemInventory() {
   await heraldHud_getDataInventory();
 }
 
+function getDamageIcon(type) {
+  const basePath = "/systems/dnd5e/icons/svg/damage/"; // Path ikon di Foundry
+  const validTypes = [
+    "acid",
+    "bludgeoning",
+    "cold",
+    "fire",
+    "force",
+    "lightning",
+    "necrotic",
+    "piercing",
+    "poison",
+    "psychic",
+    "radiant",
+    "slashing",
+    "thunder",
+  ];
+
+  if (validTypes.includes(type)) {
+    return `<img src="${basePath}${type}.svg" width="13" height="13" style=" border:none; filter: invert(1);">`;
+  }
+
+  return `<img src="${basePath}default.svg" width="13" height="13" style="vertical-align:middle; border:none; filter: invert(1);">`;
+}
+
 async function heraldHud_getDataInventory() {
   let actor = heraldHud_actorSelected;
-  console.log(actor.system.traits);
   let heraldHud_listWeaponDiv = document.getElementById(
     "heraldHud-dialogListWeapon"
   );
@@ -1040,13 +1065,11 @@ async function heraldHud_getDataInventory() {
       arrProperti.push(item.labels.save);
     }
     if (item.labels.damage) {
-      // let damageFormula =
-      //   `${item.labels.damage} ${item.labels.damageTypes}`.replace(
-      //     /@mod/g,
-      //     abilityMod
-      //   );
-      let damageFormula = item.labels.derivedDamage[0].label;
-      arrProperti.push(damageFormula);
+      for (let damage of item.labels.derivedDamage) {
+        let damageIcon = getDamageIcon(damage.damageType);
+
+        arrProperti.push(`${damage.formula} ${damageIcon}`);
+      }
     }
     if (arrProperti.length > 0) {
       labelProperti = arrProperti.join(" | ");
@@ -1086,9 +1109,19 @@ async function heraldHud_getDataInventory() {
       }
     }
     if (item.system.activation?.type) {
-      arrPropertiTooltip.push(
-        `${item.system.activation.cost} ${item.system.activation.type}`
-      );
+      const cost = item.system.activation.cost;
+      let type =
+        item.system.activation.type.charAt(0).toUpperCase() +
+        item.system.activation.type.slice(1);
+      if (item.system.activation.type.toLowerCase() === "bonus") {
+        type = "Bonus Action";
+      }
+
+      if (cost) {
+        arrPropertiTooltip.push(`${cost} ${type}`);
+      } else {
+        arrPropertiTooltip.push(type);
+      }
     }
     if (item.system.range?.value) {
       let rangeValue = `${item.system.range.value} ft`;
@@ -1101,8 +1134,7 @@ async function heraldHud_getDataInventory() {
     if (arrPropertiTooltip.length > 0) {
       labelPropertiTooltip = arrPropertiTooltip.join(" | ");
     }
-
-    console.log(item);
+    let arrCategory = [];
     let category = ``;
     if (item.system.activation.type == "action") {
       category = `<i class="fa-solid fa-circle" style="color:#1f6237;"></i> Action`;
@@ -1112,7 +1144,40 @@ async function heraldHud_getDataInventory() {
       category = `<i class="fa-solid fa-rotate-right" style="color:#fe85f6;"></i> Reaction`;
     } else if (item.system.activation.type.includes("legendary")) {
       category = `<i class="fa-solid fa-dragon" style="color:#0a35d1;"></i> Legendary Action`;
+    } else if (item.system.activation.type.includes("lair")) {
+      category = `<i class="fa-solid fa-chess-rook" style="color:#c7cad6;"></i> Lair Action`;
+    } else if (item.system.activation.type.includes("mythic")) {
+      category = `<i class="fa-solid fa-spaghetti-monster-flying" style="color:#adffeb;"></i> Mythic Action`;
+    } else if (item.system.activation.type.includes("minute")) {
+      category = `<i class="fa-solid fa-hourglass-start" style="color:#0ad1c4;"></i> ${item.system.activation.cost} Minute`;
+    } else if (item.system.activation.type.includes("hour")) {
+      category = `<i class="fa-solid fa-hourglass-start" style="color:#0ad1c4;"></i> ${item.system.activation.cost} Hour`;
+    } else if (item.system.activation.type.includes("day")) {
+      category = `<i class="fa-solid fa-hourglass-start" style="color:#0ad1c4;"></i> ${item.system.activation.cost} Day`;
+    } else if (item.system.activation.type.includes("special")) {
+      category = `<i class="fa-solid fa-sparkles" style="color:#d0f4fc;"></i> Special`;
     }
+
+    if (category) {
+      arrCategory.push(category);
+    }
+    let weaponitemUses = "";
+
+    if (item.system.uses?.value && item.system.uses?.max) {
+      weaponitemUses = `${item.system.uses.value}/${item.system.uses.max}`;
+    }
+
+    if (weaponitemUses) {
+      arrCategory.push(weaponitemUses);
+    }
+
+    let labelCategory = ``;
+
+    if (arrCategory.length > 0) {
+      labelCategory = arrCategory.join(" | ");
+    }
+
+    console.log(item.system.uses);
     listWeapons += `
     <div id="heraldHud-dialogWeaponContainer" class="heraldHud-dialogWeaponContainer">
       <div id="heraldHud-dialogWeaponItem" class="heraldHud-dialogWeaponItem" data-item-id="${item.id}">
@@ -1123,7 +1188,7 @@ async function heraldHud_getDataInventory() {
           </div>
           <div id="heraldHud-weaponMiddle" class="heraldHud-weaponMiddle">
             <div id="heraldHud-weaponName" class="heraldHud-weaponName">${item.name}</div>
-            <div id="heraldHud-weaponCategory" class="heraldHud-weaponCategory">${category}</div>
+            <div id="heraldHud-weaponCategory-${item.id}" class="heraldHud-weaponCategory">${labelCategory}</div>
             <div id class="heraldHud-weaponProperti">${labelProperti}</div>
           </div>
           <div id="heraldHud-weaponRight" class="heraldHud-weaponRight">
@@ -1346,6 +1411,13 @@ async function heraldHud_getDataInventory() {
 
   consumablesItem.forEach((item) => {
     let htmlDescription = item.system.description.value;
+
+    let consumableItemUses = "";
+
+    if (item.system.uses?.value && item.system.uses?.max) {
+      consumableItemUses = `${item.system.uses.value}/${item.system.uses.max}`;
+    }
+
     listConsumables += `
     <div id="heraldHud-dialogConsumableContainer" class="heraldHud-dialogConsumableContainer">
       <div id="heraldHud-dialogConsumableItem" class="heraldHud-dialogConsumableItem" data-item-id="${item.id}">
@@ -1354,7 +1426,7 @@ async function heraldHud_getDataInventory() {
           </div>
           <div id="heraldHud-consumableMiddle" class="heraldHud-consumableMiddle">
             <div id="heraldHud-consumableName" class="heraldHud-consumableName">${item.name}</div>
-            <div id="heraldHud-consumableCategory" class="heraldHud-consumableCategory">${item.system.type.label}</div>
+            <div id="heraldHud-consumableCategory-${item.id}" class="heraldHud-consumableCategory" >${item.system.type.label} | ${consumableItemUses}</div>
           </div>
           <div id="heraldHud-consumableRight" class="heraldHud-consumableRight">
             <div id="heraldHud-consumableQty-${item.id}">
@@ -1400,8 +1472,23 @@ async function heraldHud_getDataInventory() {
               let qtyConsumableDiv = document.getElementById(
                 `heraldHud-consumableQty-${item.id}`
               );
+
               if (qtyConsumableDiv) {
                 qtyConsumableDiv.innerText = `x${updatedItem.system.quantity}`;
+              }
+              let categoryConsumableDiv = document.getElementById(
+                `heraldHud-consumableCategory-${item.id}`
+              );
+              let consumableItemUses = "";
+
+              if (
+                updatedItem.system.uses?.value &&
+                updatedItem.system.uses?.max
+              ) {
+                consumableItemUses = `${updatedItem.system.uses.value}/${updatedItem.system.uses.max}`;
+              }
+              if (categoryConsumableDiv) {
+                categoryConsumableDiv.innerText = `${updatedItem.system.type.label} | ${consumableItemUses}`;
               }
             }
           }
@@ -1452,17 +1539,21 @@ async function heraldHud_getDataFeatures() {
   let listFeaturesActive = ``;
   let listFeaturesPassive = ``;
   featuresItem.forEach((item) => {
-    console.log(item.labels.featType);
     if (item.system.activation?.type) {
       let category = ``;
-      if (item.labels.featType == "Action") {
-        category = `<i class="fa-solid fa-circle" style="color:#1f6237;"></i> ${item.labels.featType}`;
-      } else if (item.labels.featType.includes("Bonus")) {
-        category = `<i class="fa-solid fa-square-plus" style="color:#d5530b;"></i> ${item.labels.featType}`;
-      } else if (item.labels.featType.includes("Reaction")) {
-        category = `<i class="fa-solid fa-rotate-right" style="color:#fe85f6;"></i> ${item.labels.featType}`;
-      } else if (item.labels.featType.includes("Legendary")) {
-        category = `<i class="fa-solid fa-dragon" style="color:#0a35d1;"></i> ${item.labels.featType}`;
+      if (item.labels.activation.includes("Bonus Action")) {
+        category = `<i class="fa-solid fa-square-plus" style="color:#d5530b;"></i> Bonus Action`;
+      } else if (item.labels.activation.includes("Reaction")) {
+        category = `<i class="fa-solid fa-rotate-right" style="color:#fe85f6;"></i> Reaction`;
+      } else if (item.labels.activation.includes("Legendary Action")) {
+        category = `<i class="fa-solid fa-dragon" style="color:#0a35d1;"></i> Legendary Action`;
+      } else {
+        category = `<i class="fa-solid fa-circle" style="color:#1f6237;"></i> Action`;
+      }
+      let featureUses = ``;
+
+      if (item.system.uses.value && item.system.uses.max) {
+        featureUses = `${item.system.uses.value} / ${item.system.uses.max}`;
       }
       listFeaturesActive += `
         <div id="heraldHud-dialogFeaturesContainer" class="heraldHud-dialogFeaturesContainer">
@@ -1471,12 +1562,19 @@ async function heraldHud_getDataFeatures() {
               <div class="heraldHud-dialogFeaturesImageContainer">
                 <img src="${item.img}" alt="${item.name}" class="heraldHud-dialogFeaturesImage">
               </div>
+              <div>
+              test
+              </div>
             </div>
             <div id="heraldHud-dialogFeaturesMiddle" class="heraldHud-dialogFeaturesMiddle">
              <div id="heraldHud-dialogFeaturesName" class="heraldHud-dialogFeaturesName">${item.name}</div>
              <div id="heraldHud-dialogFeaturesCategory" class="heraldHud-dialogFeaturesCategory">${category}</div>
+              <div id="heraldHud-dialogFeaturesUses" class="heraldHud-dialogFeaturesUses">
+              ${featureUses}
+              </div>
             </div>
-            <div id="heraldHud-dialogFeaturesRight" class="heraldHud-dialogActiveFeaturesRight">
+            <div id="heraldHud-dialogFeaturesRight" class="heraldHud-dialogFeaturesRight">
+             
             </div>
           </div>
         </div>
@@ -1494,7 +1592,7 @@ async function heraldHud_getDataFeatures() {
              <div id="heraldHud-dialogFeaturesName" class="heraldHud-dialogFeaturesName">${item.name}</div>
              <div id="heraldHud-dialogFeaturesCategory" class="heraldHud-dialogFeaturesCategory">${item.labels.featType}</div>
             </div>
-            <div id="heraldHud-dialogFeaturesRight" class="heraldHud-dialogActiveFeaturesRight">
+            <div id="heraldHud-dialogFeaturesRight" class="heraldHud-dialogFeaturesRight">
             </div>
           </div>
         </div>
@@ -1525,8 +1623,6 @@ async function heraldHud_getDataFeatures() {
   if (featuresPassiveDiv) {
     featuresPassiveDiv.innerHTML = listFeaturesPassive;
   }
-
-  console.log(featuresItem);
 }
 
 Hooks.on("updateActor", async (actor, data) => {
@@ -1534,7 +1630,6 @@ Hooks.on("updateActor", async (actor, data) => {
   await heraldHud_updateMovementsActor();
   await heraldHud_updateItemFavoriteActor();
   await heraldHud_updateItemCosumablesActor();
-  console.log("testing consumable");
 });
 
 function darkenHex(hex, percent) {

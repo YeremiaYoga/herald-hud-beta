@@ -113,7 +113,7 @@
 
 .heraldHud-addSummonContainer {
     margin-top: 11px;
-
+    display: none;
 }
 
 .heraldHud-addSummonerButton {
@@ -973,7 +973,7 @@
     height: 350px;
 }
 
-.heraldHud-dialog.loots {
+.heraldHud-dialog.loot {
     bottom: 14%;
     left: 45%;
     width: 300px;
@@ -1194,7 +1194,7 @@
     display: block;
 }
 
-.heraldHud-toolTooltipTop{
+.heraldHud-toolTooltipTop {
     font-size: 16px;
 }
 
@@ -1308,7 +1308,13 @@
 .heraldHud-dialogFeaturesMiddle {
     padding: 2px;
 }
+
 .heraldHud-dialogFeaturesCategory {
+    font-size: 8px;
+    color: rgb(200, 200, 200);
+}
+
+.heraldHud-dialogFeaturesUses {
     font-size: 8px;
     color: rgb(200, 200, 200);
 }
