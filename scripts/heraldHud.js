@@ -923,6 +923,7 @@ async function heraldHud_showDialog(kategori) {
   if (kategori == "inventory") {
     await heraldHud_renderItemInventory();
   } else if (kategori == "loot") {
+    await heraldHud_renderItemLoots();
   } else if (kategori == "features") {
     await heraldHud_renderItemFeatures();
   } else if (kategori == "spells") {
@@ -1008,8 +1009,8 @@ async function heraldHud_renderItemInventory() {
   await heraldHud_getDataInventory();
 }
 
-function getDamageIcon(type) {
-  const basePath = "/systems/dnd5e/icons/svg/damage/"; // Path ikon di Foundry
+function heraldHud_getGameIconDamage(type) {
+  const basePath = "/systems/dnd5e/icons/svg/damage/";
   const validTypes = [
     "acid",
     "bludgeoning",
@@ -1024,6 +1025,8 @@ function getDamageIcon(type) {
     "radiant",
     "slashing",
     "thunder",
+    "healing",
+    "temphp",
   ];
 
   if (validTypes.includes(type)) {
@@ -1055,9 +1058,6 @@ async function heraldHud_getDataInventory() {
     let arrProperti = [];
     let labelProperti = "";
 
-    let abilityMod = item.system.abilityMod
-      ? actor.system.abilities[item.system.abilityMod]?.mod
-      : "";
     if (item.labels.toHit) {
       arrProperti.push(`To hit ${item.labels.toHit}`);
     }
@@ -1066,7 +1066,7 @@ async function heraldHud_getDataInventory() {
     }
     if (item.labels.damage) {
       for (let damage of item.labels.derivedDamage) {
-        let damageIcon = getDamageIcon(damage.damageType);
+        let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
 
         arrProperti.push(`${damage.formula} ${damageIcon}`);
       }
@@ -1134,7 +1134,7 @@ async function heraldHud_getDataInventory() {
     if (arrPropertiTooltip.length > 0) {
       labelPropertiTooltip = arrPropertiTooltip.join(" | ");
     }
-    let arrCategory = [];
+    let arrWeaponCategory = [];
     let category = ``;
     if (item.system.activation.type == "action") {
       category = `<i class="fa-solid fa-circle" style="color:#1f6237;"></i> Action`;
@@ -1159,7 +1159,7 @@ async function heraldHud_getDataInventory() {
     }
 
     if (category) {
-      arrCategory.push(category);
+      arrWeaponCategory.push(category);
     }
     let weaponitemUses = "";
 
@@ -1168,13 +1168,13 @@ async function heraldHud_getDataInventory() {
     }
 
     if (weaponitemUses) {
-      arrCategory.push(weaponitemUses);
+      arrWeaponCategory.push(weaponitemUses);
     }
 
     let labelCategory = ``;
 
-    if (arrCategory.length > 0) {
-      labelCategory = arrCategory.join(" | ");
+    if (arrWeaponCategory.length > 0) {
+      labelCategory = arrWeaponCategory.join(" | ");
     }
 
     console.log(item.system.uses);
@@ -1225,6 +1225,23 @@ async function heraldHud_getDataInventory() {
             actor.getEmbeddedDocument("Item", itemId);
           if (item) {
             await item.use();
+            let updatedItem =
+              actor.items.get(itemId) ||
+              actor.getEmbeddedDocument("Item", itemId);
+            let categoryConsumableDiv = document.getElementById(
+              `heraldHud-weaponCategory-${item.id}`
+            );
+            let weaponItemUses = "";
+
+            if (
+              updatedItem.system.uses?.value &&
+              updatedItem.system.uses?.max
+            ) {
+              weaponItemUses = `${updatedItem.system.uses.value}/${updatedItem.system.uses.max}`;
+            }
+            if (categoryConsumableDiv) {
+              categoryConsumableDiv.innerText = `${updatedItem.system.type.label} | ${weaponItemUses}`;
+            }
           }
         });
       });
@@ -1293,6 +1310,25 @@ async function heraldHud_getDataInventory() {
       : "";
     let isEquipped = item.system.equipped ? "equipped" : "";
     let htmlDescription = item.system.description.value;
+    let arrToolCategory = [];
+    let toolItemUses = "";
+
+    if (item.system.type.label) {
+      arrToolCategory.push(item.system.type.label);
+    }
+    if (item.system.uses?.value && item.system.uses?.max) {
+      toolItemUses = `${item.system.uses.value}/${item.system.uses.max}`;
+    }
+
+    if (toolItemUses) {
+      arrToolCategory.push(toolItemUses);
+    }
+
+    let labelCategory = ``;
+
+    if (arrToolCategory.length > 0) {
+      labelCategory = arrToolCategory.join(" | ");
+    }
     listTools += ` 
     <div id="heraldHud-dialogToolContainer" class="heraldHud-dialogToolContainer">
         <div id="heraldHud-dialogToolItem" class="heraldHud-dialogToolItem" data-item-id="${item.id}">
@@ -1301,7 +1337,7 @@ async function heraldHud_getDataInventory() {
           </div>
           <div id="heraldHud-toolMiddle" class="heraldHud-toolMiddle">
             <div id="heraldHud-toolName" class="heraldHud-toolName">${item.name}</div>
-            <div id="heraldHud-toolCategory" class="heraldHud-toolCategory">${item.system.type.label}</div>
+            <div id="heraldHud-toolCategory" class="heraldHud-toolCategory">${labelCategory}</div>
           </div>
           <div id="heraldHud-toolRight" class="heraldHud-toolRight">
         <div class="heraldHud-toolEquipButton ${isEquipped}" data-item-id="${item.id}">
@@ -1496,9 +1532,159 @@ async function heraldHud_getDataInventory() {
       });
   }
 }
+async function heraldHud_inventoryGetDataWeapon() {}
+async function heraldHud_inventoryGetDataTool() {}
+async function heraldHud_inventoryGetDataConsumable() {}
 
-async function heraldHud_renderItemLoots() {}
-async function heraldHud_getDataLoots() {}
+async function heraldHud_renderItemLoots() {
+  let actor = heraldHud_actorSelected;
+  let heraldHud_dialogDiv = document.getElementById("heraldHud-dialog");
+
+  if (heraldHud_dialogDiv) {
+    heraldHud_dialogDiv.innerHTML = `
+    <div id="heraldHud-dialogItemLoots" class="heraldHud-dialogItemLoots">
+      <div id="heraldHud-dialogLootsContainer" class="heraldHud-dialogLootsContainer">
+        <div id="heraldHud-dialogLootsTitle" class="heraldHud-dialogLootsTitle">Loots</div>
+        <hr style=" border: 1px solid grey; margin-top: 5px;">
+        <div id="heraldHud-dialogListLoots" class="heraldHud-dialogListLoots">
+        </div>
+      </div>
+      <div id="heraldHud-dialogCurrencyContainer" class="heraldHud-dialogCurrencyContainer">
+      </div>
+    </div>
+    `;
+    await heraldHud_getDataLoots();
+  }
+}
+async function heraldHud_getDataLoots() {
+  let actor = heraldHud_actorSelected;
+  let heraldHudListLootsDiv = document.getElementById(
+    "heraldHud-dialogListLoots"
+  );
+  let heraldHudCurrencyDiv = document.getElementById(
+    "heraldHud-dialogCurrencyContainer"
+  );
+  let lootsItem = actor.items.filter((item) => item.type === "loot");
+
+  let listLoots = ``;
+
+  lootsItem.forEach((item) => {
+    let lootsItemUses = "";
+    let arrLootsCategory = [];
+
+    if (item.system.type.label) {
+      arrLootsCategory.push(item.system.type.label);
+    }
+    if (item.system.uses?.value && item.system.uses?.max) {
+      lootsItemUses = `${item.system.uses.value}/${item.system.uses.max}`;
+    }
+    if (lootsItemUses) {
+      arrLootsCategory.push(lootsItemUses);
+    }
+    let labelCategory = ``;
+    if (arrLootsCategory.length > 0) {
+      labelCategory = arrLootsCategory.join(" | ");
+    }
+
+    listLoots += `
+      <div id="heraldHud-dialogLootsContainer" class="heraldHud-dialogLootsContainer">
+        <div id="heraldHud-dialogLootsItem" class="heraldHud-dialogLootsItem" data-item-id="${item.id}">
+          <div id="heraldHud-lootsLeft" class="heraldHud-lootsLeft">
+            <img src="${item.img}" alt="${item.name}" class="heraldHud-dialogLootsImage">
+          </div>
+          <div id="heraldHud-lootsMiddle" class="heraldHud-lootsMiddle">
+            <div id="heraldHud-lootsName" class="heraldHud-lootsName">${item.name}</div>
+            <div id="heraldHud-lootsCategory-${item.id}" class="heraldHud-lootsCategory" >${labelCategory}</div>
+          </div>
+          <div id="heraldHud-lootsRight" class="heraldHud-lootsRight">
+            <div id="heraldHud-lootsQty-${item.id}">
+                x${item.system.quantity}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  if (heraldHudListLootsDiv) {
+    heraldHudListLootsDiv.innerHTML = listLoots;
+  }
+
+  if (heraldHudCurrencyDiv) {
+    heraldHudCurrencyDiv.innerHTML = `
+    <div class="heraldHud-currencyContainer">
+      <div class="heraldHud-platinumContainer">
+        <div class="heraldHud-iconCurrencyPlatinum">
+          <img src="/systems/dnd5e/icons/currency/platinum.webp" alt="Platinum Icon">
+        </div>
+        <input type="number" id="heraldHud-currency-pp" value="${actor.system.currency.pp}" min="0">
+      </div>
+      <div class="heraldHud-goldContainer">
+        <div class="heraldHud-iconCurrencyGold">
+          <img src="/systems/dnd5e/icons/currency/gold.webp" alt="Gold Icon">
+        </div>
+        <input type="number" id="heraldHud-currency-gp" value="${actor.system.currency.gp}" min="0">
+      </div>
+      <div class="heraldHud-electrumContainer">
+        <div class="heraldHud-iconCurrencyElectrum">
+          <img src="/systems/dnd5e/icons/currency/electrum.webp" alt="Electrum Icon">
+        </div>
+        <input type="number" id="heraldHud-currency-ep" value="${actor.system.currency.ep}" min="0">
+      </div>
+  
+      <div class="heraldHud-silverContainer">
+        <div class="heraldHud-iconCurrencySilver">
+          <img src="/systems/dnd5e/icons/currency/silver.webp" alt="Silver Icon">
+        </div>
+        <input type="number" id="heraldHud-currency-sp" value="${actor.system.currency.sp}" min="0">
+      </div>
+  
+      <div class="heraldHud-copperContainer">
+        <div class="heraldHud-iconCurrencyCopper">
+          <img src="/systems/dnd5e/icons/currency/copper.webp" alt="Copper Icon">
+        </div>
+        <input type="number" id="heraldHud-currency-cp" value="${actor.system.currency.cp}" min="0">
+      </div>
+    </div>
+  `;
+  }
+
+  document
+    .querySelectorAll(".heraldHud-dialogLootsItem")
+    .forEach((toolItem) => {
+      toolItem.addEventListener("click", async function () {
+        let itemId = this.getAttribute("data-item-id");
+
+        let item =
+          actor.items.get(itemId) || actor.getEmbeddedDocument("Item", itemId);
+        if (item) {
+          await item.use();
+        }
+      });
+    });
+
+  ["gp", "pp", "ep", "sp", "cp"].forEach((type) => {
+    const input = document.getElementById(`heraldHud-currency-${type}`);
+
+    if (input) {
+      let timeout;
+
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          clearTimeout(timeout);
+
+          timeout = setTimeout(() => {
+            let value = parseInt(event.target.value);
+            value = isNaN(value) || value < 0 ? 0 : value;
+            actor.update({ [`system.currency.${type}`]: value });
+
+            console.log(`Updated ${type} to ${value}`);
+          }, 500);
+        }
+      });
+    }
+  });
+}
 
 async function heraldHud_renderItemFeatures() {
   let actor = heraldHud_actorSelected;
@@ -1538,23 +1724,60 @@ async function heraldHud_getDataFeatures() {
 
   let listFeaturesActive = ``;
   let listFeaturesPassive = ``;
+  let favoritesActor = actor.system?.favorites || [];
   featuresItem.forEach((item) => {
+    let htmlDescription = item.system.description.value;
+    // htmlDescription = htmlDescription.replace(
+    //   /@UUID\[(.*?)\]/g,
+    //   (match, uuid) => {
+    //     return `<button class="heraldHud-uuidButton" onclick="game.packs.get('${uuid}').sheet.render(true)">
+    //             🔗 Open UUID
+    //           </button>`;
+    //   }
+    // );
+    let rawItemId = `.Item.${item.id}`;
+    let isFavorited = favoritesActor.some(
+      (favorite) => favorite.id === rawItemId
+    )
+      ? "favorited"
+      : "";
     if (item.system.activation?.type) {
       let category = ``;
-      if (item.labels.activation.includes("Bonus Action")) {
-        category = `<i class="fa-solid fa-square-plus" style="color:#d5530b;"></i> Bonus Action`;
-      } else if (item.labels.activation.includes("Reaction")) {
-        category = `<i class="fa-solid fa-rotate-right" style="color:#fe85f6;"></i> Reaction`;
-      } else if (item.labels.activation.includes("Legendary Action")) {
-        category = `<i class="fa-solid fa-dragon" style="color:#0a35d1;"></i> Legendary Action`;
-      } else {
+      if (item.system.activation.type == "action") {
         category = `<i class="fa-solid fa-circle" style="color:#1f6237;"></i> Action`;
+      } else if (item.system.activation.type.includes("bonus")) {
+        category = `<i class="fa-solid fa-square-plus" style="color:#d5530b;"></i> Bonus Action`;
+      } else if (item.system.activation.type.includes("reaction")) {
+        category = `<i class="fa-solid fa-rotate-right" style="color:#fe85f6;"></i> Reaction`;
+      } else if (item.system.activation.type.includes("legendary")) {
+        category = `<i class="fa-solid fa-dragon" style="color:#0a35d1;"></i> Legendary Action`;
+      } else if (item.system.activation.type.includes("lair")) {
+        category = `<i class="fa-solid fa-chess-rook" style="color:#c7cad6;"></i> Lair Action`;
+      } else if (item.system.activation.type.includes("mythic")) {
+        category = `<i class="fa-solid fa-spaghetti-monster-flying" style="color:#adffeb;"></i> Mythic Action`;
+      } else if (item.system.activation.type.includes("minute")) {
+        category = `<i class="fa-solid fa-hourglass-start" style="color:#0ad1c4;"></i> ${item.system.activation.cost} Minute`;
+      } else if (item.system.activation.type.includes("hour")) {
+        category = `<i class="fa-solid fa-hourglass-start" style="color:#0ad1c4;"></i> ${item.system.activation.cost} Hour`;
+      } else if (item.system.activation.type.includes("day")) {
+        category = `<i class="fa-solid fa-hourglass-start" style="color:#0ad1c4;"></i> ${item.system.activation.cost} Day`;
+      } else if (item.system.activation.type.includes("special")) {
+        category = `<i class="fa-solid fa-sparkles" style="color:#d0f4fc;"></i> Special`;
       }
-      let featureUses = ``;
+      let arrFeaturesCategory = [];
+      if (category) {
+        arrFeaturesCategory.push(category);
+      }
+      let featuresItemUses = "";
 
-      if (item.system.uses.value && item.system.uses.max) {
-        featureUses = `${item.system.uses.value} / ${item.system.uses.max}`;
+      if (item.system.uses?.value && item.system.uses?.max) {
+        featuresItemUses = `| ${item.system.uses.value}/${item.system.uses.max}`;
       }
+
+      if (featuresItemUses) {
+        arrFeaturesCategory.push(featuresItemUses);
+      }
+
       listFeaturesActive += `
         <div id="heraldHud-dialogFeaturesContainer" class="heraldHud-dialogFeaturesContainer">
           <div id="heraldHud-dialogFeaturesItem" class="heraldHud-dialogFeaturesItem" data-item-id="${item.id}">
@@ -1562,26 +1785,35 @@ async function heraldHud_getDataFeatures() {
               <div class="heraldHud-dialogFeaturesImageContainer">
                 <img src="${item.img}" alt="${item.name}" class="heraldHud-dialogFeaturesImage">
               </div>
-              <div>
-              test
+              <div class="heraldHud-featuresFavoriteButton ${isFavorited}" data-item-id="${item.id}">
+                  <i class="fa-solid fa-star"></i>
               </div>
             </div>
             <div id="heraldHud-dialogFeaturesMiddle" class="heraldHud-dialogFeaturesMiddle">
-             <div id="heraldHud-dialogFeaturesName" class="heraldHud-dialogFeaturesName">${item.name}</div>
-             <div id="heraldHud-dialogFeaturesCategory" class="heraldHud-dialogFeaturesCategory">${category}</div>
-              <div id="heraldHud-dialogFeaturesUses" class="heraldHud-dialogFeaturesUses">
-              ${featureUses}
+              <div id="heraldHud-dialogFeaturesName" class="heraldHud-dialogFeaturesName">${item.name}</div>
+              <div id="heraldHud-dialogFeaturesCategory" class="heraldHud-dialogFeaturesCategory">
+                <div class="heraldHud-featuresActiveType">${category} </div>
+                <div id="heraldHud-featuresUsesValue-${item.id}" class="heraldHud-featuresUsesValue">${featuresItemUses}</div>
+              </div>
+              <div id="heraldHud-dialogFeaturesProperti" class="heraldHud-dialogFeaturesProperti">
               </div>
             </div>
             <div id="heraldHud-dialogFeaturesRight" class="heraldHud-dialogFeaturesRight">
              
             </div>
           </div>
+          <div id="heraldHud-dialogFeaturesTooltip" class="heraldHud-dialogFeaturesTooltip">
+            <div class="heraldHud-featuresTooltipTop">${item.name}  
+            <hr style=" border: 1px solid grey; margin-top: 5px;"></div>
+            <div class="heraldHud-weaponTooltipMiddle">${htmlDescription} 
+            <hr style=" border: 1px solid grey; margin-top: 5px;"></div>
+            <div class="heraldHud-featuresTooltipBottom"></div>
+          </div>
         </div>
       `;
     } else {
       listFeaturesPassive += `
-      <div id="heraldHud-dialogFeaturesContainer" class="heraldHud-dialogFeaturesContainer">
+        <div id="heraldHud-dialogFeaturesContainer" class="heraldHud-dialogFeaturesContainer">
           <div id="heraldHud-dialogFeaturesItem" class="heraldHud-dialogFeaturesItem"  data-item-id="${item.id}">
             <div id="heraldHud-dialogFeaturesLeft" class="heraldHud-dialogFeaturesLeft">
               <div class="heraldHud-dialogFeaturesImageContainer">
@@ -1594,6 +1826,13 @@ async function heraldHud_getDataFeatures() {
             </div>
             <div id="heraldHud-dialogFeaturesRight" class="heraldHud-dialogFeaturesRight">
             </div>
+          </div>
+          <div id="heraldHud-dialogFeaturesTooltip" class="heraldHud-dialogFeaturesTooltip">
+            <div class="heraldHud-featuresTooltipTop">${item.name}  
+            <hr style=" border: 1px solid grey; margin-top: 5px;"></div>
+            <div class="heraldHud-weaponTooltipMiddle">${htmlDescription} 
+            <hr style=" border: 1px solid grey; margin-top: 5px;"></div>
+            <div class="heraldHud-featuresTooltipBottom"></div>
           </div>
         </div>
       `;
@@ -1615,7 +1854,56 @@ async function heraldHud_getDataFeatures() {
 
           if (item) {
             await item.use();
+            let updatedItem =
+              actor.items.get(itemId) ||
+              actor.getEmbeddedDocument("Item", itemId);
+            let featuresUsesDiv = document.getElementById(
+              `heraldHud-featuresUsesValue-${item.id}`
+            );
+            let featureUses = ``;
+
+            if (updatedItem.system.uses.value && updatedItem.system.uses.max) {
+              featureUses = `${updatedItem.system.uses.value}/${updatedItem.system.uses.max}`;
+            }
+
+            if (featuresUsesDiv) {
+              featuresUsesDiv.innerText = `| ${featureUses}`;
+            }
           }
+        });
+      });
+
+    document
+      .querySelectorAll(".heraldHud-featuresFavoriteButton")
+      .forEach((button) => {
+        button.addEventListener("click", async (event) => {
+          event.stopPropagation();
+          let itemId = button.getAttribute("data-item-id");
+          let rawItemId = `.Item.${itemId}`;
+          let isCurrentlyFavorite = favoritesActor.some(
+            (fav) => fav.id === rawItemId
+          );
+
+          if (isCurrentlyFavorite) {
+            favoritesActor = favoritesActor.filter(
+              (fav) => fav.id !== rawItemId
+            );
+          } else {
+            let maxSort =
+              favoritesActor.length > 0
+                ? Math.max(...favoritesActor.map((fav) => fav.sort))
+                : 0;
+            favoritesActor.push({
+              type: "item",
+              id: rawItemId,
+              sort: maxSort + 100000,
+            });
+          }
+          if (Array.isArray(favoritesActor)) {
+            await actor.update({ "system.favorites": favoritesActor });
+          }
+
+          button.classList.toggle("favorited", !isCurrentlyFavorite);
         });
       });
   }

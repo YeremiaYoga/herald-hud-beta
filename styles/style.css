@@ -1250,6 +1250,101 @@
 }
 
 
+/* Loots */
+
+.heraldHud-dialogItemLoots {
+    width: 100%;
+    max-height: 100%;
+    color: white;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+}
+
+.heraldHud-dialogLootsItem {
+    display: flex;
+    gap: 10px;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 12px;
+    align-items: center;
+}
+
+.heraldHud-dialogLootsImage {
+    width: 30px;
+    height: 30px;
+}
+
+.heraldHud-lootsCategory {
+    font-size: 10px;
+    color: rgb(200, 200, 200);
+}
+
+.heraldHud-lootsRight {
+    display: flex;
+    margin-left: auto;
+}
+
+.heraldHud-dialogLootsItem:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    transition: background-color 0.2s ease-in-out;
+    border-radius: 5px;
+}
+
+.heraldHud-dialogCurrencyContainer {
+    padding-top: 25%;
+}
+
+.heraldHud-currencyContainer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 15%;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5);
+  }
+  
+  .heraldHud-currencyContainer > div {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+  }
+  
+  .heraldHud-currencyContainer label {
+    width: 40px;
+    font-size: 10px;
+    font-weight: bold;
+  }
+  
+  .heraldHud-currencyContainer input {
+    width: 40px;
+    text-align: center;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    color: white;
+  }
+  
+  .heraldHud-currencyContainer img {
+    width: 15px;
+    height: 15px;
+    position: absolute;
+    top: -15%;
+    left: -15%;
+    border: none;
+  }
+  
+
+
 
 /* Features */
 
@@ -1305,16 +1400,66 @@
 }
 
 
+.heraldHud-featuresFavoriteButton {
+    font-size: 13px;
+    padding: 2px;
+    cursor: pointer;
+    transition: color 0.3s ease-in-out;
+}
+
+.heraldHud-featuresFavoriteButton {
+    color: gray;
+}
+
+.heraldHud-featuresFavoriteButton.favorited {
+    color: gold;
+}
+
+
 .heraldHud-dialogFeaturesMiddle {
     padding: 2px;
 }
 
 .heraldHud-dialogFeaturesCategory {
-    font-size: 8px;
+    font-size: 10px;
+    color: rgb(200, 200, 200);
+    display: flex;
+    gap: 2px;
+}
+
+.heraldHud-featuresActiveType,
+.heraldHud-featuresUsesValue {
+    display: inline-block;
+    white-space: nowrap; 
+}
+
+.heraldHud-dialogFeaturesTooltip {
+    display: none;
+    width: 350px;
+    position: absolute;
+    bottom: -5%;
+    left: 150%;
+    transform: translateX(-50%) translateY(-10px);
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 5px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+    font-size: 12px;
+    z-index: 1000;
+    text-align: justify;
+    white-space: normal;
+}
+
+.heraldHud-featuresTooltipTop {
+    font-size: 16px;
+}
+
+.heraldHud-featuresTooltipBottom {
+    font-size: 12px;
     color: rgb(200, 200, 200);
 }
 
-.heraldHud-dialogFeaturesUses {
-    font-size: 8px;
-    color: rgb(200, 200, 200);
+.heraldHud-dialogFeaturesContainer:hover .heraldHud-dialogFeaturesTooltip {
+    display: block;
 }
