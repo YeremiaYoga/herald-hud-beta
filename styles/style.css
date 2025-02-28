@@ -1082,6 +1082,19 @@
     color: gold;
 }
 
+.heraldHud-weaponCategory {
+    font-size: 10px;
+    color: rgb(200, 200, 200);
+    display: flex;
+    gap: 2px;
+}
+
+.heraldHud-weaponsActiveType,
+.heraldHud-weaponsUsesValue {
+    display: inline-block;
+    white-space: nowrap;
+}
+
 .heraldHud-weaponProperti {
     font-size: 10px;
     color: rgb(200, 200, 200);
@@ -1309,40 +1322,40 @@
     justify-content: center;
     gap: 10px;
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5);
-  }
-  
-  .heraldHud-currencyContainer > div {
+}
+
+.heraldHud-currencyContainer>div {
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
 
-  }
-  
-  .heraldHud-currencyContainer label {
+}
+
+.heraldHud-currencyContainer label {
     width: 40px;
     font-size: 10px;
     font-weight: bold;
-  }
-  
-  .heraldHud-currencyContainer input {
+}
+
+.heraldHud-currencyContainer input {
     width: 40px;
     text-align: center;
     padding: 5px;
     border: 1px solid #ccc;
     border-radius: 5px;
     color: white;
-  }
-  
-  .heraldHud-currencyContainer img {
+}
+
+.heraldHud-currencyContainer img {
     width: 15px;
     height: 15px;
     position: absolute;
     top: -15%;
     left: -15%;
     border: none;
-  }
-  
+}
+
 
 
 
@@ -1430,7 +1443,7 @@
 .heraldHud-featuresActiveType,
 .heraldHud-featuresUsesValue {
     display: inline-block;
-    white-space: nowrap; 
+    white-space: nowrap;
 }
 
 .heraldHud-dialogFeaturesTooltip {

@@ -1164,51 +1164,49 @@ async function heraldHud_getDataInventory() {
     let weaponitemUses = "";
 
     if (item.system.uses?.value && item.system.uses?.max) {
-      weaponitemUses = `${item.system.uses.value}/${item.system.uses.max}`;
+      weaponitemUses = `| ${item.system.uses.value}/${item.system.uses.max}`;
     }
 
     if (weaponitemUses) {
       arrWeaponCategory.push(weaponitemUses);
     }
 
-    let labelCategory = ``;
-
-    if (arrWeaponCategory.length > 0) {
-      labelCategory = arrWeaponCategory.join(" | ");
-    }
-
     console.log(item.system.uses);
+
     listWeapons += `
-    <div id="heraldHud-dialogWeaponContainer" class="heraldHud-dialogWeaponContainer">
-      <div id="heraldHud-dialogWeaponItem" class="heraldHud-dialogWeaponItem" data-item-id="${item.id}">
-          <div id="heraldHud-weaponLeft" class="heraldHud-weaponLeft">
-              <div class="heraldHud-dialogWeaponImageContainer">
-                 <img src="${item.img}" alt="${item.name}" class="heraldHud-dialogWeaponImage">
+      <div id="heraldHud-dialogWeaponContainer" class="heraldHud-dialogWeaponContainer">
+        <div id="heraldHud-dialogWeaponItem" class="heraldHud-dialogWeaponItem" data-item-id="${item.id}">
+            <div id="heraldHud-weaponLeft" class="heraldHud-weaponLeft">
+                <div class="heraldHud-dialogWeaponImageContainer">
+                   <img src="${item.img}" alt="${item.name}" class="heraldHud-dialogWeaponImage">
+                </div>
+            </div>
+            <div id="heraldHud-weaponMiddle" class="heraldHud-weaponMiddle">
+              <div id="heraldHud-weaponName" class="heraldHud-weaponName">${item.name}</div>
+              <div id="heraldHud-weaponCategory-${item.id}" class="heraldHud-weaponCategory">
+                <div class="heraldHud-weaponsActiveType">${category} </div>
+                <div id="heraldHud-weaponsUsesValue-${item.id}" class="heraldHud-weaponsUsesValue">${weaponitemUses}</div>
               </div>
-          </div>
-          <div id="heraldHud-weaponMiddle" class="heraldHud-weaponMiddle">
-            <div id="heraldHud-weaponName" class="heraldHud-weaponName">${item.name}</div>
-            <div id="heraldHud-weaponCategory-${item.id}" class="heraldHud-weaponCategory">${labelCategory}</div>
-            <div id class="heraldHud-weaponProperti">${labelProperti}</div>
-          </div>
-          <div id="heraldHud-weaponRight" class="heraldHud-weaponRight">
-              <div class="heraldHud-weaponEquipButton ${isEquipped}" data-item-id="${item.id}">
-                  <i class="fa-solid fa-shield-halved"></i>
-              </div>
-              <div class="heraldHud-weaponFavoriteButton ${isFavorited}" data-item-id="${item.id}">
-                  <i class="fa-solid fa-star"></i>
-              </div>
-          </div>
+              <div id class="heraldHud-weaponProperti">${labelProperti}</div>
+            </div>
+            <div id="heraldHud-weaponRight" class="heraldHud-weaponRight">
+                <div class="heraldHud-weaponEquipButton ${isEquipped}" data-item-id="${item.id}">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div class="heraldHud-weaponFavoriteButton ${isFavorited}" data-item-id="${item.id}">
+                    <i class="fa-solid fa-star"></i>
+                </div>
+            </div>
+        </div>
+        <div id="heraldHud-dialogWeaponTooltip" class="heraldHud-dialogWeaponTooltip">
+          <div class="heraldHud-weaponTooltipTop">${item.name}  
+          <hr style=" border: 1px solid grey; margin-top: 5px;"></div>
+          <div class="heraldHud-weaponTooltipMiddle">${htmlDescription} 
+          <hr style=" border: 1px solid grey; margin-top: 5px;"></div>
+          <div class="heraldHud-weaponTooltipBottom">${labelPropertiTooltip}</div>
+        </div>
       </div>
-      <div id="heraldHud-dialogWeaponTooltip" class="heraldHud-dialogWeaponTooltip">
-        <div class="heraldHud-weaponTooltipTop">${item.name}  
-        <hr style=" border: 1px solid grey; margin-top: 5px;"></div>
-        <div class="heraldHud-weaponTooltipMiddle">${htmlDescription} 
-        <hr style=" border: 1px solid grey; margin-top: 5px;"></div>
-        <div class="heraldHud-weaponTooltipBottom">${labelPropertiTooltip}</div>
-      </div>
-    </div>
-    `;
+      `;
   });
 
   if (heraldHud_listWeaponDiv) {
@@ -1228,8 +1226,8 @@ async function heraldHud_getDataInventory() {
             let updatedItem =
               actor.items.get(itemId) ||
               actor.getEmbeddedDocument("Item", itemId);
-            let categoryConsumableDiv = document.getElementById(
-              `heraldHud-weaponCategory-${item.id}`
+            let weaponUsesDiv = document.getElementById(
+              `heraldHud-weaponsUsesValue-${item.id}`
             );
             let weaponItemUses = "";
 
@@ -1239,8 +1237,8 @@ async function heraldHud_getDataInventory() {
             ) {
               weaponItemUses = `${updatedItem.system.uses.value}/${updatedItem.system.uses.max}`;
             }
-            if (categoryConsumableDiv) {
-              categoryConsumableDiv.innerText = `${updatedItem.system.type.label} | ${weaponItemUses}`;
+            if (weaponUsesDiv) {
+              weaponUsesDiv.innerText = `| ${weaponItemUses}`;
             }
           }
         });
