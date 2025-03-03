@@ -810,35 +810,82 @@ async function heraldHud_updateItemFavoriteActor() {
       actor.getEmbeddedDocument("Item", rawItemId);
 
     listFavorites += `
-      <div class="heraldHud-favoriteItem" data-item-id="${item.id}" data-name="${item.name}">
-        <img src="${item.img}" alt="${item.name}" class="heraldHud-favoriteItemImage">
-      </div>`;
+    <div class="heraldHud-favoriteItem" data-item-id="${item.id}" data-name="${item.name}">
+      <img src="${item.img}" alt="${item.name}" class="heraldHud-favoriteItemImage">
+    </div>`;
   }
 
   if (favoritesListDiv) {
     favoritesListDiv.innerHTML = listFavorites;
     document.querySelectorAll(".heraldHud-favoriteItem").forEach((favItem) => {
+      const tooltipDiv = document.getElementById(
+        "heraldHud-favoriteItemTooltip"
+      );
+      const tooltipNameDiv = document.getElementById(
+        "heraldHud-favoriteTooltipNameItem"
+      );
+      const tooltipChargeDiv = document.getElementById(
+        "heraldHud-favoriteTooltipChargeItem"
+      );
+      const tooltipMiddleDiv = document.getElementById(
+        "heraldHud-favoriteTooltipMiddle"
+      );
       favItem.addEventListener("click", async function () {
-        let itemId = this.getAttribute("data-item-id");
+        let itemId = favItem.getAttribute("data-item-id");
 
         let item =
           actor.items.get(itemId) || actor.getEmbeddedDocument("Item", itemId);
 
         if (item) {
           await item.use();
+          let favoriteUses = "";
+          if (item.system.uses?.value && item.system.uses?.max) {
+            favoriteUses = `- (${item.system.uses.value}/${item.system.uses.max})`;
+          }
+          tooltipChargeDiv.innerText = favoriteUses;
         }
       });
-      const tooltip = document.getElementById("heraldHud-favoriteItemTooltip");
+
       favItem.addEventListener("mouseenter", (event) => {
+        let itemId = favItem.getAttribute("data-item-id");
+
+        let item =
+          actor.items.get(itemId) || actor.getEmbeddedDocument("Item", itemId);
+        let arrProperti = [];
+        let labelProperti = "";
+        if (item.labels.toHit) {
+          arrProperti.push(`To hit ${item.labels.toHit}`);
+        }
+        if (item.labels.save) {
+          arrProperti.push(item.labels.save);
+        }
+        if (item.labels.damage) {
+          for (let damage of item.labels.derivedDamage) {
+            let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+
+            arrProperti.push(`${damage.formula} ${damageIcon}`);
+          }
+        }
+        if (arrProperti.length > 0) {
+          labelProperti = arrProperti.join(" | ");
+        }
+
+        let favoriteUses = "";
+
+        if (item.system.uses?.value && item.system.uses?.max) {
+          favoriteUses = `- (${item.system.uses.value}/${item.system.uses.max})`;
+        }
         let itemName = favItem.getAttribute("data-name");
-        tooltip.innerText = itemName;
-        tooltip.style.opacity = "1";
-        tooltip.style.visibility = "visible";
+        tooltipNameDiv.innerText = itemName;
+        tooltipChargeDiv.innerText = favoriteUses;
+        tooltipMiddleDiv.innerHTML = labelProperti;
+        tooltipDiv.style.opacity = "1";
+        tooltipDiv.style.visibility = "visible";
       });
 
       favItem.addEventListener("mouseleave", () => {
-        tooltip.style.opacity = "0";
-        tooltip.style.visibility = "hidden";
+        tooltipDiv.style.opacity = "0";
+        tooltipDiv.style.visibility = "hidden";
       });
     });
   }
@@ -870,6 +917,18 @@ async function heraldHud_updateItemCosumablesActor() {
     document
       .querySelectorAll(".heraldHud-consumableItem")
       .forEach((favItem) => {
+        const tooltipDiv = document.getElementById(
+          "heraldHud-consumableItemTooltip"
+        );
+        const tooltipNameDiv = document.getElementById(
+          "heraldHud-consumableTooltipNameItem"
+        );
+        const tooltipChargeDiv = document.getElementById(
+          "heraldHud-consumableTooltipChargeItem"
+        );
+        const tooltipMiddleDiv = document.getElementById(
+          "heraldHud-consumableTooltipMiddle"
+        );
         favItem.addEventListener("click", async function () {
           let itemId = this.getAttribute("data-item-id");
 
@@ -892,19 +951,41 @@ async function heraldHud_updateItemCosumablesActor() {
             }
           }
         });
-        const tooltip = document.getElementById(
-          "heraldHud-consumableItemTooltip"
-        );
+
         favItem.addEventListener("mouseenter", (event) => {
+          let itemId = favItem.getAttribute("data-item-id");
+
+          let item =
+            actor.items.get(itemId) ||
+            actor.getEmbeddedDocument("Item", itemId);
+          let arrProperti = [];
+          let labelProperti = "";
+          if (item.labels.toHit) {
+            arrProperti.push(`To hit ${item.labels.toHit}`);
+          }
+          if (item.labels.save) {
+            arrProperti.push(item.labels.save);
+          }
+          if (item.labels.damage) {
+            for (let damage of item.labels.derivedDamage) {
+              let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+
+              arrProperti.push(`${damage.formula} ${damageIcon}`);
+            }
+          }
+          if (arrProperti.length > 0) {
+            labelProperti = arrProperti.join(" | ");
+          }
           let itemName = favItem.getAttribute("data-name");
-          tooltip.innerText = itemName;
-          tooltip.style.opacity = "1";
-          tooltip.style.visibility = "visible";
+          tooltipNameDiv.innerText = itemName;
+          tooltipMiddleDiv.innerHTML = labelProperti;
+          tooltipDiv.style.opacity = "1";
+          tooltipDiv.style.visibility = "visible";
         });
 
         favItem.addEventListener("mouseleave", () => {
-          tooltip.style.opacity = "0";
-          tooltip.style.visibility = "hidden";
+          tooltipDiv.style.opacity = "0";
+          tooltipDiv.style.visibility = "hidden";
         });
       });
   }
@@ -971,15 +1052,6 @@ async function heraldHud_renderItemInventory() {
   let actor = heraldHud_actorSelected;
   let heraldHud_dialogDiv = document.getElementById("heraldHud-dialog");
 
-  let weaponsItem = actor.items.filter((item) => item.type === "weapon");
-  let toolsItem = actor.items.filter((item) => item.type === "tool");
-  let consumablesItem = actor.items.filter(
-    (item) => item.type === "consumable"
-  );
-
-  let weaponDiv = ``;
-  let toolDiv = ``;
-  let consumableDiv = ``;
   if (heraldHud_dialogDiv) {
     heraldHud_dialogDiv.innerHTML = `
     <div id="heraldHud-dialogItemInventory" class="heraldHud-dialogItemInventory">
@@ -1009,31 +1081,86 @@ async function heraldHud_renderItemInventory() {
   await heraldHud_getDataInventory();
 }
 
+// function heraldHud_getGameIconDamage(type) {
+//   const basePath = "/systems/dnd5e/icons/svg/damage/";
+//   const validTypes = {
+//     acid: "Acid",
+//     bludgeoning: "Bludgeoning",
+//     cold: "Cold",
+//     fire: "Fire",
+//     force: "Force",
+//     lightning: "Lightning",
+//     necrotic: "Necrotic",
+//     piercing: "Piercing",
+//     poison: "Poison",
+//     psychic: "Psychic",
+//     radiant: "Radiant",
+//     slashing: "Slashing",
+//     thunder: "Thunder",
+//     healing: "Healing",
+//     temphp: "Temporary HP",
+//   };
+
+//   let iconType = validTypes[type] ? type : "default";
+//   let tooltipText = validTypes[type] || "Unknown";
+
+//   return `<img src="${basePath}${iconType}.svg" width="13" height="13" style="border:none; filter:invert(1);" title="${tooltipText}">`;
+// }
+
 function heraldHud_getGameIconDamage(type) {
   const basePath = "/systems/dnd5e/icons/svg/damage/";
-  const validTypes = [
-    "acid",
-    "bludgeoning",
-    "cold",
-    "fire",
-    "force",
-    "lightning",
-    "necrotic",
-    "piercing",
-    "poison",
-    "psychic",
-    "radiant",
-    "slashing",
-    "thunder",
-    "healing",
-    "temphp",
-  ];
+  const validTypes = {
+    acid: "Acid",
+    bludgeoning: "Bludgeoning",
+    cold: "Cold",
+    fire: "Fire",
+    force: "Force",
+    lightning: "Lightning",
+    necrotic: "Necrotic",
+    piercing: "Piercing",
+    poison: "Poison",
+    psychic: "Psychic",
+    radiant: "Radiant",
+    slashing: "Slashing",
+    thunder: "Thunder",
+    healing: "Healing",
+    temphp: "Temporary HP",
+  };
 
-  if (validTypes.includes(type)) {
-    return `<img src="${basePath}${type}.svg" width="13" height="13" style=" border:none; filter: invert(1);">`;
-  }
+  let iconType = validTypes[type] ? type : "default";
+  let tooltipText = validTypes[type] || "Unknown";
 
-  return `<img src="${basePath}default.svg" width="13" height="13" style="vertical-align:middle; border:none; filter: invert(1);">`;
+  return `
+    <div class="heraldHud-damageIconContainer">
+      <img src="${basePath}${iconType}.svg" width="13" height="13" style="border:none; filter:invert(1);">
+      <div class="heraldHud-damageTooltip">${tooltipText}</div>
+    </div>
+  `;
+}
+
+function heraldHud_getCurrencyIcon(type) {
+  const currencyIcons = {
+    pp: {
+      src: "/systems/dnd5e/icons/currency/platinum.webp",
+      label: "Platinum",
+    },
+    gp: { src: "/systems/dnd5e/icons/currency/gold.webp", label: "Gold" },
+    ep: {
+      src: "/systems/dnd5e/icons/currency/electrum.webp",
+      label: "Electrum",
+    },
+    sp: { src: "/systems/dnd5e/icons/currency/silver.webp", label: "Silver" },
+    cp: { src: "/systems/dnd5e/icons/currency/copper.webp", label: "Copper" },
+  };
+
+  let iconData = currencyIcons[type] || currencyIcons["gp"]; // Default ke Gold jika tidak dikenal
+
+  return `
+    <div class="heraldHud-currencyIconContainer">
+      <img src="${iconData.src}" >
+      <div class="heraldHud-currencyTooltip">${iconData.label}</div>
+    </div>
+  `;
 }
 
 async function heraldHud_getDataInventory() {
@@ -1449,9 +1576,27 @@ async function heraldHud_getDataInventory() {
     let consumableItemUses = "";
 
     if (item.system.uses?.value && item.system.uses?.max) {
-      consumableItemUses = `${item.system.uses.value}/${item.system.uses.max}`;
+      consumableItemUses = `| ${item.system.uses.value}/${item.system.uses.max}`;
     }
+    let arrProperti = [];
+    let labelProperti = "";
 
+    if (item.labels.toHit) {
+      arrProperti.push(`To hit ${item.labels.toHit}`);
+    }
+    if (item.labels.save) {
+      arrProperti.push(item.labels.save);
+    }
+    if (item.labels.damage) {
+      for (let damage of item.labels.derivedDamage) {
+        let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+
+        arrProperti.push(`${damage.formula} ${damageIcon}`);
+      }
+    }
+    if (arrProperti.length > 0) {
+      labelProperti = arrProperti.join(" | ");
+    }
     listConsumables += `
     <div id="heraldHud-dialogConsumableContainer" class="heraldHud-dialogConsumableContainer">
       <div id="heraldHud-dialogConsumableItem" class="heraldHud-dialogConsumableItem" data-item-id="${item.id}">
@@ -1460,7 +1605,11 @@ async function heraldHud_getDataInventory() {
           </div>
           <div id="heraldHud-consumableMiddle" class="heraldHud-consumableMiddle">
             <div id="heraldHud-consumableName" class="heraldHud-consumableName">${item.name}</div>
-            <div id="heraldHud-consumableCategory-${item.id}" class="heraldHud-consumableCategory" >${item.system.type.label} | ${consumableItemUses}</div>
+            <div id="heraldHud-consumableCategory-${item.id}" class="heraldHud-consumableCategory" >
+               <div class="heraldHud-consumableType">${item.system.type.label}</div>
+                <div id="heraldHud-consumableUsesValue-${item.id}" class="heraldHud-consumableUsesValue">${consumableItemUses}</div>
+            </div>
+            <div id class="heraldHud-consumableProperti">${labelProperti}</div>
           </div>
           <div id="heraldHud-consumableRight" class="heraldHud-consumableRight">
             <div id="heraldHud-consumableQty-${item.id}">
@@ -1510,8 +1659,8 @@ async function heraldHud_getDataInventory() {
               if (qtyConsumableDiv) {
                 qtyConsumableDiv.innerText = `x${updatedItem.system.quantity}`;
               }
-              let categoryConsumableDiv = document.getElementById(
-                `heraldHud-consumableCategory-${item.id}`
+              let consumableUsesDiv = document.getElementById(
+                `heraldHud-consumableUsesValue-${item.id}`
               );
               let consumableItemUses = "";
 
@@ -1521,8 +1670,8 @@ async function heraldHud_getDataInventory() {
               ) {
                 consumableItemUses = `${updatedItem.system.uses.value}/${updatedItem.system.uses.max}`;
               }
-              if (categoryConsumableDiv) {
-                categoryConsumableDiv.innerText = `${updatedItem.system.type.label} | ${consumableItemUses}`;
+              if (consumableUsesDiv) {
+                consumableUsesDiv.innerText = `| ${consumableItemUses}`;
               }
             }
           }
@@ -1568,20 +1717,32 @@ async function heraldHud_getDataLoots() {
 
   lootsItem.forEach((item) => {
     let lootsItemUses = "";
-    let arrLootsCategory = [];
+    let priceLabel = ``;
 
-    if (item.system.type.label) {
-      arrLootsCategory.push(item.system.type.label);
+    if (item.system.price?.denomination) {
+      let icons = {
+        pp: { name: "Platinum", file: "platinum" },
+        gp: { name: "Gold", file: "gold" },
+        ep: { name: "Electrum", file: "electrum" },
+        sp: { name: "Silver", file: "silver" },
+        cp: { name: "Copper", file: "copper" },
+      };
+
+      let currency = icons[item.system.price.denomination] || icons["gp"];
+
+      let currencyIcon = `
+        <div class="heraldHud-valueCurrencyContainer">
+          <img src="/systems/dnd5e/icons/currency/${currency.file}.webp" 
+               alt="${currency.name}" 
+               style="width: 12px; height: 12px; vertical-align: middle; border:none;">
+          <div class="heraldHud-valueCurrencyTooltip">${currency.name}</div>
+        </div>`;
+
+      priceLabel = `| ${currencyIcon} ${item.system.price.value} `;
     }
+
     if (item.system.uses?.value && item.system.uses?.max) {
-      lootsItemUses = `${item.system.uses.value}/${item.system.uses.max}`;
-    }
-    if (lootsItemUses) {
-      arrLootsCategory.push(lootsItemUses);
-    }
-    let labelCategory = ``;
-    if (arrLootsCategory.length > 0) {
-      labelCategory = arrLootsCategory.join(" | ");
+      lootsItemUses = `| ${item.system.uses.value}/${item.system.uses.max}`;
     }
 
     listLoots += `
@@ -1592,7 +1753,17 @@ async function heraldHud_getDataLoots() {
           </div>
           <div id="heraldHud-lootsMiddle" class="heraldHud-lootsMiddle">
             <div id="heraldHud-lootsName" class="heraldHud-lootsName">${item.name}</div>
-            <div id="heraldHud-lootsCategory-${item.id}" class="heraldHud-lootsCategory" >${labelCategory}</div>
+            <div id="heraldHud-lootsCategory" class="heraldHud-lootsCategory" >
+              <div id="heraldHud-lootsType" class="heraldHud-lootsType">
+                ${item.system.type.label}
+              </div>
+              <div id="heraldHud-lootsValue-${item.id}" class="heraldHud-lootsValue" >
+                ${priceLabel}
+              </div>
+              <div id="heraldHud-lootsCharge-${item.id}" class="heraldHud-lootsCharge" >
+                ${lootsItemUses}
+              </div>
+            </div>
           </div>
           <div id="heraldHud-lootsRight" class="heraldHud-lootsRight">
             <div id="heraldHud-lootsQty-${item.id}">
@@ -1609,52 +1780,56 @@ async function heraldHud_getDataLoots() {
   }
 
   if (heraldHudCurrencyDiv) {
-    heraldHudCurrencyDiv.innerHTML = `
-    <div class="heraldHud-currencyContainer">
-      <div class="heraldHud-platinumContainer">
-        <div class="heraldHud-iconCurrencyPlatinum">
-          <img src="/systems/dnd5e/icons/currency/platinum.webp" alt="Platinum Icon">
+    const currencyTypes = ["pp", "gp", "ep", "sp", "cp"];
+    const currencyNames = {
+      pp: "Platinum Piece",
+      gp: "Gold Piece",
+      ep: "Electrum Piece",
+      sp: "Silver Piece",
+      cp: "Copper Piece",
+    };
+
+    let currencyHTML = `<div class="heraldHud-currencyContainer">`;
+
+    for (let currency of currencyTypes) {
+      let icon = heraldHud_getCurrencyIcon(currency);
+      let value = actor.system.currency[currency] || 0;
+      let name = currencyNames[currency];
+
+      currencyHTML += `
+        <div class="heraldHud-${currency}Container">
+          <div class="heraldHud-iconCurrency">
+            ${icon}
+          </div>
+          <input type="number" id="heraldHud-currency-${currency}" value="${value}" min="0">
         </div>
-        <input type="number" id="heraldHud-currency-pp" value="${actor.system.currency.pp}" min="0">
-      </div>
-      <div class="heraldHud-goldContainer">
-        <div class="heraldHud-iconCurrencyGold">
-          <img src="/systems/dnd5e/icons/currency/gold.webp" alt="Gold Icon">
-        </div>
-        <input type="number" id="heraldHud-currency-gp" value="${actor.system.currency.gp}" min="0">
-      </div>
-      <div class="heraldHud-electrumContainer">
-        <div class="heraldHud-iconCurrencyElectrum">
-          <img src="/systems/dnd5e/icons/currency/electrum.webp" alt="Electrum Icon">
-        </div>
-        <input type="number" id="heraldHud-currency-ep" value="${actor.system.currency.ep}" min="0">
-      </div>
-  
-      <div class="heraldHud-silverContainer">
-        <div class="heraldHud-iconCurrencySilver">
-          <img src="/systems/dnd5e/icons/currency/silver.webp" alt="Silver Icon">
-        </div>
-        <input type="number" id="heraldHud-currency-sp" value="${actor.system.currency.sp}" min="0">
-      </div>
-  
-      <div class="heraldHud-copperContainer">
-        <div class="heraldHud-iconCurrencyCopper">
-          <img src="/systems/dnd5e/icons/currency/copper.webp" alt="Copper Icon">
-        </div>
-        <input type="number" id="heraldHud-currency-cp" value="${actor.system.currency.cp}" min="0">
-      </div>
-    </div>
-  `;
+      `;
+    }
+
+    currencyHTML += `</div>`;
+
+    heraldHudCurrencyDiv.innerHTML = currencyHTML;
   }
 
   document
     .querySelectorAll(".heraldHud-dialogLootsItem")
     .forEach((toolItem) => {
-      toolItem.addEventListener("click", async function () {
-        let itemId = this.getAttribute("data-item-id");
+      let itemId = toolItem.getAttribute("data-item-id");
+      let item =
+        actor.items.get(itemId) || actor.getEmbeddedDocument("Item", itemId);
+      let lootsValueDiv = document.getElementById(
+        `heraldHud-lootsValue-${item.id}`
+      );
 
-        let item =
-          actor.items.get(itemId) || actor.getEmbeddedDocument("Item", itemId);
+      // if (item.system.price?.value && item.system.price?.denomination) {
+      //   let currencyIcon = heraldHud_getCurrencyIcon(
+      //     item.system.price.denomination
+      //   );
+      //   let priceLabel = `${item.system.price.value} ${currencyIcon}`;
+      //   lootsValueDiv.innerHTML = priceLabel;
+      // }
+
+      toolItem.addEventListener("click", async function () {
         if (item) {
           await item.use();
         }
@@ -1775,6 +1950,25 @@ async function heraldHud_getDataFeatures() {
       if (featuresItemUses) {
         arrFeaturesCategory.push(featuresItemUses);
       }
+      let arrProperti = [];
+      let labelProperti = "";
+
+      if (item.labels.toHit) {
+        arrProperti.push(`To hit ${item.labels.toHit}`);
+      }
+      if (item.labels.save) {
+        arrProperti.push(item.labels.save);
+      }
+      if (item.labels.damage) {
+        for (let damage of item.labels.derivedDamage) {
+          let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+
+          arrProperti.push(`${damage.formula} ${damageIcon}`);
+        }
+      }
+      if (arrProperti.length > 0) {
+        labelProperti = arrProperti.join(" | ");
+      }
 
       listFeaturesActive += `
         <div id="heraldHud-dialogFeaturesContainer" class="heraldHud-dialogFeaturesContainer">
@@ -1794,6 +1988,7 @@ async function heraldHud_getDataFeatures() {
                 <div id="heraldHud-featuresUsesValue-${item.id}" class="heraldHud-featuresUsesValue">${featuresItemUses}</div>
               </div>
               <div id="heraldHud-dialogFeaturesProperti" class="heraldHud-dialogFeaturesProperti">
+              ${labelProperti}
               </div>
             </div>
             <div id="heraldHud-dialogFeaturesRight" class="heraldHud-dialogFeaturesRight">

@@ -295,6 +295,32 @@
     font-weight: bold;
 }
 
+.heraldHud-walkSpeedTooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 6px;
+    border-radius: 5px;
+    font-size: 10px;
+    min-width: 100px;
+    max-width: 200px;
+    white-space: nowrap;
+    text-align: center;
+    left: 17%;
+    bottom: 65%;
+    transform: translateX(-50%);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+    pointer-events: none;
+    z-index: 15;
+}
+
+.heraldHud-walkSpeedValue:hover+.heraldHud-walkSpeedTooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
 .heraldHud-speedIconContainer {
     display: flex;
     gap: 10px;
@@ -525,12 +551,15 @@
     position: absolute;
     background: rgba(0, 0, 0, 0.8);
     color: white;
-    padding: 3px 6px;
-    border-radius: 3px;
+    padding: 6px;
+    border-radius: 5px;
     font-size: 10px;
-    white-space: nowrap;
+    width: 150px;
+    white-space: normal;
+    word-wrap: break-word;
+    text-align: center;
     left: 50%;
-    bottom: 0;
+    bottom: 110%;
     transform: translateX(-50%);
     opacity: 0;
     visibility: hidden;
@@ -539,10 +568,24 @@
     z-index: 15;
 }
 
-/* .heraldHud-favoriteItem:hover .heraldHud-favoriteItemTooltip {
-    opacity: 1;
-    visibility: visible;
-} */
+.heraldHud-favoriteTooltipTop {
+    display: flex;
+    justify-content: center;
+
+}
+
+.heraldHud-favoriteTooltipNameItem {
+    padding-right: 3px;
+}
+
+.heraldHud-favoriteTooltipMiddle {
+    display: block;
+    margin-top: 3px;
+    font-size: 9px;
+    text-align: center;
+    color: rgb(155, 155, 155);
+}
+
 
 .heraldHud-hudBoxRight {
     display: flex;
@@ -607,18 +650,30 @@
     position: absolute;
     background: rgba(0, 0, 0, 0.8);
     color: white;
-    padding: 3px 6px;
-    border-radius: 3px;
+    padding: 6px;
+    border-radius: 5px;
     font-size: 10px;
-    white-space: nowrap;
-    left: 20%;
-    bottom: 0;
+    width: 150px;
+    white-space: normal;
+    word-wrap: break-word;
+    text-align: center;
+    left: 50%;
+    bottom: 110%;
     transform: translateX(-50%);
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
     pointer-events: none;
     z-index: 15;
+}
+
+
+.heraldHud-consumableTooltipMiddle {
+    display: block;
+    margin-top: 3px;
+    font-size: 9px;
+    text-align: center;
+    color: rgb(155, 155, 155);
 }
 
 
@@ -1048,10 +1103,6 @@
     object-fit: cover;
 }
 
-.heraldHud-weaponCategory {
-    font-size: 10px;
-    color: rgb(200, 200, 200);
-}
 
 .heraldHud-weaponRight {
     display: flex;
@@ -1228,6 +1279,13 @@
 .heraldHud-consumableCategory {
     font-size: 10px;
     color: rgb(200, 200, 200);
+    display: flex;
+    gap: 2px;
+}
+
+.heraldHud-consumableProperti {
+    font-size: 10px;
+    color: rgb(200, 200, 200);
 }
 
 .heraldHud-consumableRight {
@@ -1291,7 +1349,39 @@
 .heraldHud-lootsCategory {
     font-size: 10px;
     color: rgb(200, 200, 200);
+    display: flex;
+    gap: 2px;
 }
+
+.heraldHud-valueCurrencyContainer {
+    position: relative;
+    display: inline-block;
+}
+
+.heraldHud-valueCurrencyTooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px;
+    border-radius: 4px;
+    font-size: 10px;
+    white-space: nowrap;
+    text-align: center;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+    pointer-events: none;
+    z-index: 15;
+}
+
+.heraldHud-valueCurrencyContainer:hover .heraldHud-valueCurrencyTooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
 
 .heraldHud-lootsRight {
     display: flex;
@@ -1329,13 +1419,6 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-
-}
-
-.heraldHud-currencyContainer label {
-    width: 40px;
-    font-size: 10px;
-    font-weight: bold;
 }
 
 .heraldHud-currencyContainer input {
@@ -1344,10 +1427,12 @@
     padding: 5px;
     border: 1px solid #ccc;
     border-radius: 5px;
+    background: transparent;
     color: white;
 }
 
-.heraldHud-currencyContainer img {
+
+.heraldHud-currencyIconContainer img {
     width: 15px;
     height: 15px;
     position: absolute;
@@ -1355,6 +1440,33 @@
     left: -15%;
     border: none;
 }
+
+
+.heraldHud-currencyTooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px;
+    border-radius: 4px;
+    font-size: 10px;
+    white-space: nowrap;
+    text-align: center;
+    bottom: 120%;
+    left: 30%;
+    transform: translateX(-50%);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+    pointer-events: none;
+    z-index: 15;
+}
+
+.heraldHud-currencyIconContainer:hover .heraldHud-currencyTooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+
 
 
 
@@ -1446,6 +1558,11 @@
     white-space: nowrap;
 }
 
+.heraldHud-dialogFeaturesProperti {
+    font-size: 10px;
+    color: rgb(200, 200, 200);
+}
+
 .heraldHud-dialogFeaturesTooltip {
     display: none;
     width: 350px;
@@ -1475,4 +1592,47 @@
 
 .heraldHud-dialogFeaturesContainer:hover .heraldHud-dialogFeaturesTooltip {
     display: block;
+}
+
+
+
+
+
+
+
+/* damage icon */
+.heraldHud-damageIcon {
+    border: none;
+    filter: invert(1);
+    vertical-align: middle;
+}
+
+.heraldHud-damageIconContainer {
+    position: relative;
+    display: inline-block;
+}
+
+.heraldHud-damageTooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    white-space: nowrap;
+    text-align: center;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out, transform 0.2s ease-in-out;
+    pointer-events: none;
+    z-index: 15;
+}
+
+.heraldHud-damageIconContainer:hover .heraldHud-damageTooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-2px);
 }
