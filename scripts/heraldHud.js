@@ -137,12 +137,12 @@ async function heraldHud_renderActorData() {
     actionContainerDiv.appendChild(container);
   });
 
-  let rightHudShortcutContainerDiv = document.getElementById(
-    "heraldHud-rightHudShortcutContainer"
+  let restShortcutContainerDiv = document.getElementById(
+    "heraldHud-restShortcutContainer"
   );
 
-  if (rightHudShortcutContainerDiv) {
-    rightHudShortcutContainerDiv.innerHTML = `
+  if (restShortcutContainerDiv) {
+    restShortcutContainerDiv.innerHTML = `
     <div id="heraldHud-shortRestContainer" class="heraldHud-shortRestContainer" >
       <div id="heraldHud-shortRestButton" class="heraldHud-shortRestButton">
         <i class="fa-solid fa-utensils"></i>
@@ -155,6 +155,65 @@ async function heraldHud_renderActorData() {
       </div>
       <div class="heraldHud-longRestTooltip">Long Rest</div>
     </div>`;
+  }
+
+  let equipmentShortcutContainerDiv = document.getElementById(
+    "heraldHud-equipmentShortcutContainer"
+  );
+
+  if (equipmentShortcutContainerDiv) {
+    equipmentShortcutContainerDiv.innerHTML = `
+    <div id="heraldHud-equipmentContainer" class="heraldHud-equipmentContainer">
+      <div id="heraldHud-equipmentButton" class="heraldHud-equipmentButton">
+        <i class="fa-regular fa-backpack"></i>
+      </div>
+      <div class="heraldHud-equipmentTooltip">Equipment</div>
+    </div>
+    `;
+  }
+
+  let endturnShortcutContainerDiv = document.getElementById(
+    "heraldHud-endturnShortcutContainer"
+  );
+
+  if (endturnShortcutContainerDiv) {
+    endturnShortcutContainerDiv.innerHTML = `
+    <div id="heraldHud-endturnContainer" class="heraldHud-endturnContainer">
+      <div id="heraldHud-endturnButton" class="heraldHud-endturnButton">
+        End Turn
+      </div>
+    </div>
+    `;
+  }
+
+  let settingHudContainerDiv = document.getElementById(
+    "heraldHud-settingHudContainer"
+  );
+
+  if (settingHudContainerDiv) {
+    settingHudContainerDiv.innerHTML = `
+    <div id="heraldHud-settingContainer" class="heraldHud-settingContainer">
+      <div id="heraldHud-settingButton" class="heraldHud-settingButton">
+        <i class="fa-solid fa-gear"></i>
+      </div>
+      <div class="heraldHud-settingTooltip">Setting</div>
+    </div>
+    `;
+  }
+
+  let preparedSpellsActionContainerDiv = document.getElementById(
+    "heraldHud-preparedSpellsActionContainer"
+  );
+
+  if (preparedSpellsActionContainerDiv) {
+    preparedSpellsActionContainerDiv.innerHTML = `
+    <div id="heraldHud-preparedSpellsContainer" class="heraldHud-preparedSpellsContainer">
+      <div id="heraldHud-preparedSpellsButton" class="heraldHud-preparedSpellsButton">
+        <i class="fa-solid fa-diamond"></i>
+      </div>
+      <div class="heraldHud-preparedSpellsTooltip">Prepared Spells</div>
+    </div>
+    `;
   }
 
   setTimeout(() => {
@@ -808,7 +867,7 @@ async function heraldHud_updateItemFavoriteActor() {
     let item =
       actor.items.get(rawItemId) ||
       actor.getEmbeddedDocument("Item", rawItemId);
-
+  
     listFavorites += `
     <div class="heraldHud-favoriteItem" data-item-id="${item.id}" data-name="${item.name}">
       <img src="${item.img}" alt="${item.name}" class="heraldHud-favoriteItemImage">
@@ -820,6 +879,9 @@ async function heraldHud_updateItemFavoriteActor() {
     document.querySelectorAll(".heraldHud-favoriteItem").forEach((favItem) => {
       const tooltipDiv = document.getElementById(
         "heraldHud-favoriteItemTooltip"
+      );
+      const tooltipTypeDiv = document.getElementById(
+        "heraldHud-favoriteTooltipTypeItem"
       );
       const tooltipNameDiv = document.getElementById(
         "heraldHud-favoriteTooltipNameItem"
@@ -875,7 +937,34 @@ async function heraldHud_updateItemFavoriteActor() {
         if (item.system.uses?.value && item.system.uses?.max) {
           favoriteUses = `- (${item.system.uses.value}/${item.system.uses.max})`;
         }
+
+        let category = ``;
+        if (item.system.activation.type == "action") {
+          category = `<i class="fa-solid fa-circle" style="color:#1f6237;" ></i>`;
+        } else if (item.system.activation.type.includes("bonus")) {
+          category = `<i class="fa-solid fa-square-plus" style="color:#d5530b;"></i>`;
+        } else if (item.system.activation.type.includes("reaction")) {
+          category = `<i class="fa-solid fa-rotate-right" style="color:#fe85f6;"></i>`;
+        } else if (item.system.activation.type.includes("legendary")) {
+          category = `<i class="fa-solid fa-dragon" style="color:#0a35d1;"></i>`;
+        } else if (item.system.activation.type.includes("lair")) {
+          category = `<i class="fa-solid fa-chess-rook" style="color:#c7cad6;"></i>`;
+        } else if (item.system.activation.type.includes("mythic")) {
+          category = `<i class="fa-solid fa-spaghetti-monster-flying" style="color:#adffeb;"></i>`;
+        } else if (item.system.activation.type.includes("minute")) {
+          category = `<i class="fa-solid fa-hourglass-start" style="color:#0ad1c4;"></i>`;
+        } else if (item.system.activation.type.includes("hour")) {
+          category = `<i class="fa-solid fa-hourglass-start" style="color:#0ad1c4;"></i>`;
+        } else if (item.system.activation.type.includes("day")) {
+          category = `<i class="fa-solid fa-hourglass-start" style="color:#0ad1c4;"></i>`;
+        } else if (item.system.activation.type.includes("special")) {
+          category = `<i class="fa-solid fa-sparkles" style="color:#d0f4fc;"></i>`;
+        }
+
+        let itemRarity = item.system?.rarity || "Unknown";
+        console.log(itemRarity);
         let itemName = favItem.getAttribute("data-name");
+        tooltipTypeDiv.innerHTML = category;
         tooltipNameDiv.innerText = itemName;
         tooltipChargeDiv.innerText = favoriteUses;
         tooltipMiddleDiv.innerHTML = labelProperti;
@@ -1000,7 +1089,7 @@ async function heraldHud_showDialog(kategori) {
     await heraldHud_renderDialog(kategori);
     heraldHud_showDialogValue = true;
   }
-
+  console.log(kategori);
   if (kategori == "inventory") {
     await heraldHud_renderItemInventory();
   } else if (kategori == "loot") {
@@ -1009,6 +1098,7 @@ async function heraldHud_showDialog(kategori) {
     await heraldHud_renderItemFeatures();
   } else if (kategori == "spells") {
   } else if (kategori == "stats") {
+    await heraldHud_renderContainerStats();
   }
 }
 async function heraldHud_renderDialog(kategori) {
@@ -1080,32 +1170,6 @@ async function heraldHud_renderItemInventory() {
   }
   await heraldHud_getDataInventory();
 }
-
-// function heraldHud_getGameIconDamage(type) {
-//   const basePath = "/systems/dnd5e/icons/svg/damage/";
-//   const validTypes = {
-//     acid: "Acid",
-//     bludgeoning: "Bludgeoning",
-//     cold: "Cold",
-//     fire: "Fire",
-//     force: "Force",
-//     lightning: "Lightning",
-//     necrotic: "Necrotic",
-//     piercing: "Piercing",
-//     poison: "Poison",
-//     psychic: "Psychic",
-//     radiant: "Radiant",
-//     slashing: "Slashing",
-//     thunder: "Thunder",
-//     healing: "Healing",
-//     temphp: "Temporary HP",
-//   };
-
-//   let iconType = validTypes[type] ? type : "default";
-//   let tooltipText = validTypes[type] || "Unknown";
-
-//   return `<img src="${basePath}${iconType}.svg" width="13" height="13" style="border:none; filter:invert(1);" title="${tooltipText}">`;
-// }
 
 function heraldHud_getGameIconDamage(type) {
   const basePath = "/systems/dnd5e/icons/svg/damage/";
@@ -1817,17 +1881,6 @@ async function heraldHud_getDataLoots() {
       let itemId = toolItem.getAttribute("data-item-id");
       let item =
         actor.items.get(itemId) || actor.getEmbeddedDocument("Item", itemId);
-      let lootsValueDiv = document.getElementById(
-        `heraldHud-lootsValue-${item.id}`
-      );
-
-      // if (item.system.price?.value && item.system.price?.denomination) {
-      //   let currencyIcon = heraldHud_getCurrencyIcon(
-      //     item.system.price.denomination
-      //   );
-      //   let priceLabel = `${item.system.price.value} ${currencyIcon}`;
-      //   lootsValueDiv.innerHTML = priceLabel;
-      // }
 
       toolItem.addEventListener("click", async function () {
         if (item) {
@@ -2104,6 +2157,190 @@ async function heraldHud_getDataFeatures() {
   if (featuresPassiveDiv) {
     featuresPassiveDiv.innerHTML = listFeaturesPassive;
   }
+}
+
+async function heraldHud_renderContainerSpells() {}
+async function heraldHud_getDataSpells() {}
+
+async function heraldHud_renderContainerStats() {
+  let actor = heraldHud_actorSelected;
+  let heraldHud_dialogDiv = document.getElementById("heraldHud-dialog");
+
+  if (heraldHud_dialogDiv) {
+    heraldHud_dialogDiv.innerHTML = `
+    <div id="heraldHud-dialogStatsContainer" class="heraldHud-dialogStatsContainer">
+      <div id="heraldHud-statsAbilitiesContainer" class="heraldHud-statsAbilitiesContainer">
+        <div id="heraldHud-statsAbilitiesTitle" class="heraldHud-statsAbilitiesTitle">Abilities</div>
+        <div id="heraldHud-statsListAbilities" class="heraldHud-statsListAbilities">
+      
+        </div>
+      </div>
+      <div id="heraldHud-statsSkillsContainer" class="heraldHud-statsSkillsContainer">
+        <div id="heraldHud-statsSkillsTitle" class="heraldHud-statsSkillsTitle">Skills</div>
+        <div id="heraldHud-statsListSkills" class="heraldHud-statsListSkills">
+      
+        </div>
+      </div>
+    </div>`;
+  }
+  await heraldHud_getDataStats();
+}
+async function heraldHud_getDataStats() {
+  let actor = heraldHud_actorSelected;
+  let statsListAbilitiesDiv = document.getElementById(
+    "heraldHud-statsListAbilities"
+  );
+
+  let abilitiesData = actor.system.abilities;
+  console.log(abilitiesData);
+  let skillsData = actor.system.skills;
+
+  let listAbilities = ``;
+  let listSkills = ``;
+  const abilitiesNames = {
+    str: "Strength",
+    dex: "Dexterity",
+    con: "Constitution",
+    int: "Intelligence",
+    wis: "Wisdom",
+    cha: "Charisma",
+  };
+
+  for (let [key, abilityData] of Object.entries(abilitiesData)) {
+    let abilityMod =
+      abilityData.mod >= 0 ? `+${abilityData.mod}` : abilityData.mod;
+    listAbilities += `
+    <div id="heraldHud-abilitiesContainer" class="heraldHud-abilitiesContainer">
+      <div id="heraldHud-abilitiesItem" class="heraldHud-abilitiesItem" data-ability="${key}">
+        <div id="heraldHud-abilitiesItemTop" class="heraldHud-abilitiesItemTop">
+          <div id="heraldHud-abilitiesName" class="heraldHud-abilitiesName">  ${key.toUpperCase()}</div>
+          <div id="heraldHud-abilitiesValue" class="heraldHud-abilitiesValue">&#9654; ${
+            abilityData.value
+          }</div>
+        
+        </div>
+        <div id="heraldHud-abilitiesItemMiddle" class="heraldHud-abilitiesItemMiddle">
+          ${abilityMod}
+        </div>
+        <div id="heraldHud-abilitiesItemBot" class="heraldHud-abilitiesItemBot">
+          <div id="heraldHud-abilitiesSaveButton" class="heraldHud-abilitiesSaveButton">
+            Save
+          </div>
+        </div>
+      </div>
+    </div>
+    `;
+  }
+
+  if (statsListAbilitiesDiv) {
+    statsListAbilitiesDiv.innerHTML = listAbilities;
+
+    document
+      .querySelectorAll(
+        ".heraldHud-abilitiesItemTop, .heraldHud-abilitiesItemMiddle"
+      )
+      .forEach((element) => {
+        element.addEventListener("click", (event) => {
+          let ability = event.target
+            .closest(".heraldHud-abilitiesItem")
+            .getAttribute("data-ability");
+          actor.rollAbilityTest(ability);
+        });
+      });
+
+    document
+      .querySelectorAll(".heraldHud-abilitiesSaveButton")
+      .forEach((button) => {
+        button.addEventListener("click", (event) => {
+          let ability = event.target.getAttribute("data-ability");
+          actor.rollAbilitySave(ability);
+        });
+      });
+
+    // document
+    //   .querySelectorAll(
+    //     ".heraldHud-abilitiesItemTop, .heraldHud-abilitiesItemMiddle"
+    //   )
+    //   .forEach((element) => {
+    //     element.addEventListener("click", (event) => {
+    //       let ability = event.target
+    //         .closest(".heraldHud-abilitiesItem")
+    //         .getAttribute("data-ability");
+    //       actor.rollAbilityTest(ability, { fastForward: true });
+    //     });
+    //   });
+
+    // document
+    //   .querySelectorAll(".heraldHud-abilitiesSaveButton")
+    //   .forEach((button) => {
+    //     button.addEventListener("click", (event) => {
+    //       let ability = event.target
+    //         .closest(".heraldHud-abilitiesItem")
+    //         .getAttribute("data-ability");
+    //       actor.rollAbilitySave(ability, { fastForward: true });
+    //     });
+    //   });
+  }
+  let statsListSkillDiv = document.getElementById("heraldHud-statsListSkills");
+  const skillsNames = {
+    acr: "Acrobatics",
+    ani: "Animal Handling",
+    arc: "Arcana",
+    ath: "Athletics",
+    dec: "Deception",
+    his: "History",
+    ins: "Insight",
+    itm: "Intimidation",
+    inv: "Investigation",
+    med: "Medicine",
+    nat: "Nature",
+    prc: "Perception",
+    prf: "Performance",
+    per: "Persuasion",
+    rel: "Religion",
+    slt: "Sleight of Hand",
+    ste: "Stealth",
+    sur: "Survival",
+  };
+
+  for (let [key, skillData] of Object.entries(skillsData)) {
+    let nameSkill = skillsNames[key];
+    let skillTotal =
+      skillData.total >= 0 ? `+${skillData.total}` : skillData.total;
+    listSkills += `
+    <div id="heraldHud-skillContainer" class="heraldHud-skillContainer">
+      <div id="heraldHud-skillItem" class="heraldHud-skillItem" data-skill="${key}">
+        <div id="heraldHud-skillItemTop" class="heraldHud-skillItemTop">
+          <div id="heraldHud-skillName" class="heraldHud-skillName">${nameSkill}</div>
+            <div class="heraldHud-skillValueData">
+              <div id="heraldHud-skillValueTotal" class="heraldHud-skillValueTotal">${skillTotal}</div>
+              <div id="heraldHud-skillValuePassive" class="heraldHud-skillValuePassive">(${skillData.passive})</div>
+            </div>
+        
+        </div>
+        <div id="heraldHud-skillItemMiddle" class="heraldHud-skillItemMiddle">
+        </div>
+        <div id="heraldHud-skillItemBot" class="heraldHud-skillItemBot">
+        </div>
+      </div>
+    </div>
+    `;
+  }
+
+  if (statsListSkillDiv) {
+    statsListSkillDiv.innerHTML = listSkills;
+
+    document.querySelectorAll(".heraldHud-skillItem").forEach((element) => {
+      element.addEventListener("click", (event) => {
+        let skillKey = element.getAttribute("data-skill");
+        if (!skillKey) return;
+
+        actor.rollSkill(skillKey);
+      });
+    });
+  }
+
+  console.log(skillsData);
 }
 
 Hooks.on("updateActor", async (actor, data) => {
