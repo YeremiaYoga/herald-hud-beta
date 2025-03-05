@@ -2382,6 +2382,13 @@ async function heraldHud_getDataSpells() {
         let spellsSchool = heraldHud_getSpellsSchoolIcon(item.system.school);
 
         let spellComponent = heraldHud_getSpellIcons(item);
+
+        let spellsRange = item.system.range?.units
+          ? `| ${item.system.range.value || ""} ${
+              item.system.range.units
+            }`.trim()
+          : "";
+
         listSpells += `
           <div class="heraldHud-spellsContainer">
             <div class="heraldHud-spellsItem" data-item-id="${item.id}">
@@ -2399,7 +2406,7 @@ async function heraldHud_getDataSpells() {
                   <div class="heraldHud-spellsMiddleMid">
                     <div class="heraldHud-spellsActiveType">${activeType}</div>
                     <div class="heraldHud-spellsUses">${spellsUses}</div>
-                    <div class="heraldHud-spellsRange"></div>
+                    <div class="heraldHud-spellsRange">${spellsRange}</div>
                   </div>
                   <div class="heraldHud-spellsMiddleBot">
                     ${labelProperti}
