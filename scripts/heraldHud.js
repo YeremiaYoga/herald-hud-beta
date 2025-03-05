@@ -1,5 +1,6 @@
 let heraldHud_actorSelected = null;
 let heraldHud_checkerValue = null;
+let heraldHud_preparedSpellsOn = false;
 
 let hp0 = "#8B0000";
 let hp25 = "#bc3c04";
@@ -867,7 +868,7 @@ async function heraldHud_updateItemFavoriteActor() {
     let item =
       actor.items.get(rawItemId) ||
       actor.getEmbeddedDocument("Item", rawItemId);
-  
+    console.log(item.system.properties);
     listFavorites += `
     <div class="heraldHud-favoriteItem" data-item-id="${item.id}" data-name="${item.name}">
       <img src="${item.img}" alt="${item.name}" class="heraldHud-favoriteItemImage">
@@ -962,7 +963,28 @@ async function heraldHud_updateItemFavoriteActor() {
         }
 
         let itemRarity = item.system?.rarity || "Unknown";
-        console.log(itemRarity);
+        let rarityColors = {
+          common: "#b5bda6",
+          uncommon: "#78c178",
+          rare: "#6464bd",
+          veryrare: "#62c1ad",
+          legendary: "#bb9348",
+          artifact: "#a46b43",
+        };
+
+        if (itemRarity != "Unknown") {
+          if (rarityColors[itemRarity.toLowerCase()]) {
+            let color = rarityColors[itemRarity.toLowerCase()];
+            tooltipNameDiv.style.color = color;
+            tooltipDiv.style.border = `2px solid ${color}`;
+            tooltipChargeDiv.style.color = color;
+          }
+        } else {
+          tooltipNameDiv.style.color = "white";
+          tooltipDiv.style.border = ``;
+          tooltipChargeDiv.style.color = "white";
+        }
+
         let itemName = favItem.getAttribute("data-name");
         tooltipTypeDiv.innerHTML = category;
         tooltipNameDiv.innerText = itemName;
@@ -1097,6 +1119,7 @@ async function heraldHud_showDialog(kategori) {
   } else if (kategori == "features") {
     await heraldHud_renderItemFeatures();
   } else if (kategori == "spells") {
+    await heraldHud_renderContainerSpells();
   } else if (kategori == "stats") {
     await heraldHud_renderContainerStats();
   }
@@ -1362,18 +1385,33 @@ async function heraldHud_getDataInventory() {
       arrWeaponCategory.push(weaponitemUses);
     }
 
-    console.log(item.system.uses);
+    let itemRarity = item.system?.rarity;
+    let rarityColors = {
+      common: "#b5bda6",
+      uncommon: "#78c178",
+      rare: "#6464bd",
+      veryrare: "#62c1ad",
+      legendary: "#bb9348",
+      artifact: "#a46b43",
+    };
+    let nameColor = ``;
+    let borderColor = ``;
+    if (rarityColors[itemRarity.toLowerCase()]) {
+      let color = rarityColors[itemRarity.toLowerCase()];
+      nameColor = `color:${color};`;
+      borderColor = `border:2px solid ${color};`;
+    }
 
     listWeapons += `
       <div id="heraldHud-dialogWeaponContainer" class="heraldHud-dialogWeaponContainer">
         <div id="heraldHud-dialogWeaponItem" class="heraldHud-dialogWeaponItem" data-item-id="${item.id}">
             <div id="heraldHud-weaponLeft" class="heraldHud-weaponLeft">
                 <div class="heraldHud-dialogWeaponImageContainer">
-                   <img src="${item.img}" alt="${item.name}" class="heraldHud-dialogWeaponImage">
+                   <img src="${item.img}" alt="${item.name}" class="heraldHud-dialogWeaponImage" style="${borderColor}">
                 </div>
             </div>
             <div id="heraldHud-weaponMiddle" class="heraldHud-weaponMiddle">
-              <div id="heraldHud-weaponName" class="heraldHud-weaponName">${item.name}</div>
+              <div id="heraldHud-weaponName" class="heraldHud-weaponName" style="${nameColor}">${item.name}</div>
               <div id="heraldHud-weaponCategory-${item.id}" class="heraldHud-weaponCategory">
                 <div class="heraldHud-weaponsActiveType">${category} </div>
                 <div id="heraldHud-weaponsUsesValue-${item.id}" class="heraldHud-weaponsUsesValue">${weaponitemUses}</div>
@@ -1996,7 +2034,7 @@ async function heraldHud_getDataFeatures() {
       }
       let featuresItemUses = "";
 
-      if (item.system.uses?.value && item.system.uses?.max) {
+      if (item.system.uses?.max) {
         featuresItemUses = `| ${item.system.uses.value}/${item.system.uses.max}`;
       }
 
@@ -2159,8 +2197,285 @@ async function heraldHud_getDataFeatures() {
   }
 }
 
-async function heraldHud_renderContainerSpells() {}
-async function heraldHud_getDataSpells() {}
+async function heraldHud_renderContainerSpells() {
+  let actor = heraldHud_actorSelected;
+  let heraldHud_dialogDiv = document.getElementById("heraldHud-dialog");
+
+  if (heraldHud_dialogDiv) {
+    heraldHud_dialogDiv.innerHTML = `
+    <div id="heraldHud-dialogSpellsContainer" class="heraldHud-dialogSpellsContainer">
+      <div id="heraldHud-spellsListContainer" class="heraldHud-spellsListContainer">
+        <div id="heraldHud-spellsTitle" class="heraldHud-spellsTitle"></div>
+        <div id="heraldHud-spellsListItem" class="heraldHud-spellsListItem">
+      
+        </div>
+      </div>
+      <div id="heraldHud-spellsTrackerContainer" class="heraldHud-spellsTrackerContainer">
+      </div>
+    </div>`;
+  }
+  await heraldHud_getDataSpells();
+}
+
+function heraldHud_getSpellIcons(item) {
+  if (!item.system || !item.system.properties) return "";
+
+  let icons = [];
+  let properties = Array.from(item.system.properties); // Konversi Set ke Array
+
+  let spellIcons = {
+    vocal: { label: "Verbal", symbol: "V" },
+    somatic: { label: "Somatic", symbol: "S" },
+    material: { label: "Material", symbol: "M" },
+    concentration: {
+      label: "Concentration",
+      icon: "systems/dnd5e/icons/svg/statuses/concentrating.svg",
+    },
+    ritual: {
+      label: "Ritual",
+      icon: "systems/dnd5e/icons/svg/items/spell.svg",
+    },
+  };
+
+  properties.forEach((prop) => {
+    if (spellIcons[prop]) {
+      if (spellIcons[prop].symbol) {
+        icons.push(`
+          <div class="heraldHud-spellComponentContainer">
+            <span class="heraldHud-spellComponentName">${spellIcons[prop].symbol}</span>
+            <div class="heraldHud-spellsComponentTooltip">${spellIcons[prop].label}</div>
+          </div>
+        `);
+      } else if (spellIcons[prop].icon) {
+        icons.push(`
+          <div class="heraldHud-spellComponentContainer">
+            <img src="${spellIcons[prop].icon}" class="heraldHud-spellComponentIcon">
+            <div class="heraldHud-spellsComponentTooltip">${spellIcons[prop].label}</div>
+          </div>
+        `);
+      }
+    }
+  });
+
+  return icons.join(" ");
+}
+
+function heraldHud_getSpellsSchoolIcon(schoolCode) {
+  const spellSchoolMap = {
+    abj: { name: "Abjuration", icon: "abjuration" },
+    con: { name: "Conjuration", icon: "conjuration" },
+    div: { name: "Divination", icon: "divination" },
+    enc: { name: "Enchantment", icon: "enchantment" },
+    evo: { name: "Evocation", icon: "evocation" },
+    ill: { name: "Illusion", icon: "illusion" },
+    nec: { name: "Necromancy", icon: "necromancy" },
+    trs: { name: "Transmutation", icon: "transmutation" },
+  };
+
+  let spellSchool = spellSchoolMap[schoolCode] || {
+    name: "Unknown",
+    icon: "unknown",
+  };
+  let iconPath = `/systems/dnd5e/icons/svg/schools/${spellSchool.icon}.svg`;
+
+  return `
+    <div class="heraldHud-spellSchoolContainer">
+      <img src="${iconPath}" class="heraldHud-spellSchoolIcon" alt="${spellSchool.name}">
+      <div class="heraldHud-spellsSchoolTooltip">${spellSchool.name}</div>
+    </div>
+  `;
+}
+
+async function heraldHud_getDataSpells() {
+  let actor = heraldHud_actorSelected;
+  let spellListDiv = document.getElementById("heraldHud-spellsListItem");
+  let spellsTrackerDiv = document.getElementById(
+    "heraldHud-spellsTrackerContainer"
+  );
+  const spellsData = actor.items.filter((item) => item.type === "spell");
+  let favoritesActor = actor.system?.favorites || [];
+  let listSpells = ``;
+  let spellLevels = {
+    0: { title: "Cantrips", spells: [] },
+    1: { title: "1st Level", spells: [] },
+    2: { title: "2st Level", spells: [] },
+    3: { title: "3st Level", spells: [] },
+    4: { title: "4st Level", spells: [] },
+    5: { title: "5st Level", spells: [] },
+    6: { title: "6st Level", spells: [] },
+    7: { title: "7st Level", spells: [] },
+    8: { title: "8st Level", spells: [] },
+    9: { title: "9st Level", spells: [] },
+  };
+
+  spellsData.forEach((item) => {
+    let level = item.system.level || 0;
+    if (spellLevels.hasOwnProperty(level)) {
+      if (item.system.preparation.mode != "prepared") {
+        spellLevels[level].spells.push(item);
+      }
+      if (
+        item.system.preparation.mode == "prepared" &&
+        item.system.preparation.prepared == true
+      ) {
+        spellLevels[level].spells.push(item);
+      }
+    }
+  });
+  Object.values(spellLevels).forEach(({ title, spells }) => {
+    if (spells.length > 0) {
+      listSpells += `<div class="heraldHud-spellLevelTitle">${title}</div>`;
+      spells.forEach((item) => {
+        let rawItemId = `.Item.${item.id}`;
+        let isFavorited = favoritesActor.some(
+          (favorite) => favorite.id === rawItemId
+        )
+          ? "favorited"
+          : "";
+
+        let arrProperti = [];
+        let labelProperti = "";
+
+        if (item.labels.toHit) {
+          arrProperti.push(`To hit ${item.labels.toHit}`);
+        }
+        if (item.labels.save) {
+          arrProperti.push(item.labels.save);
+        }
+        if (item.labels.damage) {
+          for (let damage of item.labels.derivedDamage) {
+            let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+            arrProperti.push(`${damage.formula} ${damageIcon}`);
+          }
+        }
+        if (arrProperti.length > 0) {
+          labelProperti = arrProperti.join(" | ");
+        }
+
+        let activeType = ``;
+        if (item.system.activation.type == "action") {
+          activeType = `<i class="fa-solid fa-circle" style="color:#1f6237;"></i> Action`;
+        } else if (item.system.activation.type.includes("bonus")) {
+          activeType = `<i class="fa-solid fa-square-plus" style="color:#d5530b;"></i> Bonus Action`;
+        } else if (item.system.activation.type.includes("reaction")) {
+          activeType = `<i class="fa-solid fa-rotate-right" style="color:#fe85f6;"></i> Reaction`;
+        } else if (item.system.activation.type.includes("legendary")) {
+          activeType = `<i class="fa-solid fa-dragon" style="color:#0a35d1;"></i> Legendary Action`;
+        } else if (item.system.activation.type.includes("lair")) {
+          activeType = `<i class="fa-solid fa-chess-rook" style="color:#c7cad6;"></i> Lair Action`;
+        } else if (item.system.activation.type.includes("mythic")) {
+          activeType = `<i class="fa-solid fa-spaghetti-monster-flying" style="color:#adffeb;"></i> Mythic Action`;
+        } else if (item.system.activation.type.includes("minute")) {
+          activeType = `<i class="fa-solid fa-hourglass-start" style="color:#0ad1c4;"></i> ${item.system.activation.cost} Minute`;
+        } else if (item.system.activation.type.includes("hour")) {
+          activeType = `<i class="fa-solid fa-hourglass-start" style="color:#0ad1c4;"></i> ${item.system.activation.cost} Hour`;
+        } else if (item.system.activation.type.includes("day")) {
+          activeType = `<i class="fa-solid fa-hourglass-start" style="color:#0ad1c4;"></i> ${item.system.activation.cost} Day`;
+        } else if (item.system.activation.type.includes("special")) {
+          activeType = `<i class="fa-solid fa-sparkles" style="color:#d0f4fc;"></i> Special`;
+        }
+
+        let spellsUses = "";
+        if (item.system.uses?.value && item.system.uses?.max) {
+          spellsUses = `| ${item.system.uses.value}/${item.system.uses.max}`;
+        }
+        let spellsSchool = heraldHud_getSpellsSchoolIcon(item.system.school);
+
+        let spellComponent = heraldHud_getSpellIcons(item);
+        listSpells += `
+          <div class="heraldHud-spellsContainer">
+            <div class="heraldHud-spellsItem" data-item-id="${item.id}">
+                <div class="heraldHud-spellsLeftContainer">
+                    <div class="heraldHud-spellsImageContainer">
+                      <img src="${item.img}" alt="${item.name}" class="heraldHud-spellsImage">
+                    </div>
+                    <div class="heraldHud-spellsSchool">${spellsSchool}</div>
+                </div>
+                <div class="heraldHud-spellsMiddleContainer">
+                  <div class="heraldHud-spellsMiddleTop">
+                    <div class="heraldHud-spellsName">${item.name}</div>
+                    <div class="heraldHud-spellsComponent">${spellComponent}</div>
+                  </div>
+                  <div class="heraldHud-spellsMiddleMid">
+                    <div class="heraldHud-spellsActiveType">${activeType}</div>
+                    <div class="heraldHud-spellsUses">${spellsUses}</div>
+                    <div class="heraldHud-spellsRange"></div>
+                  </div>
+                  <div class="heraldHud-spellsMiddleBot">
+                    ${labelProperti}
+                  </div>
+                </div>
+                <div class="heraldHud-spellsRightContainer">
+                    <div class="heraldHud-spellFavoriteButton ${isFavorited}" data-item-id="${item.id}">
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+  });
+
+  if (spellListDiv) {
+    spellListDiv.innerHTML = listSpells;
+
+    document.querySelectorAll(".heraldHud-spellsItem").forEach((spellItem) => {
+      spellItem.addEventListener("click", (event) => {
+        event.stopPropagation();
+
+        let spellId = spellItem.getAttribute("data-item-id");
+        let spell =
+          actor.items.get(spellId) ||
+          actor.getEmbeddedDocument("Item", spellId);
+
+        if (spell) {
+          spell.use();
+        }
+      });
+    });
+
+    document
+      .querySelectorAll(".heraldHud-spellFavoriteButton")
+      .forEach((button) => {
+        button.addEventListener("click", async (event) => {
+          event.stopPropagation();
+          let itemId = button.getAttribute("data-item-id");
+          let rawItemId = `.Item.${itemId}`;
+          let isCurrentlyFavorite = favoritesActor.some(
+            (fav) => fav.id === rawItemId
+          );
+
+          if (isCurrentlyFavorite) {
+            favoritesActor = favoritesActor.filter(
+              (fav) => fav.id !== rawItemId
+            );
+          } else {
+            let maxSort =
+              favoritesActor.length > 0
+                ? Math.max(...favoritesActor.map((fav) => fav.sort))
+                : 0;
+            favoritesActor.push({
+              type: "item",
+              id: rawItemId,
+              sort: maxSort + 100000,
+            });
+          }
+          if (Array.isArray(favoritesActor)) {
+            await actor.update({ "system.favorites": favoritesActor });
+          }
+
+          button.classList.toggle("favorited", !isCurrentlyFavorite);
+        });
+      });
+  }
+
+  if (spellsTrackerDiv) {
+    spellsTrackerDiv.innerHTML = `
+    <div class="heraldHud-spellsTracker"></div>
+    `;
+  }
+}
 
 async function heraldHud_renderContainerStats() {
   let actor = heraldHud_actorSelected;
@@ -2192,7 +2507,6 @@ async function heraldHud_getDataStats() {
   );
 
   let abilitiesData = actor.system.abilities;
-  console.log(abilitiesData);
   let skillsData = actor.system.skills;
 
   let listAbilities = ``;
@@ -2256,30 +2570,6 @@ async function heraldHud_getDataStats() {
           actor.rollAbilitySave(ability);
         });
       });
-
-    // document
-    //   .querySelectorAll(
-    //     ".heraldHud-abilitiesItemTop, .heraldHud-abilitiesItemMiddle"
-    //   )
-    //   .forEach((element) => {
-    //     element.addEventListener("click", (event) => {
-    //       let ability = event.target
-    //         .closest(".heraldHud-abilitiesItem")
-    //         .getAttribute("data-ability");
-    //       actor.rollAbilityTest(ability, { fastForward: true });
-    //     });
-    //   });
-
-    // document
-    //   .querySelectorAll(".heraldHud-abilitiesSaveButton")
-    //   .forEach((button) => {
-    //     button.addEventListener("click", (event) => {
-    //       let ability = event.target
-    //         .closest(".heraldHud-abilitiesItem")
-    //         .getAttribute("data-ability");
-    //       actor.rollAbilitySave(ability, { fastForward: true });
-    //     });
-    //   });
   }
   let statsListSkillDiv = document.getElementById("heraldHud-statsListSkills");
   const skillsNames = {
@@ -2343,11 +2633,20 @@ async function heraldHud_getDataStats() {
   console.log(skillsData);
 }
 
+async function heraldHud_onPreparedSpells() {
+  if (heraldHud_preparedSpellsOn == false) {
+    heraldHud_preparedSpellsOn = true;
+  } else {
+    heraldHud_preparedSpellsOn = false;
+  }
+}
+
 Hooks.on("updateActor", async (actor, data) => {
   await heraldHud_updateDataActor();
   await heraldHud_updateMovementsActor();
   await heraldHud_updateItemFavoriteActor();
   await heraldHud_updateItemCosumablesActor();
+  console.log("test update");
 });
 
 function darkenHex(hex, percent) {
