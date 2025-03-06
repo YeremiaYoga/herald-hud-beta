@@ -1171,7 +1171,9 @@ async function heraldHud_renderDialog(kategori) {
   if (heraldHud_dialogContainerDiv) {
     console.log(kategori);
     heraldHud_dialogContainerDiv.innerHTML = `
-    <div id="heraldHud-dialog" class="heraldHud-dialog ${kategori}"></div>`;
+    <div id="heraldHud-dialog" class="heraldHud-dialog ${kategori}"></div>
+    <div id="heraldHud-dialog2" class="heraldHud-dialog2 ${kategori}"></div>
+    `;
   }
 }
 
@@ -1280,7 +1282,7 @@ function heraldHud_getCurrencyIcon(type) {
     cp: { src: "/systems/dnd5e/icons/currency/copper.webp", label: "Copper" },
   };
 
-  let iconData = currencyIcons[type] || currencyIcons["gp"]; // Default ke Gold jika tidak dikenal
+  let iconData = currencyIcons[type];
 
   return `
     <div class="heraldHud-currencyIconContainer">
@@ -2234,6 +2236,7 @@ async function heraldHud_getDataFeatures() {
 async function heraldHud_renderContainerSpells() {
   let actor = heraldHud_actorSelected;
   let heraldHud_dialogDiv = document.getElementById("heraldHud-dialog");
+  let heraldHud_dialog2Div = document.getElementById("heraldHud-dialog2");
 
   if (heraldHud_dialogDiv) {
     heraldHud_dialogDiv.innerHTML = `
@@ -2244,9 +2247,25 @@ async function heraldHud_renderContainerSpells() {
       
         </div>
       </div>
-      <div id="heraldHud-spellsTrackerContainer" class="heraldHud-spellsTrackerContainer">
-      </div>
     </div>`;
+  }
+
+  if (heraldHud_dialog2Div) {
+    heraldHud_dialog2Div.innerHTML = `
+    <div id="heraldHud-dialogSpellsSlotContainer" class="heraldHud-dialogSpellsSlotContainer">
+      <div id="heraldHud-spellsSlotLeftContainer" class="heraldHud-spellsSlotLeftContainer">
+        <div id="heraldHud-spellSlotIcon" class="heraldHud-spellSlotIcon">
+      
+        </div>
+        <div id="heraldHud-spellsPactMagicContainer" class="heraldHud-spellsPactMagicContainer">
+      
+        </div>
+      </div>
+      <div id="heraldHud-spellsSlotRightContainer" class="heraldHud-spellsSlotRightContainer">
+      
+      </div>
+    </div>
+    `;
   }
   await heraldHud_getDataSpells();
 }
@@ -2296,67 +2315,156 @@ function heraldHud_getSpellIcons(item) {
 
 function heraldHud_getSpellsSchoolIcon(schoolCode) {
   const spellSchoolMap = {
-    abj: { name: "Abjuration", icon: "abjuration" },
-    con: { name: "Conjuration", icon: "conjuration" },
-    div: { name: "Divination", icon: "divination" },
-    enc: { name: "Enchantment", icon: "enchantment" },
-    evo: { name: "Evocation", icon: "evocation" },
-    ill: { name: "Illusion", icon: "illusion" },
-    nec: { name: "Necromancy", icon: "necromancy" },
-    trs: { name: "Transmutation", icon: "transmutation" },
+    abj: {
+      name: "Abjuration",
+      icon: "abjuration",
+      color: "#00AEEF",
+      filter:
+        "invert(57%) sepia(88%) saturate(3986%) hue-rotate(170deg) brightness(97%) contrast(101%)",
+    },
+    con: {
+      name: "Conjuration",
+      icon: "conjuration",
+      color: "#F68D2E",
+      filter:
+        "invert(67%) sepia(91%) saturate(1096%) hue-rotate(359deg) brightness(102%) contrast(100%)",
+    },
+    div: {
+      name: "Divination",
+      icon: "divination",
+      color: "#A65EFF",
+      filter:
+        "invert(58%) sepia(47%) saturate(2539%) hue-rotate(244deg) brightness(103%) contrast(98%)",
+    },
+    enc: {
+      name: "Enchantment",
+      icon: "enchantment",
+      color: "#FF4ECC",
+      filter:
+        "invert(53%) sepia(78%) saturate(2177%) hue-rotate(295deg) brightness(102%) contrast(98%)",
+    },
+    evo: {
+      name: "Evocation",
+      icon: "evocation",
+      color: "#ED1C24",
+      filter:
+        "invert(20%) sepia(92%) saturate(4372%) hue-rotate(355deg) brightness(98%) contrast(107%)",
+    },
+    ill: {
+      name: "Illusion",
+      icon: "illusion",
+      color: "#FFDD00",
+      filter:
+        "invert(84%) sepia(49%) saturate(576%) hue-rotate(357deg) brightness(108%) contrast(103%)",
+    },
+    nec: {
+      name: "Necromancy",
+      icon: "necromancy",
+      color: "#008A5E",
+      filter:
+        "invert(22%) sepia(92%) saturate(738%) hue-rotate(138deg) brightness(99%) contrast(102%)",
+    },
+    trs: {
+      name: "Transmutation",
+      icon: "transmutation",
+      color: "#00B3B3",
+      filter:
+        "invert(42%) sepia(94%) saturate(1418%) hue-rotate(148deg) brightness(100%) contrast(99%)",
+    },
   };
 
   let spellSchool = spellSchoolMap[schoolCode] || {
     name: "Unknown",
     icon: "unknown",
+    color: "#888888",
+    filter:
+      "invert(50%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%)",
   };
+
   let iconPath = `/systems/dnd5e/icons/svg/schools/${spellSchool.icon}.svg`;
 
   return `
-    <div class="heraldHud-spellSchoolContainer">
-      <img src="${iconPath}" class="heraldHud-spellSchoolIcon" alt="${spellSchool.name}">
-      <div class="heraldHud-spellsSchoolTooltip">${spellSchool.name}</div>
+    <div class="heraldHud-spellSchoolContainer" style="border-color: ${spellSchool.color};">
+      <img src="${iconPath}" class="heraldHud-spellSchoolIcon" alt="${spellSchool.name}" style="filter: ${spellSchool.filter};">
+      <div class="heraldHud-spellsSchoolTooltip" style="">
+        ${spellSchool.name}
+      </div>
     </div>
   `;
 }
 
 async function heraldHud_getDataSpells() {
   let actor = heraldHud_actorSelected;
+  let pactLevel = actor.system?.spells?.pact?.level || "";
+
+  if (pactLevel > 0) {
+    let suffix = "th";
+    if (pactLevel === 1) suffix = "st";
+    else if (pactLevel === 2) suffix = "nd";
+    else if (pactLevel === 3) suffix = "rd";
+
+    pactLevel = `(${pactLevel}${suffix})`;
+  }
   let spellListDiv = document.getElementById("heraldHud-spellsListItem");
-  let spellsTrackerDiv = document.getElementById(
-    "heraldHud-spellsTrackerContainer"
-  );
   const spellsData = actor.items.filter((item) => item.type === "spell");
   let favoritesActor = actor.system?.favorites || [];
   let listSpells = ``;
-  let spellLevels = {
-    0: { title: "Cantrips", spells: [] },
-    1: { title: "1st Level", spells: [] },
-    2: { title: "2st Level", spells: [] },
-    3: { title: "3st Level", spells: [] },
-    4: { title: "4st Level", spells: [] },
-    5: { title: "5st Level", spells: [] },
-    6: { title: "6st Level", spells: [] },
-    7: { title: "7st Level", spells: [] },
-    8: { title: "8st Level", spells: [] },
-    9: { title: "9st Level", spells: [] },
+  let spellCategories = {
+    atWill: { title: "At Will", spells: [] },
+    innate: { title: "Innate Spellcasting", spells: [] },
+    cantrip: { title: "Cantrips", spells: [] },
+    pact: { title: `Pact Magic ${pactLevel}`, spells: [] },
+    ritual: { title: "Ritual", spells: [] },
+    1: { title: "1st Level Spells", spells: [] },
+    2: { title: "2nd Level Spells", spells: [] },
+    3: { title: "3rd Level Spells", spells: [] },
+    4: { title: "4th Level Spells", spells: [] },
+    5: { title: "5th Level Spells", spells: [] },
+    6: { title: "6th Level Spells", spells: [] },
+    7: { title: "7th Level Spells", spells: [] },
+    8: { title: "8th Level Spells", spells: [] },
+    9: { title: "9th Level Spells", spells: [] },
   };
 
   spellsData.forEach((item) => {
     let level = item.system.level || 0;
-    if (spellLevels.hasOwnProperty(level)) {
-      if (item.system.preparation.mode != "prepared") {
-        spellLevels[level].spells.push(item);
-      }
-      if (
-        item.system.preparation.mode == "prepared" &&
-        item.system.preparation.prepared == true
-      ) {
-        spellLevels[level].spells.push(item);
+    let prepMode = item.system.preparation.mode;
+    console.log(prepMode);
+    let isPrepared = item.system.preparation.prepared;
+
+    if (prepMode === "atwill") {
+      spellCategories.atWill.spells.push(item);
+    } else if (prepMode === "innate") {
+      spellCategories.innate.spells.push(item);
+    } else if (level === 0) {
+      spellCategories.cantrip.spells.push(item);
+    } else if (prepMode === "pact") {
+      spellCategories.pact.spells.push(item);
+    } else if (prepMode.includes("ritual")) {
+      spellCategories.ritual.spells.push(item);
+    } else if (spellCategories.hasOwnProperty(level)) {
+      if (prepMode !== "prepared" || isPrepared) {
+        spellCategories[level].spells.push(item);
       }
     }
   });
-  Object.values(spellLevels).forEach(({ title, spells }) => {
+  [
+    "atWill",
+    "innate",
+    "cantrip",
+    "pact",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "ritual",
+  ].forEach((key) => {
+    let { title, spells } = spellCategories[key];
     if (spells.length > 0) {
       listSpells += `<div class="heraldHud-spellLevelTitle">${title}</div>`;
       spells.forEach((item) => {
@@ -2430,7 +2538,6 @@ async function heraldHud_getDataSpells() {
                     <div class="heraldHud-spellsImageContainer">
                       <img src="${item.img}" alt="${item.name}" class="heraldHud-spellsImage">
                     </div>
-                    <div class="heraldHud-spellsSchool">${spellsSchool}</div>
                 </div>
                 <div class="heraldHud-spellsMiddleContainer">
                   <div class="heraldHud-spellsMiddleTop">
@@ -2445,11 +2552,13 @@ async function heraldHud_getDataSpells() {
                   <div class="heraldHud-spellsMiddleBot">
                     ${labelProperti}
                   </div>
+                  
                 </div>
                 <div class="heraldHud-spellsRightContainer">
                     <div class="heraldHud-spellFavoriteButton ${isFavorited}" data-item-id="${item.id}">
                         <i class="fa-solid fa-star"></i>
                     </div>
+                    <div class="heraldHud-spellsSchool">${spellsSchool}</div>
                 </div>
             </div>
           </div>
@@ -2510,11 +2619,79 @@ async function heraldHud_getDataSpells() {
         });
       });
   }
+  let spellsPactMagicContainer = document.getElementById(
+    "heraldHud-spellsPactMagicContainer"
+  );
+  let spellsSlotRightDiv = document.getElementById(
+    "heraldHud-spellsSlotRightContainer"
+  );
 
-  if (spellsTrackerDiv) {
-    spellsTrackerDiv.innerHTML = `
-    <div class="heraldHud-spellsTracker"></div>
+  if (spellsPactMagicContainer) {
+    let pactLevel = actor.system?.spells?.pact?.level || 0;
+
+    function getOrdinalSuffix(num) {
+      if (num === 0) return "";
+      let suffix = ["th", "st", "nd", "rd"];
+      let v = num % 100;
+      return num + (suffix[(v - 20) % 10] || suffix[v] || suffix[0]);
+    }
+
+    let pactLevelFormatted = getOrdinalSuffix(pactLevel);
+
+    let pactMagicValue = actor.system?.spells?.pact?.value || 0;
+    let pactMagicMax = actor.system?.spells?.pact?.max || 0;
+
+    let pactMagicDisplay = `${pactMagicValue}/${pactMagicMax}`;
+
+    spellsPactMagicContainer.innerHTML = `
+    <div class="heraldHud-slotPactMagicContainer">
+      <div class="heraldHud-slotPactMagicTitle">Pact Magic ${pactLevelFormatted}</div>
+        <div class="heraldHud-slotPactMagicItem">
+          <div class="heraldHud-slotPactMagicTop"></div>
+          <div class="heraldHud-slotPactMagicMiddle">
+            <div class="heraldHud-slotPactMagicValue">${pactMagicDisplay}</div>
+          </div>
+          <div class="heraldHud-slotPactMagicBottom"></div>
+        </div>
+      </div>
+    </div>
+     
     `;
+  }
+
+  if (spellsSlotRightDiv) {
+    let spellSlotsHTML = `<div class="heraldHud-spellSlotsGrid">`;
+
+    for (let level = 1; level <= 9; level++) {
+      let levelFormatted =
+        level === 1
+          ? "1st"
+          : level === 2
+          ? "2nd"
+          : level === 3
+          ? "3rd"
+          : `${level}th`;
+
+      let slotValue = actor.system?.spells?.[`spell${level}`]?.value || 0;
+      let slotMax = actor.system?.spells?.[`spell${level}`]?.max || 0;
+      let spellSlotDisplay = `${slotValue}/${slotMax}`;
+
+      spellSlotsHTML += `
+        <div class="heraldHud-slotSpellContainer">
+          <div class="heraldHud-slotSpellTitle">${levelFormatted}</div>
+          <div class="heraldHud-slotSpellItem">
+            <div class="heraldHud-slotSpellTop"></div>
+            <div class="heraldHud-slotSpellMiddle">
+              <div class="heraldHud-slotSpellValue">${spellSlotDisplay}</div>
+            </div>
+            <div class="heraldHud-slotSpellBottom"></div>
+          </div>
+        </div>
+      `;
+    }
+
+    spellSlotsHTML += `</div>`;
+    spellsSlotRightDiv.innerHTML = spellSlotsHTML;
   }
 }
 
