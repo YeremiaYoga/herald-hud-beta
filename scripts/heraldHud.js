@@ -1171,8 +1171,11 @@ async function heraldHud_renderDialog(kategori) {
   if (heraldHud_dialogContainerDiv) {
     console.log(kategori);
     heraldHud_dialogContainerDiv.innerHTML = `
-    <div id="heraldHud-dialog" class="heraldHud-dialog ${kategori}"></div>
-    <div id="heraldHud-dialog2" class="heraldHud-dialog2 ${kategori}"></div>
+    <div class="heraldHud-dialogDiv ${kategori}">
+      <div id="heraldHud-dialog" class="heraldHud-dialog ${kategori}"></div>
+      <div id="heraldHud-dialog2" class="heraldHud-dialog2 ${kategori}"></div>
+    </div>
+  
     `;
   }
 }

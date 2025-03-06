@@ -1094,6 +1094,10 @@
 
 .heraldHud-dialogContainer {}
 
+
+.heraldHud-dialogDiv{
+    
+}
 .heraldHud-dialog {
     position: fixed;
     transform: translateX(-50%);
@@ -1146,7 +1150,7 @@
 
 .heraldHud-dialog2.spells {
     bottom: 14%;
-    left: 41%;
+    left: 46%;
     width: 200px;
     height: 150px;
 }
