@@ -902,7 +902,7 @@ async function heraldHud_updateItemFavoriteActor() {
         if (item) {
           await item.use();
           let favoriteUses = "";
-          if (item.system.uses?.value && item.system.uses?.max) {
+          if (item.system.uses?.max) {
             favoriteUses = `- (${item.system.uses.value}/${item.system.uses.max})`;
           }
           tooltipChargeDiv.innerText = favoriteUses;
@@ -935,7 +935,7 @@ async function heraldHud_updateItemFavoriteActor() {
 
         let favoriteUses = "";
 
-        if (item.system.uses?.value && item.system.uses?.max) {
+        if (item.system.uses?.max) {
           favoriteUses = `- (${item.system.uses.value}/${item.system.uses.max})`;
         }
 
@@ -1014,7 +1014,7 @@ async function heraldHud_updateItemCosumablesActor() {
   consumablesItem.forEach((item) => {
     let validTypes = ["potion", "poison", "scroll"];
     if (!validTypes.includes(item.system.type.value)) return;
-    let itemName = `${item.name} (x${item.system.quantity})`;
+    let itemName = `${item.name}`;
     listConsumableItem += `
       <div class="heraldHud-consumableItem" data-item-id="${item.id}" data-name="${itemName}">
         <div class="heraldHud-consumableItemWrapper">
@@ -1033,6 +1033,9 @@ async function heraldHud_updateItemCosumablesActor() {
         );
         const tooltipNameDiv = document.getElementById(
           "heraldHud-consumableTooltipNameItem"
+        );
+        const tooltipQtyDiv = document.getElementById(
+          "heraldHud-consumableTooltipQtyItem"
         );
         const tooltipChargeDiv = document.getElementById(
           "heraldHud-consumableTooltipChargeItem"
@@ -1058,6 +1061,26 @@ async function heraldHud_updateItemCosumablesActor() {
               );
               if (qtyConsumableDiv) {
                 qtyConsumableDiv.innerText = `x${updatedItem.system.quantity}`;
+              }
+
+              if (tooltipQtyDiv) {
+                tooltipQtyDiv.innerText = `(x${updatedItem.system.quantity})`;
+              }
+
+              let consumableCharge = "";
+
+              if (
+                updatedItem.system.uses?.value != null &&
+                updatedItem.system.uses?.max != null &&
+                !(
+                  updatedItem.system.uses.max === 1 &&
+                  updatedItem.system.uses.value === 1
+                )
+              ) {
+                consumableCharge = `| (${updatedItem.system.uses.value}/${updatedItem.system.uses.max})`;
+              }
+              if (tooltipChargeDiv) {
+                tooltipChargeDiv.innerText = consumableCharge;
               }
             }
           }
@@ -1086,6 +1109,23 @@ async function heraldHud_updateItemCosumablesActor() {
           }
           if (arrProperti.length > 0) {
             labelProperti = arrProperti.join(" | ");
+          }
+
+          if (tooltipQtyDiv) {
+            tooltipQtyDiv.innerText = `(x${item.system.quantity})`;
+          }
+
+          let consumableCharge = "";
+
+          if (
+            item.system.uses?.value != null &&
+            item.system.uses?.max != null &&
+            !(item.system.uses.max == 1 && item.system.uses.value == 1)
+          ) {
+            consumableCharge = `| (${item.system.uses.value}/${item.system.uses.max})`;
+          }
+          if (tooltipChargeDiv) {
+            tooltipChargeDiv.innerText = consumableCharge;
           }
           let itemName = favItem.getAttribute("data-name");
           tooltipNameDiv.innerText = itemName;
@@ -1377,7 +1417,7 @@ async function heraldHud_getDataInventory() {
     }
     let weaponitemUses = "";
 
-    if (item.system.uses?.value && item.system.uses?.max) {
+    if (item.system.uses?.max) {
       weaponitemUses = `| ${item.system.uses.value}/${item.system.uses.max}`;
     }
 
@@ -1460,10 +1500,7 @@ async function heraldHud_getDataInventory() {
             );
             let weaponItemUses = "";
 
-            if (
-              updatedItem.system.uses?.value &&
-              updatedItem.system.uses?.max
-            ) {
+            if (updatedItem.system.uses?.max) {
               weaponItemUses = `${updatedItem.system.uses.value}/${updatedItem.system.uses.max}`;
             }
             if (weaponUsesDiv) {
@@ -1543,7 +1580,7 @@ async function heraldHud_getDataInventory() {
     if (item.system.type.label) {
       arrToolCategory.push(item.system.type.label);
     }
-    if (item.system.uses?.value && item.system.uses?.max) {
+    if (item.system.uses?.max) {
       toolItemUses = `${item.system.uses.value}/${item.system.uses.max}`;
     }
 
@@ -1677,7 +1714,7 @@ async function heraldHud_getDataInventory() {
 
     let consumableItemUses = "";
 
-    if (item.system.uses?.value && item.system.uses?.max) {
+    if (item.system.uses?.max) {
       consumableItemUses = `| ${item.system.uses.value}/${item.system.uses.max}`;
     }
     let arrProperti = [];
@@ -1766,10 +1803,7 @@ async function heraldHud_getDataInventory() {
               );
               let consumableItemUses = "";
 
-              if (
-                updatedItem.system.uses?.value &&
-                updatedItem.system.uses?.max
-              ) {
+              if (updatedItem.system.uses?.max) {
                 consumableItemUses = `${updatedItem.system.uses.value}/${updatedItem.system.uses.max}`;
               }
               if (consumableUsesDiv) {
@@ -1843,7 +1877,7 @@ async function heraldHud_getDataLoots() {
       priceLabel = `| ${currencyIcon} ${item.system.price.value} `;
     }
 
-    if (item.system.uses?.value && item.system.uses?.max) {
+    if (item.system.uses?.max) {
       lootsItemUses = `| ${item.system.uses.value}/${item.system.uses.max}`;
     }
 
@@ -2146,7 +2180,7 @@ async function heraldHud_getDataFeatures() {
             );
             let featureUses = ``;
 
-            if (updatedItem.system.uses.value && updatedItem.system.uses.max) {
+            if (updatedItem.system.uses.max) {
               featureUses = `${updatedItem.system.uses.value}/${updatedItem.system.uses.max}`;
             }
 
@@ -2376,7 +2410,7 @@ async function heraldHud_getDataSpells() {
         }
 
         let spellsUses = "";
-        if (item.system.uses?.value && item.system.uses?.max) {
+        if (item.system.uses?.max) {
           spellsUses = `| ${item.system.uses.value}/${item.system.uses.max}`;
         }
         let spellsSchool = heraldHud_getSpellsSchoolIcon(item.system.school);

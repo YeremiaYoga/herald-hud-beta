@@ -305,15 +305,18 @@
 .heraldHud-walkSpeedContainer {
     text-align: center;
     color: white;
+    margin-top: 5px;
 }
 
 .heraldHud-walkSpeedName {
     font-size: 14px;
+
 }
 
 .heraldHud-walkSpeedValue {
     font-size: 20px;
     font-weight: bold;
+    margin-top: 2px;
 }
 
 .heraldHud-walkSpeedTooltip {
@@ -346,6 +349,7 @@
     display: flex;
     gap: 10px;
     justify-content: center;
+    margin-top: 3px;
 }
 
 .heraldHud-burrowSpeedContainer {}
@@ -512,24 +516,6 @@
     position: relative;
 }
 
-/* .heraldHud-hudBoxMiddle::before,
-.heraldHud-hudBoxMiddle::after {
-    content: "";
-    position: absolute;
-    width: 2px;
-    height: 80%;
-    background-color: rgb(0, 203, 253);
-    top: 10%;
-
-}
-
-.heraldHud-hudBoxMiddle::before {
-    left: -5%;
-}
-
-.heraldHud-hudBoxMiddle::after {
-    right: 0;
-} */
 
 .heraldHud-favoritesContainer {}
 
@@ -689,6 +675,11 @@
     z-index: 15;
 }
 
+.heraldHud-consumableTooltipTop {
+    display: flex;
+    gap: 3px;
+    justify-content: center;
+}
 
 .heraldHud-consumableTooltipMiddle {
     display: block;
