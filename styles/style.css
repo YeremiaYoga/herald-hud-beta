@@ -34,15 +34,18 @@
 }
 
 .heraldHud-effectContainer {
+    position: relative;
     width: 25px;
     height: 25px;
     background-color: gray;
+    display: inline-block;
 }
 
 .heraldHud-effectTooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
     width: 200px;
-    position: fixed;
-    margin-top: -100px;
     padding: 10px;
     background: rgba(0, 0, 0, 0.8);
     color: white;
@@ -50,6 +53,12 @@
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
     font-size: 12px;
     z-index: 1000;
+    display: none;
+}
+
+
+.heraldHud-effectContainer:hover .heraldHud-effectTooltip {
+    display: block;
 }
 
 
@@ -877,7 +886,6 @@
     position: absolute;
     left: 13%;
     z-index: 16;
-    display: none;
 }
 
 .heraldHud-settingButton {
@@ -924,7 +932,6 @@
     position: absolute;
     left: 85%;
     z-index: 16;
-    display: none;
 }
 
 .heraldHud-preparedSpellsButton {
@@ -1095,9 +1102,8 @@
 .heraldHud-dialogContainer {}
 
 
-.heraldHud-dialogDiv{
-    
-}
+.heraldHud-dialogDiv {}
+
 .heraldHud-dialog {
     position: fixed;
     transform: translateX(-50%);
@@ -1150,7 +1156,7 @@
 
 .heraldHud-dialog2.spells {
     bottom: 14%;
-    left: 46%;
+    left: 46.5%;
     width: 200px;
     height: 150px;
 }
@@ -1160,6 +1166,13 @@
     left: 60%;
     width: 300px;
     height: 350px;
+}
+
+.heraldHud-dialog.spellsPrep {
+    bottom: 14%;
+    left: 65%;
+    width: 400px;
+    height: 300px;
 }
 
 
@@ -1819,8 +1832,8 @@
 }
 
 .heraldHud-spellComponentIcon {
-    width: 14px;
-    height: 14px;
+    width: 13px;
+    height: 13px;
     border: none;
 }
 
@@ -1858,6 +1871,27 @@
     font-size: 10px;
     color: rgb(200, 200, 200);
     display: flex;
+}
+
+.heraldHud-dialogSpellsTooltip {
+    display: none;
+    width: 300px;
+    position: absolute;
+    bottom: 42%;
+    right: 52%;
+    transform: translateX(-50%) translateY(-10px);
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 5px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+    font-size: 12px;
+    z-index: 1000;
+    white-space: normal;
+}
+
+.heraldHud-spellsContainer:hover .heraldHud-dialogSpellsTooltip {
+    display: block;
 }
 
 .heraldHud-dialogSpellsSlotContainer {
@@ -1964,7 +1998,8 @@
     flex-direction: column;
     height: 100%;
     width: 100%;
-    color: white
+    color: white;
+    overflow-y: auto;
 }
 
 .heraldHud-statsAbilitiesContainer {
@@ -2060,7 +2095,7 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
     max-height: 200px;
-    overflow-y: auto;
+
     padding-right: 5px;
 }
 
@@ -2089,6 +2124,123 @@
     font-size: 12px;
     color: #8f8f8f;
     justify-content: center;
+}
+
+/* Spells Prepared */
+.heraldHud-dialogSpellsPrepContainer {
+    max-height: 100%;
+    overflow-y: auto;
+    scrollbar-width: thin;
+
+}
+
+.heraldHud-spellsPrepContainerDiv {
+    font-size: 12px;
+    color: white;
+}
+
+
+
+.heraldHud-spellsCategory {
+    padding: 5px;
+}
+
+.heraldHud-spellsCategoryList {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+    font-size: 12px;
+}
+
+.heraldHud-spellsPrepItem {
+    display: flex;
+    font-size: 10px;
+    gap: 2px;
+}
+.heraldHud-spellsPrepUnderImage{
+    display: flex;
+    gap: 2px;
+    margin-top: 2px;
+    align-items: center;
+}
+.heraldHud-spellsPrepButton {
+    cursor: pointer;
+    font-size: 13px;
+    color: gray;
+}
+
+.heraldHud-spellsPrepButton {
+
+    color: gray;
+}
+
+.heraldHud-spellsPrepButton.prepared {
+
+    color: rgb(243, 187, 34);
+}
+
+.heraldHud-spellPrepSchoolContainer {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    padding: 3px;
+}
+
+.heraldHud-spellPrepSchoolIcon {
+    width: 12px;
+    height: 12px;
+    border: none;
+}
+
+.heraldHud-spellsPrepSchoolTooltip {
+    visibility: hidden;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    text-align: center;
+    padding: 5px 10px;
+    border-radius: 5px;
+    position: absolute;
+    bottom: 100%;
+    left: 0%;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 16;
+    font-size: 12px;
+}
+
+.heraldHud-spellPrepSchoolContainer:hover .heraldHud-spellsPrepSchoolTooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+.heraldHud-spellsPrepMiddleTop {
+    display: flex;
+    gap: 2px;
+    width: 100%; 
+    flex-wrap: wrap;
+}
+
+
+
+.heraldHud-spellsPrepComponent {
+    font-size: 10px;
+    color: gray;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.heraldHud-spellsPrepMiddleMid{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    font-size: 10px;
+    color: gray;
+}
+.heraldHud-spellsPrepMiddleBot{
+    font-size: 10px;
+    color: gray;
 }
 
 
