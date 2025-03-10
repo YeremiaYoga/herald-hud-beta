@@ -884,8 +884,10 @@
 
 .heraldHud-settingHudContainer {
     position: absolute;
-    left: 13%;
+    left: -16%;
     z-index: 16;
+    bottom: 40%;
+    cursor: pointer;
 }
 
 .heraldHud-settingButton {
@@ -930,15 +932,42 @@
 
 .heraldHud-preparedSpellsActionContainer {
     position: absolute;
-    left: 85%;
+    left: 86%;
     z-index: 16;
+    cursor: pointer;
+}
+
+
+.heraldHud-preparedSpellsWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px; 
+    
 }
 
 .heraldHud-preparedSpellsButton {
-    color: rgb(155, 118, 255);
-    font-size: 30px;
-    -webkit-text-stroke: 2px rgba(0, 0, 0);
+    width: 20px;
+    height: 20px;
+    background: rgb(0, 0, 0); 
+    transform: rotate(45deg); 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute; 
+ 
 }
+
+.heraldHud-preparedSpellsImage {
+    border: none;
+    width: 30px; 
+    height: 30px;
+    position: absolute;
+}
+
+
 
 
 .heraldHud-preparedSpellsTooltip {
@@ -1099,13 +1128,19 @@
 
 /* Herald Hud Dialog */
 
-.heraldHud-dialogContainer {}
+.heraldHud-dialogContainer {
+   
+  
+}
 
 
-.heraldHud-dialogDiv {}
+.heraldHud-dialogDiv {
+
+}
 
 .heraldHud-dialog {
     position: fixed;
+    bottom: 14%;
     transform: translateX(-50%);
     border: 3px solid gold;
     border-radius: 10px;
@@ -1116,7 +1151,9 @@
 }
 
 .heraldHud-dialog2 {
+    display: none;
     position: fixed;
+    bottom: 14%;
     transform: translateX(-50%);
     border: 3px solid gold;
     border-radius: 10px;
@@ -1127,50 +1164,43 @@
 }
 
 .heraldHud-dialog.inventory {
-    bottom: 14%;
     left: 40%;
     width: 300px;
     height: 350px;
 }
 
 .heraldHud-dialog.loot {
-    bottom: 14%;
     left: 45%;
     width: 300px;
     height: 350px;
 }
 
 .heraldHud-dialog.features {
-    bottom: 14%;
     left: 50%;
     width: 400px;
     height: 300px;
 }
 
 .heraldHud-dialog.spells {
-    bottom: 14%;
     left: 60%;
     width: 300px;
     height: 350px;
 }
 
 .heraldHud-dialog2.spells {
-    bottom: 14%;
     left: 46.5%;
     width: 200px;
     height: 150px;
 }
 
 .heraldHud-dialog.stats {
-    bottom: 14%;
-    left: 60%;
+    left: 55%;
     width: 300px;
     height: 350px;
 }
 
 .heraldHud-dialog.spellsPrep {
-    bottom: 14%;
-    left: 65%;
+    left: 60%;
     width: 400px;
     height: 300px;
 }
@@ -1722,7 +1752,11 @@
     overflow-x: hidden;
     scrollbar-width: thin;
 }
-
+.heraldHud-spellCategoryDiv{
+    display: flex;
+    gap: 2px;
+    flex-wrap: wrap;
+}
 .heraldHud-spellLevelTitle {}
 
 .heraldHud-spellsItem {
@@ -1794,6 +1828,7 @@
 .heraldHud-spellsMiddleTop {
     display: flex;
     gap: 5px;
+    flex-wrap: wrap;
 }
 
 .heraldHud-spellsComponent {
@@ -2130,14 +2165,32 @@
 .heraldHud-dialogSpellsPrepContainer {
     max-height: 100%;
     overflow-y: auto;
+    overflow-x: hidden;
     scrollbar-width: thin;
 
 }
-
+.heraldHud-spellsPrepSearchContainer{
+    padding: 5px;
+}
 .heraldHud-spellsPrepContainerDiv {
     font-size: 12px;
     color: white;
 }
+.heraldHud-spellsPrepTitle{
+    padding: 2px;
+    padding-bottom: 5px;
+}
+.heraldHud-spellsPrepSearch {
+    color: white !important;
+
+    outline: 2px solid gold;
+}
+
+
+.heraldHud-spellsPrepSearch::placeholder {
+    color: rgba(255, 255, 255, 0.7); 
+}
+
 
 
 
