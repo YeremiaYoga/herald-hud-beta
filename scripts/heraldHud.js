@@ -2,13 +2,18 @@ let heraldHud_actorSelected = null;
 let heraldHud_checkerValue = null;
 let heraldHud_spellsTrackerOff = false;
 let heraldHud_dockHudToBottom = false;
-
+let heraldHud_statsAbbreviations = false;
+let heraldHud_gameVersion = ``;
 let hp0 = "#8B0000";
 let hp25 = "#bc3c04";
 let hp50 = "#c47404";
 let hp75 = "#8c9c04";
 let hp100 = "#389454";
 let hpgradient = "rgb(34, 34, 34)";
+
+Hooks.on("ready", () => {
+  heraldHud_gameVersion = game.system.version;
+});
 
 async function heraldHud_renderHtml() {
   try {
@@ -39,6 +44,7 @@ async function heraldHud_renderHeraldHud() {
     await heraldHud_updateItemCosumablesActor();
     await heraldHud_renderHtmlDialog();
     await heraldHud_resetDialog();
+    await heraldHud_updateEndTurnButton();
   }, 1000);
 }
 
@@ -125,26 +131,62 @@ async function heraldHud_renderActorData() {
   actions.forEach((action) => {
     let container = document.createElement("div");
     container.id = `heraldHud-${action.id}Container`;
-    container.className = `heraldHud-${action.id}Container`;
+    container.className = `heraldHud-actionMenuContainer`;
 
     let button = document.createElement("div");
     button.id = `heraldHud-${action.id}Button`;
     button.className = `heraldHud-${action.id}Button`;
     button.textContent = action.text;
 
-    let tooltip = document.createElement("div");
-    tooltip.id = `heraldHud-${action.id}Tooltip`;
-    tooltip.className = `heraldHud-${action.id}Tooltip`;
-
     button.addEventListener("click", async () => {
       await heraldHud_showDialog(action.id);
     });
 
     container.appendChild(button);
-    container.appendChild(tooltip);
 
     actionContainerDiv.appendChild(container);
   });
+
+  let preparedSpellsActionContainerDiv = document.getElementById(
+    "heraldHud-preparedSpellsActionContainer"
+  );
+  const spellsData = actor.items.filter(
+    (item) =>
+      item.type === "spell" &&
+      item.system.preparation.mode === "prepared" &&
+      item.system.level > 0
+  );
+  if (preparedSpellsActionContainerDiv && spellsData.length > 0) {
+    preparedSpellsActionContainerDiv.innerHTML = `
+    <div id="heraldHud-preparedSpellsContainer" class="heraldHud-preparedSpellsContainer">
+      <div id="heraldHud-preparedSpellsWrapper" class="heraldHud-preparedSpellsWrapper">
+        <div id="heraldHud-preparedSpellsButton" class="heraldHud-preparedSpellsButton">
+        </div>
+        <img
+          src="/modules/herald-hud-beta/assets/spellsprep_img.webp"
+          alt=""
+          class="heraldHud-preparedSpellsImage"
+        />
+      </div>
+      <div class="heraldHud-preparedSpellsTooltip">Prepared Spells</div>
+    </div>
+    `;
+
+    let preparedSpellsWrapper = document.getElementById(
+      "heraldHud-preparedSpellsWrapper"
+    );
+
+    if (preparedSpellsWrapper) {
+      preparedSpellsWrapper.addEventListener("click", (event) => {
+        event.stopPropagation();
+        heraldHud_showDialog("spellsPrep");
+      });
+    }
+  } else {
+    if (preparedSpellsActionContainerDiv) {
+      preparedSpellsActionContainerDiv.innerHTML = ``;
+    }
+  }
 
   let restShortcutContainerDiv = document.getElementById(
     "heraldHud-restShortcutContainer"
@@ -180,20 +222,6 @@ async function heraldHud_renderActorData() {
     `;
   }
 
-  let endturnShortcutContainerDiv = document.getElementById(
-    "heraldHud-endturnShortcutContainer"
-  );
-
-  if (endturnShortcutContainerDiv) {
-    endturnShortcutContainerDiv.innerHTML = `
-    <div id="heraldHud-endturnContainer" class="heraldHud-endturnContainer">
-      <div id="heraldHud-endturnButton" class="heraldHud-endturnButton">
-        End Turn
-      </div>
-    </div>
-    `;
-  }
-
   let settingHudContainerDiv = document.getElementById(
     "heraldHud-settingHudContainer"
   );
@@ -215,49 +243,6 @@ async function heraldHud_renderActorData() {
         event.stopPropagation();
         heraldHud_openSettingHudDialog();
       });
-    }
-  }
-
-  let preparedSpellsActionContainerDiv = document.getElementById(
-    "heraldHud-preparedSpellsActionContainer"
-  );
-  const spellsData = actor.items.filter(
-    (item) =>
-      item.type === "spell" &&
-      item.system.preparation.mode === "prepared" &&
-      item.system.level > 0
-  );
-  if (preparedSpellsActionContainerDiv && spellsData.length > 0) {
-    preparedSpellsActionContainerDiv.innerHTML = `
-    <div id="heraldHud-preparedSpellsContainer" class="heraldHud-preparedSpellsContainer">
-      <div id="heraldHud-preparedSpellsWrapper" class="heraldHud-preparedSpellsWrapper">
-        <div id="heraldHud-preparedSpellsButton" class="heraldHud-preparedSpellsButton">
-          
-        </div>
-        <img
-          src="/modules/herald-hud-beta/assets/spellsprep_img.webp"
-          alt=""
-          class="heraldHud-preparedSpellsImage"
-        />
-      </div>
-    
-      <div class="heraldHud-preparedSpellsTooltip">Prepared Spells</div>
-    </div>
-    `;
-
-    let preparedSpellsButton = document.getElementById(
-      "heraldHud-preparedSpellsWrapper"
-    );
-
-    if (preparedSpellsButton) {
-      preparedSpellsButton.addEventListener("click", (event) => {
-        event.stopPropagation();
-        heraldHud_showDialog("spellsPrep");
-      });
-    }
-  } else {
-    if (preparedSpellsActionContainerDiv) {
-      preparedSpellsActionContainerDiv.innerHTML = ``;
     }
   }
 
@@ -286,6 +271,52 @@ async function heraldHud_renderActorData() {
     }
   }, 500);
 }
+
+async function heraldHud_updateEndTurnButton() {
+  let actor = heraldHud_actorSelected;
+  let endturnShortcutContainerDiv = document.getElementById(
+    "heraldHud-endturnShortcutContainer"
+  );
+
+  if (!endturnShortcutContainerDiv || !actor) {
+    if (endturnShortcutContainerDiv)
+      endturnShortcutContainerDiv.style.display = "none";
+    return;
+  }
+
+  const combat = game.combat;
+  if (!combat) {
+    endturnShortcutContainerDiv.style.display = "none";
+    return;
+  }
+
+  const currentCombatant = combat.combatant;
+  const isActorTurn = currentCombatant?.actor?.id === actor.id;
+
+  if (isActorTurn) {
+    endturnShortcutContainerDiv.innerHTML = `
+      <div id="heraldHud-endturnContainer" class="heraldHud-endturnContainer">
+        <div id="heraldHud-endturnButton" class="heraldHud-endturnButton">
+          End Turn
+        </div>
+      </div>
+    `;
+    endturnShortcutContainerDiv.style.display = "flex";
+
+    document
+      .getElementById("heraldHud-endturnButton")
+      .addEventListener("click", async () => {
+        await combat.nextTurn();
+      });
+  } else {
+    endturnShortcutContainerDiv.innerHTML = "";
+    endturnShortcutContainerDiv.style.display = "none";
+  }
+}
+
+Hooks.on("updateCombat", heraldHud_updateEndTurnButton);
+Hooks.on("createCombat", heraldHud_updateEndTurnButton);
+Hooks.on("deleteCombat", heraldHud_updateEndTurnButton);
 
 async function heraldHud_updateDataActor() {
   let actor = heraldHud_actorSelected;
@@ -912,7 +943,7 @@ async function heraldHud_updateItemFavoriteActor() {
     let item =
       actor.items.get(rawItemId) ||
       actor.getEmbeddedDocument("Item", rawItemId);
-
+    console.log(item);
     listFavorites += `
     <div class="heraldHud-favoriteItem" data-item-id="${item.id}" data-name="${item.name}">
       <img src="${item.img}" alt="${item.name}" class="heraldHud-favoriteItemImage">
@@ -960,19 +991,31 @@ async function heraldHud_updateItemFavoriteActor() {
           actor.items.get(itemId) || actor.getEmbeddedDocument("Item", itemId);
         let arrProperti = [];
         let labelProperti = "";
+      
         if (item.labels.toHit) {
           arrProperti.push(`To hit ${item.labels.toHit}`);
         }
         if (item.labels.save) {
           arrProperti.push(item.labels.save);
         }
-        if (item.labels.damage) {
-          for (let damage of item.labels.derivedDamage) {
-            let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
-
-            arrProperti.push(`${damage.formula} ${damageIcon}`);
+        if (foundry.utils.isNewerVersion(heraldHud_gameVersion, "3.3.1")) {
+          if (item.labels.damages) {
+            for (let damage of item.labels.damages) {
+              let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+              arrProperti.push(`${damage.formula} ${damageIcon}`);
+            }
+          }
+        } else {
+          if (item.labels.damage) {
+         
+            for (let damage of item.labels.derivedDamage) {
+              let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+  
+              arrProperti.push(`${damage.formula} ${damageIcon}`);
+            }
           }
         }
+       
         if (arrProperti.length > 0) {
           labelProperti = arrProperti.join(" | ");
         }
@@ -1144,11 +1187,21 @@ async function heraldHud_updateItemCosumablesActor() {
           if (item.labels.save) {
             arrProperti.push(item.labels.save);
           }
-          if (item.labels.damage) {
-            for (let damage of item.labels.derivedDamage) {
-              let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
-
-              arrProperti.push(`${damage.formula} ${damageIcon}`);
+          if (foundry.utils.isNewerVersion(heraldHud_gameVersion, "3.3.1")) {
+            if (item.labels.damages) {
+              for (let damage of item.labels.damages) {
+                let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+                arrProperti.push(`${damage.formula} ${damageIcon}`);
+              }
+            }
+          } else {
+            if (item.labels.damage) {
+           
+              for (let damage of item.labels.derivedDamage) {
+                let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+    
+                arrProperti.push(`${damage.formula} ${damageIcon}`);
+              }
             }
           }
           if (arrProperti.length > 0) {
@@ -1318,11 +1371,21 @@ async function heraldHud_getDataInventory() {
     if (item.labels.save) {
       arrProperti.push(item.labels.save);
     }
-    if (item.labels.damage) {
-      for (let damage of item.labels.derivedDamage) {
-        let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+    if (foundry.utils.isNewerVersion(heraldHud_gameVersion, "3.3.1")) {
+      if (item.labels.damages) {
+        for (let damage of item.labels.damages) {
+          let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+          arrProperti.push(`${damage.formula} ${damageIcon}`);
+        }
+      }
+    } else {
+      if (item.labels.damage) {
+     
+        for (let damage of item.labels.derivedDamage) {
+          let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
 
-        arrProperti.push(`${damage.formula} ${damageIcon}`);
+          arrProperti.push(`${damage.formula} ${damageIcon}`);
+        }
       }
     }
     if (arrProperti.length > 0) {
@@ -1726,11 +1789,21 @@ async function heraldHud_getDataInventory() {
     if (item.labels.save) {
       arrProperti.push(item.labels.save);
     }
-    if (item.labels.damage) {
-      for (let damage of item.labels.derivedDamage) {
-        let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+    if (foundry.utils.isNewerVersion(heraldHud_gameVersion, "3.3.1")) {
+      if (item.labels.damages) {
+        for (let damage of item.labels.damages) {
+          let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+          arrProperti.push(`${damage.formula} ${damageIcon}`);
+        }
+      }
+    } else {
+      if (item.labels.damage) {
+     
+        for (let damage of item.labels.derivedDamage) {
+          let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
 
-        arrProperti.push(`${damage.formula} ${damageIcon}`);
+          arrProperti.push(`${damage.formula} ${damageIcon}`);
+        }
       }
     }
     if (arrProperti.length > 0) {
@@ -2074,11 +2147,21 @@ async function heraldHud_getDataFeatures() {
       if (item.labels.save) {
         arrProperti.push(item.labels.save);
       }
-      if (item.labels.damage) {
-        for (let damage of item.labels.derivedDamage) {
-          let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+      if (foundry.utils.isNewerVersion(heraldHud_gameVersion, "3.3.1")) {
+        if (item.labels.damages) {
+          for (let damage of item.labels.damages) {
+            let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+            arrProperti.push(`${damage.formula} ${damageIcon}`);
+          }
+        }
+      } else {
+        if (item.labels.damage) {
+       
+          for (let damage of item.labels.derivedDamage) {
+            let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
 
-          arrProperti.push(`${damage.formula} ${damageIcon}`);
+            arrProperti.push(`${damage.formula} ${damageIcon}`);
+          }
         }
       }
       if (arrProperti.length > 0) {
@@ -2364,10 +2447,21 @@ async function heraldHud_getDataSpellsList() {
         if (item.labels.save) {
           arrProperti.push(item.labels.save);
         }
-        if (item.labels.damage) {
-          for (let damage of item.labels.derivedDamage) {
-            let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
-            arrProperti.push(`${damage.formula} ${damageIcon}`);
+        if (foundry.utils.isNewerVersion(heraldHud_gameVersion, "3.3.1")) {
+          if (item.labels.damages) {
+            for (let damage of item.labels.damages) {
+              let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+              arrProperti.push(`${damage.formula} ${damageIcon}`);
+            }
+          }
+        } else {
+          if (item.labels.damage) {
+         
+            for (let damage of item.labels.derivedDamage) {
+              let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+  
+              arrProperti.push(`${damage.formula} ${damageIcon}`);
+            }
           }
         }
         if (arrProperti.length > 0) {
@@ -2638,10 +2732,9 @@ async function heraldHud_getDataStats() {
   );
 
   let abilitiesData = actor.system.abilities;
-  let skillsData = actor.system.skills;
 
   let listAbilities = ``;
-  let listSkills = ``;
+ 
   const abilitiesNames = {
     str: "Strength",
     dex: "Dexterity",
@@ -2704,6 +2797,14 @@ async function heraldHud_getDataStats() {
         });
       });
   }
+
+  await heraldHud_renderDataStatsSkill();
+}
+
+async function heraldHud_renderDataStatsSkill() {
+  let actor = heraldHud_actorSelected;
+  let skillsData = actor.system.skills;
+  let listSkills = ``;
   let statsListSkillDiv = document.getElementById("heraldHud-statsListSkills");
   const skillsNames = {
     acr: "Acrobatics",
@@ -2730,17 +2831,46 @@ async function heraldHud_getDataStats() {
     let nameSkill = skillsNames[key];
     let skillTotal =
       skillData.total >= 0 ? `+${skillData.total}` : skillData.total;
+    console.log(skillData.proficient);
+    let proficientData = ``;
+    if (skillData.proficient == 1) {
+      proficientData = `<i class="fa-solid fa-circle" style="color:#8f8f8f;"></i>`;
+    } else {
+      proficientData = `<i class="fa-regular fa-circle"  style="color:#8f8f8f;"></i>`;
+    }
+
+    let skillDivTop = `
+    <div id="heraldHud-skillItemTop" class="heraldHud-skillItemTop">
+      <div id="heraldHud-skillName" class="heraldHud-skillName">${nameSkill}</div>
+        <div class="heraldHud-skillValueData">
+          <div id="heraldHud-skillValueTotal" class="heraldHud-skillValueTotal">${skillTotal}</div>
+          <div id="heraldHud-skillValuePassive" class="heraldHud-skillValuePassive">(${skillData.passive})</div>
+          <div id="heraldHud-skillValueProficient" class="heraldHud-skillValueProficient">${proficientData}</div>
+        </div>
+    </div>
+    
+    `;
+
+    if(heraldHud_statsAbbreviations){
+      let skillNameFormatted = key.charAt(0).toUpperCase() + key.slice(1);
+
+      skillDivTop = `
+      <div id="heraldHud-skillItemTop" class="heraldHud-skillItemTop">
+        <div id="heraldHud-skillName" class="heraldHud-skillName">${skillNameFormatted}</div>
+          <div class="heraldHud-skillValueData">
+            <div id="heraldHud-skillValueTotal" class="heraldHud-skillValueTotal">${skillTotal}</div>
+            <div id="heraldHud-skillValuePassive" class="heraldHud-skillValuePassive">(${skillData.passive})</div>
+            <div id="heraldHud-skillValueProficient" class="heraldHud-skillValueProficient">${proficientData}</div>
+          </div>
+      </div>
+      `;
+    
+      statsListSkillDiv.style.gridTemplateColumns = "repeat(4, 1fr)";
+    }
     listSkills += `
     <div id="heraldHud-skillContainer" class="heraldHud-skillContainer">
       <div id="heraldHud-skillItem" class="heraldHud-skillItem" data-skill="${key}">
-        <div id="heraldHud-skillItemTop" class="heraldHud-skillItemTop">
-          <div id="heraldHud-skillName" class="heraldHud-skillName">${nameSkill}</div>
-            <div class="heraldHud-skillValueData">
-              <div id="heraldHud-skillValueTotal" class="heraldHud-skillValueTotal">${skillTotal}</div>
-              <div id="heraldHud-skillValuePassive" class="heraldHud-skillValuePassive">(${skillData.passive})</div>
-            </div>
-        
-        </div>
+        ${skillDivTop}
         <div id="heraldHud-skillItemMiddle" class="heraldHud-skillItemMiddle">
         </div>
         <div id="heraldHud-skillItemBot" class="heraldHud-skillItemBot">
@@ -2856,10 +2986,21 @@ async function heraldHud_getDataSpellsPrep() {
         if (item.labels.save) {
           arrProperti.push(item.labels.save);
         }
-        if (item.labels.damage) {
-          for (let damage of item.labels.derivedDamage) {
-            let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
-            arrProperti.push(`${damage.formula} ${damageIcon}`);
+        if (foundry.utils.isNewerVersion(heraldHud_gameVersion, "3.3.1")) {
+          if (item.labels.damages) {
+            for (let damage of item.labels.damages) {
+              let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+              arrProperti.push(`${damage.formula} ${damageIcon}`);
+            }
+          }
+        } else {
+          if (item.labels.damage) {
+         
+            for (let damage of item.labels.derivedDamage) {
+              let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+  
+              arrProperti.push(`${damage.formula} ${damageIcon}`);
+            }
           }
         }
         if (arrProperti.length > 0) {
@@ -2991,11 +3132,19 @@ async function heraldHud_openSettingHudDialog() {
         }>
         <label for="heraldHud-spellsTrackerToggle">Disable Spell Slot Tracker Box</label>
       </div>
+      
       <div style="display: flex; align-items: center; gap: 10px;">
         <input type="checkbox" id="heraldHud-dockHudToggle" ${
           heraldHud_dockHudToBottom ? "checked" : ""
         }>
         <label for="heraldHud-dockHudToggle">Dock Herald's HUD to Bottom</label>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <input type="checkbox" id="heraldHud-statsAbbreviationsToggle" ${
+          heraldHud_statsAbbreviations ? "checked" : ""
+        }>
+        <label for="heraldHud-statsAbbreviationsToggle">Abbreviations Skill</label>
       </div>
     </div>
   `;
@@ -3007,13 +3156,13 @@ async function heraldHud_openSettingHudDialog() {
       save: {
         label: "Save",
         callback: (html) => {
-          let spellTrackerCheckbox = html.find(
-            "#heraldHud-spellsTrackerToggle"
-          )[0];
+          let spellTrackerCheckbox = html.find("#heraldHud-spellsTrackerToggle")[0];
           let dockHudCheckbox = html.find("#heraldHud-dockHudToggle")[0];
+          let statsAbbreviationsCheckbox = html.find("#heraldHud-statsAbbreviationsToggle")[0];
 
           heraldHud_spellsTrackerOff = spellTrackerCheckbox.checked;
           heraldHud_dockHudToBottom = dockHudCheckbox.checked;
+          heraldHud_statsAbbreviations = statsAbbreviationsCheckbox.checked;
 
           heraldHud_settingHudToBottom();
         },
@@ -3028,6 +3177,7 @@ async function heraldHud_openSettingHudDialog() {
     default: "save",
   }).render(true);
 }
+
 
 async function heraldHud_settingHudToBottom() {
   let heraldHud = document.getElementById("heraldHud");
@@ -3063,6 +3213,7 @@ Hooks.on("updateActor", async (actor, data) => {
   await heraldHud_updateItemFavoriteActor();
   await heraldHud_updateItemCosumablesActor();
   await heraldHud_getDataSpellsSlot();
+  console.log("test update actor");
 });
 
 function darkenHex(hex, percent) {

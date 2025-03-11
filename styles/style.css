@@ -790,24 +790,24 @@
 
 .heraldHud-endturnShortcutContainer {
     position: absolute;
-    left: 550%;
-    display: none;
+    left: 95%;
+    top: -10%;
 }
 
 .heraldHud-endturnButton {
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     display: flex;
     justify-content: center;
     align-items: center;
     border-radius: 5px;
-    background-color: #444;
+    background-color: rgb(0, 0, 0, 0.7);
+    border: 2px solid black;
     color: white;
     cursor: pointer;
     position: relative;
-    transition: transform 0.2s ease-in-out;
     text-align: center;
-    font-size: 12px;
+    font-size: 11px;
 }
 
 
@@ -949,8 +949,8 @@
 }
 
 .heraldHud-preparedSpellsButton {
-    width: 20px;
-    height: 20px;
+    width: 23px;
+    height: 23px;
     background: rgb(0, 0, 0); 
     transform: rotate(45deg); 
     display: flex;
@@ -962,8 +962,8 @@
 
 .heraldHud-preparedSpellsImage {
     border: none;
-    width: 30px; 
-    height: 30px;
+    width: 35px; 
+    height: 35px;
     position: absolute;
 }
 
@@ -1055,7 +1055,7 @@
     border: none;
 }
 
-.heraldHud-actionContainer>div {
+.heraldHud-actionMenuContainer {
     background-color: rgb(0, 0, 0, 0.7);
     border: 2px solid black;
     color: white;
@@ -2130,7 +2130,6 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
     max-height: 200px;
-
     padding-right: 5px;
 }
 
@@ -2156,7 +2155,7 @@
     align-items: center;
     gap: 2px;
     flex-wrap: nowrap;
-    font-size: 12px;
+    font-size: 10px;
     color: #8f8f8f;
     justify-content: center;
 }
