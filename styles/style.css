@@ -122,18 +122,18 @@
 
 .heraldHud-addSummonContainer {
     margin-top: 11px;
-    display: none;
+    cursor: pointer;
 }
 
 .heraldHud-addSummonerButton {
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
     align-items: center;
-    border: 2px dashed black;
+    border: 2px dashed green;
     text-align: center;
     display: flex;
     justify-content: center;
-    color: white;
+    color: green;
     font-size: 20px;
     border-radius: 50%;
     -webkit-border-radius: 50%;
@@ -148,6 +148,86 @@
     align-items: center;
     justify-content: center;
 }
+.heraldHud-chargeTrackerContainer {
+    position: absolute;
+    left: -60%;
+    top: 58%;
+    transform: translateY(-50%);
+    width: 80px; 
+    height: 160px; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 17;
+}
+
+.heraldHud-chargeItem {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid black;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+}
+
+.heraldHud-chargeImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.heraldHud-chargeText {
+    position: absolute;
+    bottom: 0;
+    font-size: 8px;
+    font-weight: bold;
+    color: white;
+    padding: 1px 3px;
+    border-radius: 3px;
+    text-shadow: 1px 1px 2px black, 0 0 3px black;
+}
+
+.heraldHud-chargeFavoriteIcon {
+    position: absolute;
+    font-size: 12px;
+    bottom: -30%;
+    right: -15%;
+    color: gold;
+    text-shadow: 1px 1px 2px black;
+}
+
+.heraldHud-chargeItem:nth-child(1) { top: 80%; right: 20%; transform: translateX(-50%); }
+.heraldHud-chargeItem:nth-child(2) { top: 65%; right: 50%; transform: translateX(-50%); }
+.heraldHud-chargeItem:nth-child(3) { top: 45%; right: 65%; transform: translateX(-50%); }
+.heraldHud-chargeItem:nth-child(4) { top: 25%; right: 65%; transform: translateX(-50%); }
+.heraldHud-chargeItem:nth-child(5) { top: 5%; right: 50%; transform: translateX(-50%); }
+.heraldHud-chargeItem:nth-child(6) { top: -10%; right: 20%; transform: translateX(-50%); }
+
+.heraldHud-chargeTrackerTooltip {
+    position: absolute;
+    bottom: 10%;
+    right: 120%;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 8px;
+    border-radius: 5px;
+    font-size: 10px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    pointer-events: none; /* Supaya tidak mengganggu klik */
+    z-index: 19;
+}
+
+.heraldHud-chargeItem:hover .heraldHud-chargeTrackerTooltip {
+    opacity: 1;
+}
+
 
 
 
@@ -238,10 +318,6 @@
     z-index: 6;
     transition: stroke-dashoffset 0.5s ease;
 }
-
-
-
-
 
 
 .heraldHud-imageValueDiv {
@@ -693,9 +769,7 @@
 .heraldHud-consumableTooltipMiddle {
     display: block;
     margin-top: 3px;
-    font-size: 9px;
-    text-align: center;
-    color: rgb(155, 155, 155);
+
 }
 
 
@@ -1400,6 +1474,7 @@
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
     font-size: 12px;
     z-index: 1000;
+    text-align: justify;
     white-space: normal;
 }
 
@@ -1456,6 +1531,7 @@
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
     font-size: 12px;
     z-index: 1000;
+    text-align: justify;
     white-space: normal;
 }
 
@@ -2294,6 +2370,67 @@
     font-size: 10px;
     color: gray;
 }
+
+
+/* NPC */
+
+.heraldHud-dialogNpcContainer{
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px;
+}
+
+.heraldHud-dialogNpcImageContainer{
+    position: relative;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #363636;
+    border: 2px solid #d4af37;
+    z-index: 8;
+    cursor: pointer;
+}
+.heraldHud-dialogNpcImageView{
+    width: 99%;
+    height: 99%;
+    border: none;
+    object-fit: cover;
+    object-position: center;
+    z-index: 8;
+    border-radius: 50%;
+}
+.heraldHud-dialogNpcCr{
+    font-size: 12px;
+    color: gray;
+}
+.heraldHud-dialogNpcMiddle{
+    
+}
+
+.heraldHud-dialogNpcName{
+font-weight: bold;
+font-size: 16px;
+}
+
+.heraldHud-dialogNpcUuid{
+    font-size: 10px;
+    color: gray;
+}
+
+.heraldHud-dialogNpcLinkActorData{
+    font-size: 10px;
+}
+
+.heraldHud-dialogNpcHp{
+    font-size: 12px;
+}
+
+
+.heraldHud-dialogNpcRight {
+    position: absolute;
+    right: 10px;
+  }
 
 
 /* damage icon */

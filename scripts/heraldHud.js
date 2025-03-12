@@ -3,6 +3,7 @@ let heraldHud_checkerValue = null;
 let heraldHud_spellsTrackerOff = false;
 let heraldHud_dockHudToBottom = false;
 let heraldHud_statsAbbreviations = false;
+let heraldHud_displayChargeTracker = false;
 let heraldHud_gameVersion = ``;
 let hp0 = "#8B0000";
 let hp25 = "#bc3c04";
@@ -10,6 +11,28 @@ let hp50 = "#c47404";
 let hp75 = "#8c9c04";
 let hp100 = "#389454";
 let hpgradient = "rgb(34, 34, 34)";
+
+let heraldHud_listChargeTracker = [
+  "Rage",
+  "Bardic Inspiration",
+  "Channel Divinity",
+  "Indomitable",
+  "Second Wind",
+  "Action Surge",
+  "Ki",
+  "Ki Point",
+  "Lay on Hands",
+  "Favored Foe",
+  "Arcane Recovery",
+  "Sorcery Points",
+  "Wild Shape",
+  "Superiority Dice",
+  "Divine Sense",
+  "Arcane Ward",
+  "Relentless Endurance",
+  "Stone’s Endurance",
+  "Fury of the Small",
+];
 
 Hooks.on("ready", () => {
   heraldHud_gameVersion = game.system.version;
@@ -45,6 +68,7 @@ async function heraldHud_renderHeraldHud() {
     await heraldHud_renderHtmlDialog();
     await heraldHud_resetDialog();
     await heraldHud_updateEndTurnButton();
+    await heraldHud_renderChargeTracker();
   }, 1000);
 }
 
@@ -270,6 +294,94 @@ async function heraldHud_renderActorData() {
       });
     }
   }, 500);
+
+  const summonContainer = document.getElementById(
+    "heraldHud-addSummonContainer"
+  );
+  if (summonContainer) {
+    summonContainer.innerHTML = `
+      <div id="heraldHud-addSummonerButton" class="heraldHud-addSummonerButton">
+        <i class="fa-solid fa-plus"></i>
+      </div>
+    `;
+
+    summonContainer.addEventListener("click", async () => {
+      await heraldHud_showDialogAddSummon();
+    });
+  }
+}
+
+async function heraldHud_showDialogAddSummon() {
+  let sceneListActor = game.scenes.viewed.tokens
+  .filter((t) => t.actor.type === "npc")
+  .map((t) => t.actor);
+  const user = game.user;
+  let listDataNpcPlayer = [];
+  for (let actor of sceneListActor) {
+    if (actor.ownership[user.id]) {
+      if (actor.ownership[user.id] == 3) {
+        listDataNpcPlayer.push(actor);
+      }
+    }
+  }
+  let listNpcPlayer = ``;
+  for(let npc of listDataNpcPlayer){
+
+    let currentHp = npc.system.attributes.hp.value;  
+    let maxHp = npc.system.attributes.hp.max;       
+    let token = npc.getActiveTokens()[0];
+    let isLinked = token?.document.actorLink;
+    let linkActorDataDiv = ``;
+    if(isLinked){
+      linkActorDataDiv = `<div id="heraldHud-dialogNpcLinkActorData" class="heraldHud-dialogNpcLinkActorData" style="color:green;">Actor Data is Link</div>`;
+    }else{
+      linkActorDataDiv = `<div id="heraldHud-dialogNpcLinkActorData" class="heraldHud-dialogNpcLinkActorData" style="color:red;">Actor data is not link! (Check with Dungeon Master!)</div>`;
+    }
+
+    let npcCr = npc.system.details?.cr
+    console.log(isLinked);
+    listNpcPlayer+=`
+    <div id="heraldHud-dialogNpcContainer" class="heraldHud-dialogNpcContainer">
+        <div id="heraldHud-dialogNpcLeft" class="heraldHud-dialogNpcLeft">
+          <div class="heraldHud-dialogNpcImageContainer">
+            <img src="${npc.img}" alt="" class="heraldHud-dialogNpcImageView" />
+          </div>
+          <div class="heraldHud-dialogNpcCr">
+            CR ${npcCr}
+          </div>
+        </div>
+        <div id="heraldHud-dialogNpcMiddle" class="heraldHud-dialogNpcMiddle">
+          <div id="heraldHud-dialogNpcName" class="heraldHud-dialogNpcName">${npc.name}</div>
+          <div id="heraldHud-dialogNpcUuid" class="heraldHud-dialogNpcUuid">${npc.id}</div>
+          ${linkActorDataDiv}
+          <div id="heraldHud-dialogNpcHp" class="heraldHud-dialogNpcHp">HP: ${currentHp}/${maxHp}</div>
+        </div>
+         <div id="heraldHud-dialogNpcRight" class="heraldHud-dialogNpcRight">
+          <label>
+            <input type="checkbox" class="heraldHud-dialogNpcCheckbox" >
+          </label>
+        </div>
+    </div>`;
+  }
+
+
+  let dialogContent = `
+  <div id="heraldHud-dialogListNpcContainer" class="heraldHud_dialogListNpcContainer">
+    ${listNpcPlayer}
+  </div>`
+  new Dialog({
+    title: "Add Summon",
+    content: dialogContent,
+    buttons: {
+      save: {
+        label: "Save",
+      },
+      cancel: {
+        label: "Cancel",
+      },
+    },
+    default: "add",
+  }).render(true);
 }
 
 async function heraldHud_updateEndTurnButton() {
@@ -943,7 +1055,6 @@ async function heraldHud_updateItemFavoriteActor() {
     let item =
       actor.items.get(rawItemId) ||
       actor.getEmbeddedDocument("Item", rawItemId);
-    console.log(item);
     listFavorites += `
     <div class="heraldHud-favoriteItem" data-item-id="${item.id}" data-name="${item.name}">
       <img src="${item.img}" alt="${item.name}" class="heraldHud-favoriteItemImage">
@@ -991,7 +1102,7 @@ async function heraldHud_updateItemFavoriteActor() {
           actor.items.get(itemId) || actor.getEmbeddedDocument("Item", itemId);
         let arrProperti = [];
         let labelProperti = "";
-      
+
         if (item.labels.toHit) {
           arrProperti.push(`To hit ${item.labels.toHit}`);
         }
@@ -1007,15 +1118,14 @@ async function heraldHud_updateItemFavoriteActor() {
           }
         } else {
           if (item.labels.damage) {
-         
             for (let damage of item.labels.derivedDamage) {
               let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
-  
+
               arrProperti.push(`${damage.formula} ${damageIcon}`);
             }
           }
         }
-       
+
         if (arrProperti.length > 0) {
           labelProperti = arrProperti.join(" | ");
         }
@@ -1196,10 +1306,9 @@ async function heraldHud_updateItemCosumablesActor() {
             }
           } else {
             if (item.labels.damage) {
-           
               for (let damage of item.labels.derivedDamage) {
                 let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
-    
+
                 arrProperti.push(`${damage.formula} ${damageIcon}`);
               }
             }
@@ -1361,7 +1470,12 @@ async function heraldHud_getDataInventory() {
       ? "favorited"
       : "";
     let isEquipped = item.system.equipped ? "equipped" : "";
-    let htmlDescription = item.system.description.value;
+    let htmlDescription = ``;
+    if (item.system?.identified === false) {
+      htmlDescription = item.system.unidentified.description;
+    } else {
+      htmlDescription = item.system.description.value;
+    }
     let arrProperti = [];
     let labelProperti = "";
 
@@ -1380,7 +1494,6 @@ async function heraldHud_getDataInventory() {
       }
     } else {
       if (item.labels.damage) {
-     
         for (let damage of item.labels.derivedDamage) {
           let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
 
@@ -1636,7 +1749,12 @@ async function heraldHud_getDataInventory() {
       ? "favorited"
       : "";
     let isEquipped = item.system.equipped ? "equipped" : "";
-    let htmlDescription = item.system.description.value;
+    let htmlDescription = ``;
+    if (item.system?.identified === false) {
+      htmlDescription = item.system.unidentified.description;
+    } else {
+      htmlDescription = item.system.description.value;
+    }
     let arrToolCategory = [];
     let toolItemUses = "";
 
@@ -1773,7 +1891,12 @@ async function heraldHud_getDataInventory() {
   );
 
   consumablesItem.forEach((item) => {
-    let htmlDescription = item.system.description.value;
+    let htmlDescription = ``;
+    if (item.system?.identified === false) {
+      htmlDescription = item.system.unidentified.description;
+    } else {
+      htmlDescription = item.system.description.value;
+    }
 
     let consumableItemUses = "";
 
@@ -1798,7 +1921,6 @@ async function heraldHud_getDataInventory() {
       }
     } else {
       if (item.labels.damage) {
-     
         for (let damage of item.labels.derivedDamage) {
           let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
 
@@ -2156,7 +2278,6 @@ async function heraldHud_getDataFeatures() {
         }
       } else {
         if (item.labels.damage) {
-       
           for (let damage of item.labels.derivedDamage) {
             let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
 
@@ -2456,10 +2577,9 @@ async function heraldHud_getDataSpellsList() {
           }
         } else {
           if (item.labels.damage) {
-         
             for (let damage of item.labels.derivedDamage) {
               let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
-  
+
               arrProperti.push(`${damage.formula} ${damageIcon}`);
             }
           }
@@ -2676,7 +2796,7 @@ async function heraldHud_getDataSpellsSlot() {
 
       let slotValue = actor.system?.spells?.[`spell${level}`]?.value || 0;
       let slotMax = actor.system?.spells?.[`spell${level}`]?.max || 0;
-      let spellSlotDisplay = `${slotValue}/${slotMax}`;
+      let spellSlotDisplay = `(${slotValue}/${slotMax})`;
       let spellSlotElement = document.querySelector(
         `.heraldHud-spellLevelSlot[data-level="${level}"]`
       );
@@ -2734,7 +2854,7 @@ async function heraldHud_getDataStats() {
   let abilitiesData = actor.system.abilities;
 
   let listAbilities = ``;
- 
+
   const abilitiesNames = {
     str: "Strength",
     dex: "Dexterity",
@@ -2831,7 +2951,6 @@ async function heraldHud_renderDataStatsSkill() {
     let nameSkill = skillsNames[key];
     let skillTotal =
       skillData.total >= 0 ? `+${skillData.total}` : skillData.total;
-    console.log(skillData.proficient);
     let proficientData = ``;
     if (skillData.proficient == 1) {
       proficientData = `<i class="fa-solid fa-circle" style="color:#8f8f8f;"></i>`;
@@ -2851,7 +2970,7 @@ async function heraldHud_renderDataStatsSkill() {
     
     `;
 
-    if(heraldHud_statsAbbreviations){
+    if (heraldHud_statsAbbreviations) {
       let skillNameFormatted = key.charAt(0).toUpperCase() + key.slice(1);
 
       skillDivTop = `
@@ -2864,7 +2983,7 @@ async function heraldHud_renderDataStatsSkill() {
           </div>
       </div>
       `;
-    
+
       statsListSkillDiv.style.gridTemplateColumns = "repeat(4, 1fr)";
     }
     listSkills += `
@@ -2995,10 +3114,9 @@ async function heraldHud_getDataSpellsPrep() {
           }
         } else {
           if (item.labels.damage) {
-         
             for (let damage of item.labels.derivedDamage) {
               let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
-  
+
               arrProperti.push(`${damage.formula} ${damageIcon}`);
             }
           }
@@ -3126,11 +3244,24 @@ async function heraldHud_getDataSpellsPrep() {
 async function heraldHud_openSettingHudDialog() {
   let dialogContent = `
     <div style="display: flex; flex-direction: column; gap: 10px;">
+
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <input type="checkbox" id="heraldHud-statsAbbreviationsToggle" ${
+          heraldHud_statsAbbreviations ? "checked" : ""
+        }>
+        <label for="heraldHud-statsAbbreviationsToggle">Abbreviations Skill</label>
+      </div>
       <div style="display: flex; align-items: center; gap: 10px;">
         <input type="checkbox" id="heraldHud-spellsTrackerToggle" ${
           heraldHud_spellsTrackerOff ? "checked" : ""
         }>
         <label for="heraldHud-spellsTrackerToggle">Disable Spell Slot Tracker Box</label>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <input type="checkbox" id="heraldHud-displayChargeTrackerToggle" ${
+          heraldHud_displayChargeTracker ? "checked" : ""
+        }>
+        <label for="heraldHud-displayChargeTrackerToggle">Display Charge Tracker</label>
       </div>
       
       <div style="display: flex; align-items: center; gap: 10px;">
@@ -3138,13 +3269,6 @@ async function heraldHud_openSettingHudDialog() {
           heraldHud_dockHudToBottom ? "checked" : ""
         }>
         <label for="heraldHud-dockHudToggle">Dock Herald's HUD to Bottom</label>
-      </div>
-
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <input type="checkbox" id="heraldHud-statsAbbreviationsToggle" ${
-          heraldHud_statsAbbreviations ? "checked" : ""
-        }>
-        <label for="heraldHud-statsAbbreviationsToggle">Abbreviations Skill</label>
       </div>
     </div>
   `;
@@ -3156,15 +3280,24 @@ async function heraldHud_openSettingHudDialog() {
       save: {
         label: "Save",
         callback: (html) => {
-          let spellTrackerCheckbox = html.find("#heraldHud-spellsTrackerToggle")[0];
+          let spellTrackerCheckbox = html.find(
+            "#heraldHud-spellsTrackerToggle"
+          )[0];
           let dockHudCheckbox = html.find("#heraldHud-dockHudToggle")[0];
-          let statsAbbreviationsCheckbox = html.find("#heraldHud-statsAbbreviationsToggle")[0];
+          let statsAbbreviationsCheckbox = html.find(
+            "#heraldHud-statsAbbreviationsToggle"
+          )[0];
+          let displayChargeTrackerCheckbox = html.find(
+            "#heraldHud-displayChargeTrackerToggle"
+          )[0];
 
           heraldHud_spellsTrackerOff = spellTrackerCheckbox.checked;
           heraldHud_dockHudToBottom = dockHudCheckbox.checked;
           heraldHud_statsAbbreviations = statsAbbreviationsCheckbox.checked;
+          heraldHud_displayChargeTracker = displayChargeTrackerCheckbox.checked;
 
           heraldHud_settingHudToBottom();
+          heraldHud_renderChargeTracker();
         },
       },
       cancel: {
@@ -3177,7 +3310,6 @@ async function heraldHud_openSettingHudDialog() {
     default: "save",
   }).render(true);
 }
-
 
 async function heraldHud_settingHudToBottom() {
   let heraldHud = document.getElementById("heraldHud");
@@ -3204,6 +3336,69 @@ async function heraldHud_settingHudToBottom() {
     if (dialog2) {
       dialog2.style.bottom = `14%`;
     }
+  }
+}
+async function heraldHud_renderChargeTracker() {
+  if (heraldHud_displayChargeTracker == false) {
+    return;
+  }
+  let actor = heraldHud_actorSelected;
+  let favoritesActor = actor.system?.favorites;
+  let chargeTrackerDiv = document.getElementById(
+    "heraldHud-chargeTrackerContainer"
+  );
+  let chargeItems = actor.items.filter((item) =>
+    heraldHud_listChargeTracker.some((trackerName) => trackerName === item.name)
+  );
+  let favoriteItems = chargeItems.filter((item) =>
+    favoritesActor.some((fav) => fav.id.includes(item.id))
+  );
+  let nonFavoriteItems = chargeItems.filter(
+    (item) => !favoriteItems.includes(item)
+  );
+  let selectedItems = [...favoriteItems, ...nonFavoriteItems].slice(0, 6);
+  let listChargeItem = ``;
+  chargeTrackerDiv.innerHTML = "";
+  selectedItems.forEach((item, index) => {
+    let imgSrc = item.img || "/icons/svg/mystery-man.svg";
+    let charges = item.system.uses?.value ?? 0;
+    let maxCharges = item.system.uses?.max ?? 0;
+    let isFavorite = favoriteItems.some((fav) => fav.id === item.id);
+    listChargeItem += `
+       <div class="heraldHud-chargeItem" data-item-id="${item.id}" title="${
+      item.name
+    }">
+        <img src="${imgSrc}" class="heraldHud-chargeImage" alt="${item.name}">
+        <div class="heraldHud-chargeText">${charges}/${maxCharges}</div>
+        <div class="heraldHud-chargeTrackerTooltip">${item.name}</div>
+         ${
+           isFavorite
+             ? '<div class="heraldHud-chargeFavoriteIcon"><i class="fa-solid fa-sparkle"></i></div>'
+             : ""
+         }
+      </div>`;
+  });
+
+  if (chargeTrackerDiv) {
+    chargeTrackerDiv.innerHTML = listChargeItem;
+
+    document
+      .querySelectorAll(".heraldHud-chargeItem")
+      .forEach((itemElement) => {
+        itemElement.addEventListener("click", async () => {
+          let itemId = itemElement.getAttribute("data-item-id");
+
+          let item =
+            actor.items.get(itemId) ||
+            actor.getEmbeddedDocument("Item", itemId);
+
+          if (item) {
+            await item.use();
+            let chargeText = itemElement.querySelector(".heraldHud-chargeText");
+            chargeText.textContent = `${item.system.uses.value}/${item.system.uses.max}`;
+          }
+        });
+      });
   }
 }
 
