@@ -19,8 +19,8 @@
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    gap: 10px;
-   
+    gap: 5px;
+
     z-index: 15;
     width: 800px;
 }
@@ -33,7 +33,7 @@
     max-width: calc(10 * (25px + 5px));
     flex-wrap: wrap-reverse;
     align-self: flex-end;
-  
+
 }
 
 .heraldHud-effectContainer {
@@ -132,11 +132,11 @@
     width: 35px;
     height: 35px;
     align-items: center;
-    border: 2px dashed green;
+    border: 2px dashed rgb(49, 49, 49);
     text-align: center;
     display: flex;
     justify-content: center;
-    color: green;
+    color: rgb(49, 49, 49);
     font-size: 20px;
     border-radius: 50%;
     -webkit-border-radius: 50%;
@@ -151,13 +151,14 @@
     align-items: center;
     justify-content: center;
 }
+
 .heraldHud-chargeTrackerContainer {
     position: absolute;
     left: -60%;
     top: 58%;
     transform: translateY(-50%);
-    width: 80px; 
-    height: 160px; 
+    width: 80px;
+    height: 160px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -204,12 +205,41 @@
     text-shadow: 1px 1px 2px black;
 }
 
-.heraldHud-chargeItem:nth-child(1) { top: 80%; right: 20%; transform: translateX(-50%); }
-.heraldHud-chargeItem:nth-child(2) { top: 65%; right: 50%; transform: translateX(-50%); }
-.heraldHud-chargeItem:nth-child(3) { top: 45%; right: 65%; transform: translateX(-50%); }
-.heraldHud-chargeItem:nth-child(4) { top: 25%; right: 65%; transform: translateX(-50%); }
-.heraldHud-chargeItem:nth-child(5) { top: 5%; right: 50%; transform: translateX(-50%); }
-.heraldHud-chargeItem:nth-child(6) { top: -10%; right: 20%; transform: translateX(-50%); }
+.heraldHud-chargeItem:nth-child(1) {
+    top: 80%;
+    right: 20%;
+    transform: translateX(-50%);
+}
+
+.heraldHud-chargeItem:nth-child(2) {
+    top: 65%;
+    right: 50%;
+    transform: translateX(-50%);
+}
+
+.heraldHud-chargeItem:nth-child(3) {
+    top: 45%;
+    right: 65%;
+    transform: translateX(-50%);
+}
+
+.heraldHud-chargeItem:nth-child(4) {
+    top: 25%;
+    right: 65%;
+    transform: translateX(-50%);
+}
+
+.heraldHud-chargeItem:nth-child(5) {
+    top: 5%;
+    right: 50%;
+    transform: translateX(-50%);
+}
+
+.heraldHud-chargeItem:nth-child(6) {
+    top: -10%;
+    right: 20%;
+    transform: translateX(-50%);
+}
 
 .heraldHud-chargeTrackerTooltip {
     position: absolute;
@@ -223,7 +253,8 @@
     white-space: nowrap;
     opacity: 0;
     transition: opacity 0.2s ease-in-out;
-    pointer-events: none; /* Supaya tidak mengganggu klik */
+    pointer-events: none;
+    /* Supaya tidak mengganggu klik */
     z-index: 19;
 }
 
@@ -1021,25 +1052,25 @@
     align-items: center;
     justify-content: center;
     width: 30px;
-    height: 30px; 
-    
+    height: 30px;
+
 }
 
 .heraldHud-preparedSpellsButton {
     width: 23px;
     height: 23px;
-    background: rgb(0, 0, 0); 
-    transform: rotate(45deg); 
+    background: rgb(0, 0, 0);
+    transform: rotate(45deg);
     display: flex;
     align-items: center;
     justify-content: center;
-    position: absolute; 
- 
+    position: absolute;
+
 }
 
 .heraldHud-preparedSpellsImage {
     border: none;
-    width: 35px; 
+    width: 35px;
     height: 35px;
     position: absolute;
 }
@@ -1205,15 +1236,10 @@
 
 /* Herald Hud Dialog */
 
-.heraldHud-dialogContainer {
-   
-  
-}
+.heraldHud-dialogContainer {}
 
 
-.heraldHud-dialogDiv {
-
-}
+.heraldHud-dialogDiv {}
 
 .heraldHud-dialog {
     position: fixed;
@@ -1831,11 +1857,13 @@
     overflow-x: hidden;
     scrollbar-width: thin;
 }
-.heraldHud-spellCategoryDiv{
+
+.heraldHud-spellCategoryDiv {
     display: flex;
     gap: 2px;
     flex-wrap: wrap;
 }
+
 .heraldHud-spellLevelTitle {}
 
 .heraldHud-spellsItem {
@@ -2247,17 +2275,21 @@
     scrollbar-width: thin;
 
 }
-.heraldHud-spellsPrepSearchContainer{
+
+.heraldHud-spellsPrepSearchContainer {
     padding: 5px;
 }
+
 .heraldHud-spellsPrepContainerDiv {
     font-size: 12px;
     color: white;
 }
-.heraldHud-spellsPrepTitle{
+
+.heraldHud-spellsPrepTitle {
     padding: 2px;
     padding-bottom: 5px;
 }
+
 .heraldHud-spellsPrepSearch {
     color: white !important;
 
@@ -2266,7 +2298,7 @@
 
 
 .heraldHud-spellsPrepSearch::placeholder {
-    color: rgba(255, 255, 255, 0.7); 
+    color: rgba(255, 255, 255, 0.7);
 }
 
 
@@ -2288,12 +2320,14 @@
     font-size: 10px;
     gap: 2px;
 }
-.heraldHud-spellsPrepUnderImage{
+
+.heraldHud-spellsPrepUnderImage {
     display: flex;
     gap: 2px;
     margin-top: 2px;
     align-items: center;
 }
+
 .heraldHud-spellsPrepButton {
     cursor: pointer;
     font-size: 13px;
@@ -2348,7 +2382,7 @@
 .heraldHud-spellsPrepMiddleTop {
     display: flex;
     gap: 2px;
-    width: 100%; 
+    width: 100%;
     flex-wrap: wrap;
 }
 
@@ -2362,14 +2396,15 @@
     justify-content: center;
 }
 
-.heraldHud-spellsPrepMiddleMid{
+.heraldHud-spellsPrepMiddleMid {
     display: flex;
     flex-wrap: wrap;
     gap: 2px;
     font-size: 10px;
     color: gray;
 }
-.heraldHud-spellsPrepMiddleBot{
+
+.heraldHud-spellsPrepMiddleBot {
     font-size: 10px;
     color: gray;
 }
@@ -2386,7 +2421,7 @@
     border-bottom: 1px solid #ccc;
 }
 
-.heraldHud-dialogNpcImageContainer{
+.heraldHud-dialogNpcImageContainer {
     position: relative;
     width: 50px;
     height: 50px;
@@ -2396,7 +2431,8 @@
     z-index: 8;
     cursor: pointer;
 }
-.heraldHud-dialogNpcImageView{
+
+.heraldHud-dialogNpcImageView {
     width: 99%;
     height: 99%;
     border: none;
@@ -2405,66 +2441,99 @@
     z-index: 8;
     border-radius: 50%;
 }
-.heraldHud-dialogNpcCr{
+
+.heraldHud-dialogNpcCr {
     font-size: 12px;
     color: gray;
 }
-.heraldHud-dialogNpcMiddle{
-    
+
+.heraldHud-dialogNpcMiddle {}
+
+.heraldHud-dialogNpcName {
+    font-weight: bold;
+    font-size: 16px;
 }
 
-.heraldHud-dialogNpcName{
-font-weight: bold;
-font-size: 16px;
-}
-
-.heraldHud-dialogNpcUuid{
+.heraldHud-dialogNpcUuid {
     font-size: 10px;
     color: gray;
 }
 
-.heraldHud-dialogNpcLinkActorData{
+.heraldHud-dialogNpcLinkActorData {
     font-size: 10px;
 }
 
-.heraldHud-dialogNpcHp{
+.heraldHud-dialogNpcHp {
     font-size: 12px;
 }
 
 
 
 
-  .heraldHud-dialogNpcRight {
+.heraldHud-dialogNpcRight {
     margin-left: auto;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.heraldHud-listNpcContainer{
+.heraldHud-listNpcContainer {}
+
+.heraldHud-listNpcItem {
     display: flex;
     justify-content: flex-start;
     align-items: center;
     gap: 25px;
     height: 100%;
-    margin-top: -30px;
+    margin-top: -50px;
+    padding-right: 20px;
 }
 
-.heraldHud-npcContainer{
+.heraldHud-npcContainer {
     margin-top: auto;
 }
 
-.heraldHud-npcViewMiddle{
+.heraldHud-npcActionContainer {
+    display: none;
+}
+
+.heraldHud-npcActionButtonContainer {
+    position: absolute;
+    display: flex;
+    gap: 3px;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 3px;
+    border-radius: 5px;
+    z-index: 100;
+    top: -70%;
+}
+
+.heraldHud-npcActionButton {
+    background: #444;
+    color: white;
+    border: none;
+    padding: 2px 5px;
+    cursor: pointer;
+    font-size: 9px;
+}
+
+
+.heraldHud-npcViewMiddle {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
+.heraldHud-npcBarContainer {
+    display: flex;
+    align-items: center;
+}
+
 .heraldHud-npcHpBarContainer {
     position: absolute;
     top: 10px;
-    left: 70%;
+    left: 97%;
     transform: translateX(-50%);
     z-index: 6;
     -webkit-transform: translateX(-50%);
@@ -2499,9 +2568,40 @@ font-size: 16px;
 }
 
 
+.heraldHud-npcTempHpBarContainerLeft {
+    position: absolute;
+    top: 7px;
+    left: 95%;
+    transform: translateX(-50%);
+    z-index: 14;
+    -webkit-transform: translateX(-50%);
+    -moz-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    -o-transform: translateX(-50%);
+}
 
+.heraldHud-npcTempHpBarSvg {
+    transform: rotate(115deg);
+    -webkit-transform: rotate(115deg);
+    -moz-transform: rotate(115deg);
+    -ms-transform: rotate(115deg);
+    -o-transform: rotate(115deg);
+}
 
-.heraldHud-npcImageContainer{
+.heraldHud-npcTempHpLeft {
+    fill: none;
+    stroke-width: 3;
+    pointer-events: none;
+    z-index: 6;
+    stroke: rgb(70, 196, 255);
+    /* transition: stroke-dashoffset 0.5s ease; */
+}
+
+.heraldHud-npcMidContainerMiddle {
+    z-index: 15;
+}
+
+.heraldHud-npcImageContainer {
     position: relative;
     left: 50%;
     top: 15px;
@@ -2514,7 +2614,7 @@ font-size: 16px;
     cursor: pointer;
 }
 
-.heraldHud-npcImageView{
+.heraldHud-npcImageView {
     width: 99%;
     height: 99%;
     border: none;
@@ -2524,9 +2624,61 @@ font-size: 16px;
     border-radius: 50%;
 }
 
+.heraldHud-npcAcContainer {
+    position: absolute;
+    top: 25px;
+    right: -70%;
+    z-index: 14;
+}
+
+.heraldHud-npcAcIconWrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.heraldHud-npcAcIcon {
+    display: block;
+    width: 20px;
+    height: 20px;
+    border: none;
+}
+
+.heraldHud-npcAcValue {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 9px;
+    color: white;
+    text-shadow: 1px 1px 2px black;
+}
+
+.heraldHud-npcTempShieldContainer {
+    position: absolute;
+    top: 45px;
+    left: 85%;
+    z-index: 15;
+    width: 25px;
+}
+
+
+.heraldHud-npcTempShield {
+    width: 15px;
+    border: none;
+}
 
 
 
+.heraldHud-npcHpValueContainer {
+    position: absolute;
+    top: 70%;
+    color: white;
+    font-size: 10px;
+    margin-left: 15px;
+}
+.heraldHud-npcTempHpValue{
+    color: rgb(70, 196, 255);
+}
 
 
 

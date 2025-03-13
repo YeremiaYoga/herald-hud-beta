@@ -550,7 +550,7 @@ async function heraldHud_updateDataActor() {
     if (!tempHpBarLeftDiv && !tempHpBarRightDiv) {
       if (tempHpBarContainerDiv) {
         tempHpBarContainerDiv.innerHTML = `
-        <div class="heraldHud-tempHpBarLeft">
+            <div class="heraldHud-tempHpBarLeft">
               <svg
                 width="150"
                 height="150"
@@ -2398,6 +2398,7 @@ async function heraldHud_renderContainerSpells() {
       `;
     }
     await heraldHud_getDataSpellsSlot();
+  } else {
   }
 }
 
@@ -3448,46 +3449,184 @@ async function heraldHud_showDialogAddSummon() {
 async function heraldHud_renderViewListNpc() {
   let listNpcContainer = document.getElementById("heraldHud-listNpcContainer");
   if (heraldHud_npcPlayerSelected.length <= 0) {
+    listNpcContainer.innerHTML = ``;
     return;
   }
   let listNpcPlayer = ``;
   for (let id of heraldHud_npcPlayerSelected) {
     let npc = game.actors.get(id);
     let token = game.scenes.viewed.tokens.find((t) => t.actor?.id === id);
-    console.log(token.uuid);
     listNpcPlayer += `
        <div id="heraldHud-npcContainer" class="heraldHud-npcContainer">
           <div id="heraldHud-npcViewActor" class="heraldHud-npcViewActor">
-            <div id="heraldHud-npcViewTop" class="heraldHud-npcViewTop"></div>
+            <div id="heraldHud-npcViewTop" class="heraldHud-npcViewTop">
+              <div id="heraldHud-npcActionContainer-${id}" class="heraldHud-npcActionContainer">
+                <div class="heraldHud-npcActionButtonContainer">
+                    <div class="heraldHud-npcActionButton" data-id="${id}" data-type="actions">Actions</div>
+                    <div class="heraldHud-npcActionButton" data-id="${id}" data-type="stats">Stats</div>
+                </div>
+             
+              </div>
+            </div>
             <div id="heraldHud-npcViewMiddle" class="heraldHud-npcViewMiddle">
               <div id="heraldHud-npcMidContainerLeft" class="heraldHud-npcMidContainerLeft">
                 <div id="heraldHud-npcBarContainer" class="heraldHud-npcBarContainer">
                   <div id="heraldHud-npcHpBarContainer" class="heraldHud-npcHpBarContainer">
                      <svg width="50" height="50" viewBox="0 0 100 100" class="heraldHud-npcHpBarSvg">
-                      <circle cx="50" cy="50" r="45" id="heraldHud-npHpBarBackground"  class="heraldHud-npHpBarBackground" stroke-dasharray="300" stroke-dashoffset="200" />
-                      <circle cx="50" cy="50" r="45" id="heraldHud-npcHpBarValueBar"  class="heraldHud-npcHpBarValueBar" stroke-dasharray="300" stroke-dashoffset="200" />
+                      <circle cx="50" cy="50" r="45" id="heraldHud-npHpBarBackground-${id}"  class="heraldHud-npHpBarBackground" stroke-dasharray="300" stroke-dashoffset="200" />
+                      <circle cx="50" cy="50" r="45" id="heraldHud-npcHpBarValueBar-${id}"  class="heraldHud-npcHpBarValueBar" stroke-dasharray="300" stroke-dashoffset="200" />
                     </svg>
                   </div>
+                  <div id="heraldHud-npcTempHpBarContainer-${id}" class="heraldHud-npcTempHpBarContainer"></div>
                 </div>
               </div>
               <div id="heraldHud-npcMidContainerMiddle" class="heraldHud-npcMidContainerMiddle">
-                <div id="heraldHud-npcImageContainer" class="heraldHud-npcImageContainer">
+                <div id="heraldHud-npcImageContainer" class="heraldHud-npcImageContainer" data-id="${id}">
                    <img src="${npc.img}" alt="npc" class="heraldHud-npcImageView">
                 </div>
+                <div id="heraldHud-npcAcContainer" class="heraldHud-npcAcContainer">
+                  <div class="heraldHud-npcAcIconWrapper">
+                      <img
+                        src="/modules/herald-hud-beta/assets/ac_icon.webp"
+                        alt="Armor Class"
+                        class="heraldHud-npcAcIcon"
+                      />
+                      <div id="heraldHud-npcAcValue-${id}" class="heraldHud-npcAcValue"></div>
+                     
+                  </div>
+                </div>
+                 <div id="heraldHud-npcTempShieldContainer-${id}" class="heraldHud-npcTempShieldContainer"></div>
               </div>
               <div id="heraldHud-npcMidContainerRight" class="heraldHud-npcMidContainerRight"></div>
             </div>
-            <div id="heraldHud-npcViewBottom" class="heraldHud-npcViewBottom"></div>
+            <div id="heraldHud-npcViewBottom" class="heraldHud-npcViewBottom">
+               <div id="heraldHud-npcHpValueContainer" class="heraldHud-npcHpValueContainer">
+                  <div id="heraldHud-npcHpValue-${id}" class="heraldHud-npcHpValue" ></div>
+                  <div id="heraldHud-npcTempHpValue-${id}" class="heraldHud-npcTempHpValue" ></div>
+               </div>
+            </div>
           </div>
        </div>
     `;
   }
-  if(listNpcContainer){
-    listNpcContainer.innerHTML =listNpcPlayer;
+  if (listNpcContainer) {
+    listNpcContainer.innerHTML = `
+    <div class="heraldHud-listNpcItem">
+      ${listNpcPlayer}
+    </div>`;
+
+    document
+      .querySelectorAll(".heraldHud-npcImageContainer")
+      .forEach((imgContainer) => {
+        imgContainer.addEventListener("contextmenu", (event) => {
+          event.preventDefault();
+          let npcId = imgContainer.getAttribute("data-id");
+          let actionButtonContainer = document.getElementById(
+            `heraldHud-npcActionContainer-${npcId}`
+          );
+          if (
+            actionButtonContainer &&
+            actionButtonContainer.style.display === "block"
+          ) {
+            actionButtonContainer.style.display = "none";
+          } else {
+            document
+              .querySelectorAll(".heraldHud-npcActionContainer")
+              .forEach((el) => {
+                el.style.display = "none";
+              });
+
+            if (actionButtonContainer) {
+              actionButtonContainer.style.display = "block";
+            }
+          }
+        });
+      });
+
+    await heraldHud_getDataListNpc();
   }
 }
 
-async function heraldHud_getDataListNpc() {}
+async function heraldHud_getDataListNpc() {
+  if (heraldHud_npcPlayerSelected.length <= 0) {
+    return;
+  }
+  for (let id of heraldHud_npcPlayerSelected) {
+    let npc = game.actors.get(id);
+    let token = game.scenes.viewed.tokens.find((t) => t.actor?.id === id);
+    const hp = npc.system.attributes.hp.value;
+    const maxHp = npc.system.attributes.hp.max;
+    let tempHp = npc.system.attributes.hp.temp || 0;
+
+    const tempmaxhp = npc.system.attributes.hp.tempmax || 0;
+
+    const totalMaxHp = maxHp + tempmaxhp;
+    const hpPercent = (hp / totalMaxHp) * 100;
+    const tempPercent = (tempHp / totalMaxHp) * 100;
+    let acValue = npc.system.attributes.ac.value;
+    console.log(hp);
+    console.log(totalMaxHp);
+    let hpBarValueDiv = document.getElementById(
+      `heraldHud-npcHpBarValueBar-${id}`
+    );
+    if (hpBarValueDiv) {
+      if (hp >= 0) {
+        let strokeValue = 310 - hpPercent * 1.1;
+        hpBarValueDiv.style.strokeDashoffset = Math.max(strokeValue, 200);
+      }
+    }
+
+    let hpValueDiv = document.getElementById(`heraldHud-npcHpValue-${id}`);
+    if (hpValueDiv) {
+      hpValueDiv.innerText = `${hp}/${totalMaxHp}`;
+    }
+
+    let acValueDiv = document.getElementById(`heraldHud-npcAcValue-${id}`);
+    if (acValueDiv) {
+      acValueDiv.innerText = acValue;
+    }
+
+    if (tempHp > 0) {
+      let tempShieldDiv = document.getElementById(
+        `heraldHud-npcTempShieldContainer-${id}`
+      );
+      if (tempShieldDiv) {
+        tempShieldDiv.innerHTML = `<img src="/modules/herald-hud-beta/assets/tempshield_icon.png" alt="shield" class="heraldHud-npcTempShield" />`;
+      }
+
+      let npcTempHpBarContinerDiv = document.getElementById(
+        `heraldHud-npcTempHpBarContainer-${id}`
+      );
+
+      if(npcTempHpBarContinerDiv){
+        npcTempHpBarContinerDiv.innerHTML = `
+            <div class="heraldHud-npcTempHpBarContainerLeft">
+              <svg
+                width="56"
+                height="56"
+                viewBox="0 0 100 100"
+                class="heraldHud-npcTempHpBarSvg"
+              >
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="45"
+                  id="heraldHud-npcTempHpLeft"
+                  class="heraldHud-npcTempHpLeft"
+                  stroke-dasharray="300"
+                  stroke-dashoffset="200"
+                />
+              </svg>
+            </div>
+        `;
+      }
+      let tempHpValueDiv = document.getElementById(`heraldHud-npcTempHpValue-${id}`);
+      if (tempHpValueDiv) {
+        tempHpValueDiv.innerText = `+${tempHp}`;
+      }
+    }
+  }
+}
 
 Hooks.on("updateActor", async (actor, data) => {
   await heraldHud_updateDataActor();
@@ -3495,6 +3634,7 @@ Hooks.on("updateActor", async (actor, data) => {
   await heraldHud_updateItemFavoriteActor();
   await heraldHud_updateItemCosumablesActor();
   await heraldHud_getDataSpellsSlot();
+  await heraldHud_getDataListNpc();
   console.log("test update actor");
 });
 
