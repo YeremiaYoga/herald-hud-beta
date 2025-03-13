@@ -18,19 +18,22 @@
     left: 90%;
     display: flex;
     justify-content: flex-start;
+    align-items: center;
     gap: 10px;
-    width: 400px;
+   
     z-index: 15;
+    width: 800px;
 }
 
 .heraldHud-listEffectContainer {
     position: relative;
     display: flex;
-    flex-wrap: wrap;
     justify-content: flex-start;
     gap: 5px;
     max-width: calc(10 * (25px + 5px));
     flex-wrap: wrap-reverse;
+    align-self: flex-end;
+  
 }
 
 .heraldHud-effectContainer {
@@ -181,7 +184,7 @@
     border-radius: 50%;
 }
 
-.heraldHud-chargeText {
+.heraldHud-chargeValue {
     position: absolute;
     bottom: 0;
     font-size: 8px;
@@ -958,9 +961,9 @@
 
 .heraldHud-settingHudContainer {
     position: absolute;
-    left: -16%;
+    left: -8%;
     z-index: 16;
-    bottom: 40%;
+    bottom: 30%;
     cursor: pointer;
 }
 
@@ -2374,11 +2377,13 @@
 
 /* NPC */
 
-.heraldHud-dialogNpcContainer{
+.heraldHud-dialogNpcContainer {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 10px;
     padding: 5px;
+    justify-content: space-between;
+    border-bottom: 1px solid #ccc;
 }
 
 .heraldHud-dialogNpcImageContainer{
@@ -2427,10 +2432,110 @@ font-size: 16px;
 }
 
 
-.heraldHud-dialogNpcRight {
+
+
+  .heraldHud-dialogNpcRight {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.heraldHud-listNpcContainer{
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 25px;
+    height: 100%;
+    margin-top: -30px;
+}
+
+.heraldHud-npcContainer{
+    margin-top: auto;
+}
+
+.heraldHud-npcViewMiddle{
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.heraldHud-npcHpBarContainer {
     position: absolute;
-    right: 10px;
-  }
+    top: 10px;
+    left: 70%;
+    transform: translateX(-50%);
+    z-index: 6;
+    -webkit-transform: translateX(-50%);
+    -moz-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    -o-transform: translateX(-50%);
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
+.heraldHud-npcHpBarSvg {
+    transform: rotate(115deg);
+    z-index: 6;
+    -webkit-transform: rotate(115deg);
+    -moz-transform: rotate(115deg);
+    -ms-transform: rotate(115deg);
+    -o-transform: rotate(115deg);
+}
+
+.heraldHud-npHpBarBackground {
+    fill: none;
+    stroke: rgb(46, 46, 46);
+    stroke-width: 10;
+
+}
+
+.heraldHud-npcHpBarValueBar {
+    fill: none;
+    stroke: #389454;
+    stroke-width: 10;
+}
+
+
+
+
+.heraldHud-npcImageContainer{
+    position: relative;
+    left: 50%;
+    top: 15px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #363636;
+    border: 2px solid #d4af37;
+    z-index: 8;
+    cursor: pointer;
+}
+
+.heraldHud-npcImageView{
+    width: 99%;
+    height: 99%;
+    border: none;
+    object-fit: cover;
+    object-position: center;
+    z-index: 8;
+    border-radius: 50%;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /* damage icon */

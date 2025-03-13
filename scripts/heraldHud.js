@@ -1,9 +1,11 @@
 let heraldHud_actorSelected = null;
+let heraldHud_npcPlayerSelected = [];
 let heraldHud_checkerValue = null;
 let heraldHud_spellsTrackerOff = false;
 let heraldHud_dockHudToBottom = false;
 let heraldHud_statsAbbreviations = false;
 let heraldHud_displayChargeTracker = false;
+
 let heraldHud_gameVersion = ``;
 let hp0 = "#8B0000";
 let hp25 = "#bc3c04";
@@ -309,79 +311,6 @@ async function heraldHud_renderActorData() {
       await heraldHud_showDialogAddSummon();
     });
   }
-}
-
-async function heraldHud_showDialogAddSummon() {
-  let sceneListActor = game.scenes.viewed.tokens
-  .filter((t) => t.actor.type === "npc")
-  .map((t) => t.actor);
-  const user = game.user;
-  let listDataNpcPlayer = [];
-  for (let actor of sceneListActor) {
-    if (actor.ownership[user.id]) {
-      if (actor.ownership[user.id] == 3) {
-        listDataNpcPlayer.push(actor);
-      }
-    }
-  }
-  let listNpcPlayer = ``;
-  for(let npc of listDataNpcPlayer){
-
-    let currentHp = npc.system.attributes.hp.value;  
-    let maxHp = npc.system.attributes.hp.max;       
-    let token = npc.getActiveTokens()[0];
-    let isLinked = token?.document.actorLink;
-    let linkActorDataDiv = ``;
-    if(isLinked){
-      linkActorDataDiv = `<div id="heraldHud-dialogNpcLinkActorData" class="heraldHud-dialogNpcLinkActorData" style="color:green;">Actor Data is Link</div>`;
-    }else{
-      linkActorDataDiv = `<div id="heraldHud-dialogNpcLinkActorData" class="heraldHud-dialogNpcLinkActorData" style="color:red;">Actor data is not link! (Check with Dungeon Master!)</div>`;
-    }
-
-    let npcCr = npc.system.details?.cr
-    console.log(isLinked);
-    listNpcPlayer+=`
-    <div id="heraldHud-dialogNpcContainer" class="heraldHud-dialogNpcContainer">
-        <div id="heraldHud-dialogNpcLeft" class="heraldHud-dialogNpcLeft">
-          <div class="heraldHud-dialogNpcImageContainer">
-            <img src="${npc.img}" alt="" class="heraldHud-dialogNpcImageView" />
-          </div>
-          <div class="heraldHud-dialogNpcCr">
-            CR ${npcCr}
-          </div>
-        </div>
-        <div id="heraldHud-dialogNpcMiddle" class="heraldHud-dialogNpcMiddle">
-          <div id="heraldHud-dialogNpcName" class="heraldHud-dialogNpcName">${npc.name}</div>
-          <div id="heraldHud-dialogNpcUuid" class="heraldHud-dialogNpcUuid">${npc.id}</div>
-          ${linkActorDataDiv}
-          <div id="heraldHud-dialogNpcHp" class="heraldHud-dialogNpcHp">HP: ${currentHp}/${maxHp}</div>
-        </div>
-         <div id="heraldHud-dialogNpcRight" class="heraldHud-dialogNpcRight">
-          <label>
-            <input type="checkbox" class="heraldHud-dialogNpcCheckbox" >
-          </label>
-        </div>
-    </div>`;
-  }
-
-
-  let dialogContent = `
-  <div id="heraldHud-dialogListNpcContainer" class="heraldHud_dialogListNpcContainer">
-    ${listNpcPlayer}
-  </div>`
-  new Dialog({
-    title: "Add Summon",
-    content: dialogContent,
-    buttons: {
-      save: {
-        label: "Save",
-      },
-      cancel: {
-        label: "Cancel",
-      },
-    },
-    default: "add",
-  }).render(true);
 }
 
 async function heraldHud_updateEndTurnButton() {
@@ -2381,6 +2310,13 @@ async function heraldHud_getDataFeatures() {
             if (featuresUsesDiv) {
               featuresUsesDiv.innerText = `| ${featureUses}`;
             }
+
+            let chargeValueDiv = document.getElementById(
+              `heraldHud-chargeValue-${item.id}`
+            );
+            if (chargeValueDiv) {
+              chargeValueDiv.textContent = `${item.system.uses.value}/${item.system.uses.max}`;
+            }
           }
         });
       });
@@ -3369,7 +3305,9 @@ async function heraldHud_renderChargeTracker() {
       item.name
     }">
         <img src="${imgSrc}" class="heraldHud-chargeImage" alt="${item.name}">
-        <div class="heraldHud-chargeText">${charges}/${maxCharges}</div>
+        <div id="heraldHud-chargeValue-${
+          item.id
+        }" class="heraldHud-chargeValue" >${charges}/${maxCharges}</div>
         <div class="heraldHud-chargeTrackerTooltip">${item.name}</div>
          ${
            isFavorite
@@ -3394,13 +3332,162 @@ async function heraldHud_renderChargeTracker() {
 
           if (item) {
             await item.use();
-            let chargeText = itemElement.querySelector(".heraldHud-chargeText");
+            let chargeText = itemElement.querySelector(
+              ".heraldHud-chargeValue"
+            );
             chargeText.textContent = `${item.system.uses.value}/${item.system.uses.max}`;
           }
         });
       });
   }
 }
+
+async function heraldHud_showDialogAddSummon() {
+  let sceneListActor = game.scenes.viewed.tokens
+    .filter((t) => t.actor.type === "npc")
+    .map((t) => t.actor);
+  const user = game.user;
+  let listDataNpcPlayer = [];
+  for (let actor of sceneListActor) {
+    if (actor.ownership[user.id]) {
+      if (actor.ownership[user.id] == 3) {
+        listDataNpcPlayer.push(actor);
+      }
+    }
+  }
+  let listNpcPlayer = ``;
+  for (let npc of listDataNpcPlayer) {
+    let currentHp = npc.system.attributes.hp.value;
+    let maxHp = npc.system.attributes.hp.max;
+    let token = npc.getActiveTokens()[0];
+    let isLinked = token?.document.actorLink;
+    let linkActorDataDiv = ``;
+    if (isLinked) {
+      linkActorDataDiv = `<div id="heraldHud-dialogNpcLinkActorData" class="heraldHud-dialogNpcLinkActorData" style="color:green;">Actor Data is Link</div>`;
+    } else {
+      linkActorDataDiv = `<div id="heraldHud-dialogNpcLinkActorData" class="heraldHud-dialogNpcLinkActorData" style="color:red;">Actor data is not link! (Check with Dungeon Master!)</div>`;
+    }
+    let npcCr = npc.system.details?.cr;
+
+    let isChecked = heraldHud_npcPlayerSelected.some(
+      (selected) => selected === npc.id
+    )
+      ? "checked"
+      : "";
+    console.log(npc.uuid);
+    listNpcPlayer += `
+    <div id="heraldHud-dialogNpcContainer" class="heraldHud-dialogNpcContainer">
+        <div id="heraldHud-dialogNpcLeft" class="heraldHud-dialogNpcLeft">
+          <div class="heraldHud-dialogNpcImageContainer">
+            <img src="${npc.img}" alt="" class="heraldHud-dialogNpcImageView" />
+          </div>
+          <div class="heraldHud-dialogNpcCr">
+            CR ${npcCr}
+          </div>
+        </div>
+        <div id="heraldHud-dialogNpcMiddle" class="heraldHud-dialogNpcMiddle">
+          <div id="heraldHud-dialogNpcName" class="heraldHud-dialogNpcName">${npc.name}</div>
+          <div id="heraldHud-dialogNpcUuid" class="heraldHud-dialogNpcUuid">${npc.id}</div>
+          ${linkActorDataDiv}
+          <div id="heraldHud-dialogNpcHp" class="heraldHud-dialogNpcHp">HP: ${currentHp}/${maxHp}</div>
+        </div>
+         <div id="heraldHud-dialogNpcRight" class="heraldHud-dialogNpcRight">
+          <label>
+            <input type="checkbox" class="heraldHud-dialogNpcCheckbox" value="${npc.id}" ${isChecked}>
+          </label>
+        </div>
+    </div>`;
+  }
+
+  let dialogContent = `
+  <div id="heraldHud-dialogListNpcContainer" class="heraldHud-dialogListNpcContainer">
+  <div id="heraldHud-dialogListNpcTop" class="heraldHud-dialogListNpcTop"></div>
+  <div id="heraldHud-dialogListNpcMiddle" class="heraldHud-dialogListNpcMiddle">
+      ${listNpcPlayer}
+  </div>
+  <div id="heraldHud-dialogListNpcBottom" class="heraldHud-dialogListNpcBottom"></div>
+    
+  </div>`;
+  new Dialog({
+    title: "Add Summon",
+    content: dialogContent,
+    buttons: {
+      save: {
+        label: "Save",
+        callback: async (html) => {
+          heraldHud_npcPlayerSelected = [];
+          html.find(".heraldHud-dialogNpcCheckbox:checked").each(function () {
+            let npcId = this.value;
+            heraldHud_npcPlayerSelected.push(npcId);
+          });
+          await heraldHud_renderViewListNpc();
+        },
+      },
+      cancel: {
+        label: "Cancel",
+      },
+    },
+    default: "add",
+  }).render(true);
+  Hooks.once("renderDialog", (app) => {
+    if (app instanceof Dialog && app.title === "Add Summon") {
+      const width = 500;
+      const height = 500;
+
+      app.setPosition({
+        left: (window.innerWidth - width) / 2,
+        top: (window.innerHeight - height) / 2,
+        width: width,
+        height: height,
+        scale: 1.0,
+      });
+    }
+  });
+}
+
+async function heraldHud_renderViewListNpc() {
+  let listNpcContainer = document.getElementById("heraldHud-listNpcContainer");
+  if (heraldHud_npcPlayerSelected.length <= 0) {
+    return;
+  }
+  let listNpcPlayer = ``;
+  for (let id of heraldHud_npcPlayerSelected) {
+    let npc = game.actors.get(id);
+    let token = game.scenes.viewed.tokens.find((t) => t.actor?.id === id);
+    console.log(token.uuid);
+    listNpcPlayer += `
+       <div id="heraldHud-npcContainer" class="heraldHud-npcContainer">
+          <div id="heraldHud-npcViewActor" class="heraldHud-npcViewActor">
+            <div id="heraldHud-npcViewTop" class="heraldHud-npcViewTop"></div>
+            <div id="heraldHud-npcViewMiddle" class="heraldHud-npcViewMiddle">
+              <div id="heraldHud-npcMidContainerLeft" class="heraldHud-npcMidContainerLeft">
+                <div id="heraldHud-npcBarContainer" class="heraldHud-npcBarContainer">
+                  <div id="heraldHud-npcHpBarContainer" class="heraldHud-npcHpBarContainer">
+                     <svg width="50" height="50" viewBox="0 0 100 100" class="heraldHud-npcHpBarSvg">
+                      <circle cx="50" cy="50" r="45" id="heraldHud-npHpBarBackground"  class="heraldHud-npHpBarBackground" stroke-dasharray="300" stroke-dashoffset="200" />
+                      <circle cx="50" cy="50" r="45" id="heraldHud-npcHpBarValueBar"  class="heraldHud-npcHpBarValueBar" stroke-dasharray="300" stroke-dashoffset="200" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div id="heraldHud-npcMidContainerMiddle" class="heraldHud-npcMidContainerMiddle">
+                <div id="heraldHud-npcImageContainer" class="heraldHud-npcImageContainer">
+                   <img src="${npc.img}" alt="npc" class="heraldHud-npcImageView">
+                </div>
+              </div>
+              <div id="heraldHud-npcMidContainerRight" class="heraldHud-npcMidContainerRight"></div>
+            </div>
+            <div id="heraldHud-npcViewBottom" class="heraldHud-npcViewBottom"></div>
+          </div>
+       </div>
+    `;
+  }
+  if(listNpcContainer){
+    listNpcContainer.innerHTML =listNpcPlayer;
+  }
+}
+
+async function heraldHud_getDataListNpc() {}
 
 Hooks.on("updateActor", async (actor, data) => {
   await heraldHud_updateDataActor();
