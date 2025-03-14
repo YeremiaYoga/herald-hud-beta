@@ -643,16 +643,12 @@ async function heraldHud_updateDataActor() {
     "heraldHud-initiativeContainer"
   );
   let initiativeValueDiv = document.getElementById("heraldHud-initiativeValue");
-  let isRolling = false; 
-
+  let rollTimeout;
   initiativeContainerDiv.addEventListener("click", async () => {
-    if (isRolling) return; 
-  
-    isRolling = true; 
-    await actor.rollInitiativeDialog(); 
-    
-    setTimeout(() => {
-      isRolling = false; 
+    clearTimeout(rollTimeout); 
+
+    rollTimeout = setTimeout(async () => {
+      await actor.rollInitiativeDialog(); 
     }, 1000); 
   });
 
