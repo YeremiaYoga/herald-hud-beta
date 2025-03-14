@@ -644,8 +644,7 @@ async function heraldHud_updateDataActor() {
   );
   let initiativeValueDiv = document.getElementById("heraldHud-initiativeValue");
   let rollTimeout;
-  initiativeContainerDiv.addEventListener("click", async (event) => {
-    event.preventDefault();
+  initiativeContainerDiv.addEventListener("click", async () => {
     clearTimeout(rollTimeout); 
     rollTimeout = setTimeout(async () => {
       await actor.rollInitiativeDialog(); 
