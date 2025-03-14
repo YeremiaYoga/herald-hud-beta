@@ -1296,7 +1296,7 @@
     height: 150px;
 }
 
-.heraldHud-dialog.stats {
+.heraldHud-dialog.status {
     left: 55%;
     width: 300px;
     height: 350px;
@@ -2682,11 +2682,236 @@
 
 
 
+.heraldHud-npcDialogContainer {}
+
+
+.heraldHud-npcDialogDiv {}
+
+.heraldHud-npcDialog {
+    position: fixed;
+    left: 46%;
+    bottom: 27%;
+    transform: translateX(-50%);
+    border: 3px solid gold;
+    border-radius: 10px;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 16;
+    padding: 10px;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+
+.heraldHud-npcDialog.actions {
+    width: 350px;
+    height: 250px;
+}
+
+.heraldHud-npcDialog.passive {
+    width: 350px;
+    height: 250px;
+}
+.heraldHud-npcDialog.stats {
+    width: 350px;
+    height: 250px;
+}
+/* NPC ACTIONS */
+.heraldHud-npcDialogActionsContainer {
+    width: 100%;
+    max-height: 100%;
+    color: white;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+}
+
+/* ACTION ITEM */
+.heraldHud-npcActionItem {
+    display: flex;
+    gap: 10px;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 12px;
+    z-index: 16;
+}
+
+.heraldHud-npcActionItem:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transition: background-color 0.2s ease-in-out;
+    border-radius: 5px;
+}
+.heraldHud-npcActionImageContainer {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+
+.heraldHud-npcActionImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+
+.heraldHud-npcActionCategory {
+    font-size: 10px;
+    color: rgb(200, 200, 200);
+    display: flex;
+    gap: 2px;
+}
+.heraldHud-npcActionProperti {
+    font-size: 10px;
+    color: rgb(200, 200, 200);
+}
+
+.heraldHud-npcActionRight {
+    display: flex;
+    margin-left: auto;
+    gap: 10px;
+}
+
+/* ACTION BONUS */
+
+
+/* ACTION REACTION */
+/* ACTION OTHER */
+
+/* NPC PASSIVE */
 
 
 
+/* NPC STATS */
+.heraldHud-npcDialogStatsContainer {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    color: white;
+    overflow-y: auto;
+    justify-content: center;
+}
+
+.heraldHud-npcStatsAbilitiesContainer{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.heraldHud-npcStatsAbilitiesTitle,
+.heraldHud-npcStatsSkillsTitle {
+    text-align: center;
+    padding: 5px;
+    color: goldenrod;
+}
 
 
+.heraldHud-npcStatsListAbilities {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    justify-content: center;
+    align-items: center;
+    align-self: center;
+}
+
+.heraldHud-npcAbilitiesItem {
+    border: 2px solid goldenrod;
+    border-radius: 5px;
+    width: 65px;
+    height: 65px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    text-align: center;
+    box-sizing: border-box;
+    overflow: hidden;
+
+
+}
+
+.heraldHud-npcAbilitiesItemTop {
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.heraldHud-npcAbilitiesName {
+    font-size: 12px;
+    padding: 2px;
+}
+
+.heraldHud-npcAbilitiesValue {
+    font-size: 9px;
+    color: rgb(175, 175, 175);
+}
+
+.heraldHud-npcAbilitiesItemMiddle {
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.heraldHud-npcAbilitiesItemBot {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+}
+
+.heraldHud-npcAbilitiesSaveButton {
+    font-size: 12px;
+    color: white;
+    width: 100%;
+    background-color: goldenrod;
+    text-align: center;
+    cursor: pointer;
+}
+
+.heraldHud-npcStatsListSkills {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    max-height: 200px;
+    padding-right: 5px;
+}
+
+.heraldHud-npcSkillItem {
+    padding: 2px;
+    border-radius: 5px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+}
+.heraldHud-npcSkillItemTop{
+    display: flex;
+    gap:3px;
+}
+
+.heraldHud-npcSkillItem:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+
+.heraldHud-npcSkillValueData {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-wrap: nowrap;
+    font-size: 10px;
+    color: #8f8f8f;
+    justify-content: center;
+}
 
 
 

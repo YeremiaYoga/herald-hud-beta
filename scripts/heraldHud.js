@@ -71,6 +71,8 @@ async function heraldHud_renderHeraldHud() {
     await heraldHud_resetDialog();
     await heraldHud_updateEndTurnButton();
     await heraldHud_renderChargeTracker();
+    await heraldHud_renderHtmlNpcDialog();
+    await heraldHud_resetNpcDialog();
   }, 1000);
 }
 
@@ -145,7 +147,7 @@ async function heraldHud_renderActorData() {
     { id: "inventory", text: "Inventory" },
     { id: "loot", text: "Loots" },
     { id: "features", text: "Features" },
-    { id: "stats", text: "Stats" },
+    { id: "status", text: "Stats" },
   ];
 
   const hasSpells = actor?.items.some((item) => item.type === "spell");
@@ -641,8 +643,17 @@ async function heraldHud_updateDataActor() {
     "heraldHud-initiativeContainer"
   );
   let initiativeValueDiv = document.getElementById("heraldHud-initiativeValue");
+  let isRolling = false; 
+
   initiativeContainerDiv.addEventListener("click", async () => {
-    actor.rollInitiativeDialog();
+    if (isRolling) return; 
+  
+    isRolling = true; 
+    await actor.rollInitiativeDialog(); 
+    
+    setTimeout(() => {
+      isRolling = false; 
+    }, 1000); 
   });
 
   let initiativeValue = actor.system.attributes.init.total;
@@ -1294,7 +1305,7 @@ async function heraldHud_showDialog(kategori) {
     await heraldHud_renderItemFeatures();
   } else if (kategori == "spells") {
     await heraldHud_renderContainerSpells();
-  } else if (kategori == "stats") {
+  } else if (kategori == "status") {
     await heraldHud_renderContainerStats();
   } else if (kategori == "spellsPrep") {
     await heraldHud_renderContainerSpellsPrep();
@@ -3375,7 +3386,7 @@ async function heraldHud_showDialogAddSummon() {
     )
       ? "checked"
       : "";
-    console.log(npc.uuid);
+
     listNpcPlayer += `
     <div id="heraldHud-dialogNpcContainer" class="heraldHud-dialogNpcContainer">
         <div id="heraldHud-dialogNpcLeft" class="heraldHud-dialogNpcLeft">
@@ -3463,6 +3474,7 @@ async function heraldHud_renderViewListNpc() {
               <div id="heraldHud-npcActionContainer-${id}" class="heraldHud-npcActionContainer">
                 <div class="heraldHud-npcActionButtonContainer">
                     <div class="heraldHud-npcActionButton" data-id="${id}" data-type="actions">Actions</div>
+                     <div class="heraldHud-npcActionButton" data-id="${id}" data-type="passive">Passive</div>
                     <div class="heraldHud-npcActionButton" data-id="${id}" data-type="stats">Stats</div>
                 </div>
              
@@ -3529,6 +3541,7 @@ async function heraldHud_renderViewListNpc() {
             actionButtonContainer.style.display === "block"
           ) {
             actionButtonContainer.style.display = "none";
+            heraldHud_resetNpcDialog();
           } else {
             document
               .querySelectorAll(".heraldHud-npcActionContainer")
@@ -3539,7 +3552,26 @@ async function heraldHud_renderViewListNpc() {
             if (actionButtonContainer) {
               actionButtonContainer.style.display = "block";
             }
+            heraldHud_resetNpcDialog();
           }
+        });
+      });
+
+    document
+      .querySelectorAll(".heraldHud-npcActionButton")
+      .forEach((button) => {
+        button.addEventListener("click", (event) => {
+          let npcId = button.getAttribute("data-id");
+          let actionType = button.getAttribute("data-type");
+
+          heraldHud_showNpcDialog(npcId, actionType);
+
+          // let rect = button.getBoundingClientRect();
+          // let dialog = document.getElementById("heraldHud-npcDialog");
+          // console.log(rect);
+          // if (dialog) {
+          //   dialog.style.left = `${rect.left}px`;
+          // }
         });
       });
 
@@ -3564,21 +3596,30 @@ async function heraldHud_getDataListNpc() {
     const hpPercent = (hp / totalMaxHp) * 100;
     const tempPercent = (tempHp / totalMaxHp) * 100;
     let acValue = npc.system.attributes.ac.value;
-    console.log(hp);
-    console.log(totalMaxHp);
+
     let hpBarValueDiv = document.getElementById(
       `heraldHud-npcHpBarValueBar-${id}`
     );
     if (hpBarValueDiv) {
+      let hpValueDiv = document.getElementById(`heraldHud-npcHpValue-${id}`);
+      if (hpValueDiv) {
+        hpValueDiv.innerText = `${hp}/${totalMaxHp}`;
+      }
       if (hp >= 0) {
         let strokeValue = 310 - hpPercent * 1.1;
         hpBarValueDiv.style.strokeDashoffset = Math.max(strokeValue, 200);
+        if (hpPercent < 0) {
+          hpBarValueDiv.style.stroke = hp0;
+        } else if (hpPercent <= 25) {
+          hpBarValueDiv.style.stroke = hp25;
+        } else if (hpPercent <= 50) {
+          hpBarValueDiv.style.stroke = hp50;
+        } else if (hpPercent <= 75) {
+          hpBarValueDiv.style.stroke = hp75;
+        } else {
+          hpBarValueDiv.style.stroke = hp100;
+        }
       }
-    }
-
-    let hpValueDiv = document.getElementById(`heraldHud-npcHpValue-${id}`);
-    if (hpValueDiv) {
-      hpValueDiv.innerText = `${hp}/${totalMaxHp}`;
     }
 
     let acValueDiv = document.getElementById(`heraldHud-npcAcValue-${id}`);
@@ -3586,7 +3627,9 @@ async function heraldHud_getDataListNpc() {
       acValueDiv.innerText = acValue;
     }
 
-    if (tempHp > 0) {
+    if (tempHp > 0 || tempHp != "") {
+      let npcTempValueBar = 0;
+      npcTempValueBar = 300 - tempPercent;
       let tempShieldDiv = document.getElementById(
         `heraldHud-npcTempShieldContainer-${id}`
       );
@@ -3597,30 +3640,45 @@ async function heraldHud_getDataListNpc() {
       let npcTempHpBarContinerDiv = document.getElementById(
         `heraldHud-npcTempHpBarContainer-${id}`
       );
+      let npcTempHpBarContainerLeftDiv = document.getElementById(
+        `heraldHud-npcTempHpBarContainerLeft-${id}`
+      );
+      let npcTempHpLeftDiv = document.getElementById(
+        `heraldHud-npcTempHpLeft-${id}`
+      );
 
-      if(npcTempHpBarContinerDiv){
-        npcTempHpBarContinerDiv.innerHTML = `
-            <div class="heraldHud-npcTempHpBarContainerLeft">
-              <svg
-                width="56"
-                height="56"
-                viewBox="0 0 100 100"
-                class="heraldHud-npcTempHpBarSvg"
-              >
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="45"
-                  id="heraldHud-npcTempHpLeft"
-                  class="heraldHud-npcTempHpLeft"
-                  stroke-dasharray="300"
-                  stroke-dashoffset="200"
-                />
-              </svg>
-            </div>
-        `;
+      if (!npcTempHpBarContainerLeftDiv) {
+        if (npcTempHpBarContinerDiv) {
+          npcTempHpBarContinerDiv.innerHTML = `
+              <div id="heraldHud-npcTempHpBarContainerLeft-${id}" class="heraldHud-npcTempHpBarContainerLeft">
+                <svg
+                  width="56"
+                  height="56"
+                  viewBox="0 0 100 100"
+                  class="heraldHud-npcTempHpBarSvg"
+                >
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    id="heraldHud-npcTempHpLeft-${id}"
+                    class="heraldHud-npcTempHpLeft"
+                    stroke-dasharray="300"
+                    stroke-dashoffset="${npcTempValueBar}"
+                  />
+                </svg>
+              </div>
+          `;
+        }
+      } else {
+        if (npcTempHpLeftDiv) {
+          npcTempHpLeftDiv.style.strokeDashoffset = npcTempValueBar;
+        }
       }
-      let tempHpValueDiv = document.getElementById(`heraldHud-npcTempHpValue-${id}`);
+
+      let tempHpValueDiv = document.getElementById(
+        `heraldHud-npcTempHpValue-${id}`
+      );
       if (tempHpValueDiv) {
         tempHpValueDiv.innerText = `+${tempHp}`;
       }
@@ -3628,6 +3686,472 @@ async function heraldHud_getDataListNpc() {
   }
 }
 
+async function heraldHud_renderHtmlNpcDialog() {
+  try {
+    const response = await fetch(
+      "/modules/herald-hud-beta/templates/heraldHud-npcDialog.html"
+    );
+    const html = await response.text();
+
+    const div = document.createElement("div");
+    div.innerHTML = html;
+    const npcDialog = div.firstChild;
+    npcDialog.id = "heraldHud-npcDialogContainer";
+
+    document.body.appendChild(npcDialog);
+  } catch (err) {
+    console.error("Failed to load template heraldHud.html:", err);
+  }
+}
+let heraldHud_showNpcDialogValue = false;
+async function heraldHud_showNpcDialog(id, kategori) {
+  await heraldHud_resetDialog();
+  heraldHud_showDialogValue = false;
+
+  if (heraldHud_showDialogValue) {
+    await heraldHud_resetNpcDialog();
+    heraldHud_showNpcDialogValue = false;
+  } else {
+    await heraldHud_renderNpcDialog(kategori);
+    heraldHud_showNpcDialogValue = true;
+  }
+
+  if (kategori == "actions") {
+    await heraldHud_npcRenderViewActions(id);
+  } else if (kategori == "passive") {
+    await heraldHud_npcRenderViewPassive(id);
+  } else if (kategori == "stats") {
+    await heraldHud_npcRenderViewStats(id);
+  }
+}
+
+async function heraldHud_renderNpcDialog(kategori) {
+  let heraldHud_npcDialogDiv = document.getElementById("heraldHud-npcDialog");
+  if (heraldHud_npcDialogDiv) {
+    heraldHud_npcDialogDiv.style.display = "block";
+    heraldHud_npcDialogDiv.className = "heraldHud-npcDialog";
+    heraldHud_npcDialogDiv.classList.add(`${kategori}`);
+  }
+}
+
+async function heraldHud_resetNpcDialog() {
+  let heraldHud_npcDialogDiv = document.getElementById("heraldHud-npcDialog");
+  if (heraldHud_npcDialogDiv) {
+    heraldHud_npcDialogDiv.className = "heraldHud-npcDialog";
+    heraldHud_npcDialogDiv.style.display = "none";
+  }
+}
+
+async function heraldHud_npcRenderViewActions(id) {
+  let heraldHud_npcDialogDiv = document.getElementById("heraldHud-npcDialog");
+  if (heraldHud_npcDialogDiv) {
+    heraldHud_npcDialogDiv.innerHTML = `
+    <div id="heraldHud-npcDialogActionsContainer" class="heraldHud-npcDialogActionsContainer">
+        <div id="heraldHud-npcActionsContainer" class="heraldHud-npcActionsContainer">
+          <div id="heraldHud-npcActionsTitle" class="heraldHud-npcActionsTitle">Actions</div>
+          <hr style=" border: 1px solid grey; margin-top: 5px;">
+          <div id="heraldHud-npcActionsList" class="heraldHud-npcActionsList">
+        
+          </div>
+        </div>
+        <div id="heraldHud-npcBonusContainer" class="heraldHud-npcBonusContainer">
+          <div id="heraldHud-npcBonusTitle" class="heraldHud-npcBonusTitle">Bonus Actions</div>
+          <hr style=" border: 1px solid grey; margin-top: 5px;">
+          <div id="heraldHud-npcBonusList" class="heraldHud-npcBonusList">
+            -
+          </div>
+        </div>
+        <div id="heraldHud-npcReactionContainer" class="heraldHud-npcReactionContainer">
+          <div id="heraldHud-npcReactionTitle" class="heraldHud-npcReactionTitle">Reaction</div>
+          <hr style=" border: 1px solid grey; margin-top: 5px;">
+          <div id="heraldHud-npcReactionList" class="heraldHud-npcReactionList">
+            -
+          </div>
+        </div>
+        <div id="heraldHud-npcOtherContainer" class="heraldHud-npcOtherContainer">
+          <div id="heraldHud-npcOtherTitle" class="heraldHud-npcOtherTitle">Other Actions</div>
+          <hr style=" border: 1px solid grey; margin-top: 5px;">
+          <div id="heraldHud-npcOtherList" class="heraldHud-npcOtherList">
+            -
+          </div>
+        </div>
+    </div>`;
+  }
+  await heraldHud_npcGetDataActions(id);
+}
+async function heraldHud_npcGetDataActions(id) {
+  let actor = game.actors.get(id);
+  await heraldHud_renderNpcDataActions(id);
+  await heraldHud_renderNpcDataBonus(id);
+  await heraldHud_renderNpcDataReaction(id);
+  await heraldHud_renderNpcDataOther(id);
+
+  document
+    .querySelectorAll(".heraldHud-npcActionItem")
+    .forEach((actionItem) => {
+      actionItem.addEventListener("click", async function () {
+        let itemId = actionItem.getAttribute("data-item-id");
+
+        let item =
+          actor.items.get(itemId) || actor.getEmbeddedDocument("Item", itemId);
+        if (item) {
+          await item.use();
+        }
+      });
+    });
+}
+async function heraldHud_renderNpcDataActions(id) {
+  let actor = game.actors.get(id);
+  let actionsListDiv = document.getElementById("heraldHud-npcActionsList");
+  let actionItems = actor.items.filter(
+    (item) => item.system.activation?.type == "action"
+  );
+  let listActions = ``;
+
+  for (let item of actionItems) {
+    listActions += `
+         <div id="heraldHud-npcActionItemContainer" class="heraldHud-npcActionItemContainer">
+        <div id="heraldHud-npcActionItem" class="heraldHud-npcActionItem" data-item-id="${item.id}">
+            <div id="heraldHud-npcActionLeft" class="heraldHud-npcActionLeft">
+                <div class="heraldHud-npcActionImageContainer">
+                   <img src="${item.img}" alt="${item.name}" class="heraldHud-npcActionImage">
+                </div>
+            </div>
+            <div id="heraldHud-npcActionMiddle" class="heraldHud-npcActionMiddle">
+              <div id="heraldHud-npcActionName" class="heraldHud-npcActionName" >${item.name}</div>
+              <div id="heraldHud-npcActionCategory-${item.id}" class="heraldHud-npcActionCategory">
+                
+              </div>
+              <div id class="heraldHud-npcActionProperti"></div>
+            </div>
+            <div id="heraldHud-npcActionRight" class="heraldHud-npcActionRight">
+            </div>
+        </div>
+      </div>
+    `;
+  }
+
+  if (actionsListDiv) {
+    if (listActions) {
+      actionsListDiv.innerHTML = listActions;
+    } else {
+      actionsListDiv.innerHTML = `<div>-</div>`;
+    }
+  }
+}
+async function heraldHud_renderNpcDataBonus(id) {
+  let actor = game.actors.get(id);
+  let actionsListDiv = document.getElementById("heraldHud-npcBonusList");
+  let actionItems = actor.items.filter(
+    (item) => item.system.activation?.type == "bonus"
+  );
+  let listActions = ``;
+
+  for (let item of actionItems) {
+    listActions += `
+         <div id="heraldHud-npcActionItemContainer" class="heraldHud-npcActionItemContainer">
+        <div id="heraldHud-npcActionItem" class="heraldHud-npcActionItem" data-item-id="${item.id}">
+            <div id="heraldHud-npcActionLeft" class="heraldHud-npcActionLeft">
+                <div class="heraldHud-npcActionImageContainer">
+                   <img src="${item.img}" alt="${item.name}" class="heraldHud-npcActionImage">
+                </div>
+            </div>
+            <div id="heraldHud-npcActionMiddle" class="heraldHud-npcActionMiddle">
+              <div id="heraldHud-npcActionName" class="heraldHud-npcActionName" >${item.name}</div>
+              <div id="heraldHud-npcActionCategory-${item.id}" class="heraldHud-npcActionCategory">
+                
+              </div>
+              <div id class="heraldHud-npcActionProperti"></div>
+            </div>
+            <div id="heraldHud-npcActionRight" class="heraldHud-npcActionRight">
+            </div>
+        </div>
+      </div>
+    `;
+  }
+
+  if (actionsListDiv) {
+    if (listActions) {
+      actionsListDiv.innerHTML = listActions;
+    } else {
+      actionsListDiv.innerHTML = `<div>-</div>`;
+    }
+  }
+}
+
+async function heraldHud_renderNpcDataReaction(id) {
+  let actor = game.actors.get(id);
+  let actionsListDiv = document.getElementById("heraldHud-npcReactionList");
+  let actionItems = actor.items.filter(
+    (item) => item.system.activation?.type == "reaction"
+  );
+  let listActions = ``;
+
+  for (let item of actionItems) {
+    listActions += `
+         <div id="heraldHud-npcActionItemContainer" class="heraldHud-npcActionItemContainer">
+        <div id="heraldHud-npcActionItem" class="heraldHud-npcActionItem" data-item-id="${item.id}">
+            <div id="heraldHud-npcActionLeft" class="heraldHud-npcActionLeft">
+                <div class="heraldHud-npcActionImageContainer">
+                   <img src="${item.img}" alt="${item.name}" class="heraldHud-npcActionImage">
+                </div>
+            </div>
+            <div id="heraldHud-npcActionMiddle" class="heraldHud-npcActionMiddle">
+              <div id="heraldHud-npcActionName" class="heraldHud-npcActionName" >${item.name}</div>
+              <div id="heraldHud-npcActionCategory-${item.id}" class="heraldHud-npcActionCategory">
+                
+              </div>
+              <div id class="heraldHud-npcActionProperti"></div>
+            </div>
+            <div id="heraldHud-npcActionRight" class="heraldHud-npcActionRight">
+            </div>
+        </div>
+      </div>
+    `;
+  }
+
+  if (actionsListDiv) {
+    if (listActions) {
+      actionsListDiv.innerHTML = listActions;
+    } else {
+      actionsListDiv.innerHTML = `<div>-</div>`;
+    }
+  }
+}
+
+async function heraldHud_renderNpcDataOther(id) {
+  let actor = game.actors.get(id);
+  let actionsListDiv = document.getElementById("heraldHud-npcOtherList");
+  let otherActions = actor.items.filter(
+    (item) =>
+      !["action", "bonus", "reaction"].includes(item.system.activation?.type) &&
+      !(item.type === "feat" && item.labels.featType === "Passive")
+  );
+  
+
+  let listActions = ``;
+
+  for (let item of otherActions) {
+    listActions += `
+      <div id="heraldHud-npcActionItemContainer" class="heraldHud-npcActionItemContainer">
+        <div id="heraldHud-npcActionItem" class="heraldHud-npcActionItem" data-item-id="${item.id}">
+            <div id="heraldHud-npcActionLeft" class="heraldHud-npcActionLeft">
+                <div class="heraldHud-npcActionImageContainer">
+                   <img src="${item.img}" alt="${item.name}" class="heraldHud-npcActionImage">
+                </div>
+            </div>
+            <div id="heraldHud-npcActionMiddle" class="heraldHud-npcActionMiddle">
+              <div id="heraldHud-npcActionName" class="heraldHud-npcActionName" >${item.name}</div>
+              <div id="heraldHud-npcActionCategory-${item.id}" class="heraldHud-npcActionCategory">
+                
+              </div>
+              <div id class="heraldHud-npcActionProperti"></div>
+            </div>
+            <div id="heraldHud-npcActionRight" class="heraldHud-npcActionRight">
+            </div>
+        </div>
+      </div>
+    `;
+  }
+
+  if (actionsListDiv) {
+    if (listActions) {
+      actionsListDiv.innerHTML = listActions;
+    } else {
+      actionsListDiv.innerHTML = `<div>-</div>`;
+    }
+  }
+}
+
+async function heraldHud_npcRenderViewPassive() {}
+
+async function heraldHud_npcGetDataPassive() {}
+
+async function heraldHud_npcRenderViewStats(id) {
+  let heraldHud_npcDialogDiv = document.getElementById("heraldHud-npcDialog");
+  if (heraldHud_npcDialogDiv) {
+    heraldHud_npcDialogDiv.innerHTML = `
+    <div id="heraldHud-npcDialogStatsContainer" class="heraldHud-npcDialogStatsContainer">
+      <div>
+        <div id="heraldHud-npcStatsAbilitiesContainer" class="heraldHud-npcStatsAbilitiesContainer">
+          <div id="heraldHud-npcStatsAbilitiesTitle" class="heraldHud-npcStatsAbilitiesTitle">Abilities</div>
+          <div id="heraldHud-npcStatsListAbilities" class="heraldHud-npcStatsListAbilities">
+        
+          </div>
+        </div>
+        <div id="heraldHud-npcStatsSkillsContainer" class="heraldHud-npcStatsSkillsContainer">
+          <div id="heraldHud-npcStatsSkillsTitle" class="heraldHud-npcStatsSkillsTitle">Skills</div>
+          <div id="heraldHud-npcStatsListSkills" class="heraldHud-npcStatsListSkills">
+        
+          </div>
+        </div>
+      </div>
+      
+    </div>`;
+  }
+  await heraldHud_npcGetDataStats(id);
+}
+
+async function heraldHud_npcGetDataStats(id) {
+  let actor = game.actors.get(id);
+
+  let statsListAbilitiesDiv = document.getElementById(
+    "heraldHud-npcStatsListAbilities"
+  );
+
+  let abilitiesData = actor.system.abilities;
+
+  let listAbilities = ``;
+  for (let [key, abilityData] of Object.entries(abilitiesData)) {
+    let abilityMod =
+      abilityData.mod >= 0 ? `+${abilityData.mod}` : abilityData.mod;
+    listAbilities += `
+    <div id="heraldHud-npcAbilitiesContainer" class="heraldHud-npcAbilitiesContainer">
+      <div id="heraldHud-npcAbilitiesItem" class="heraldHud-npcAbilitiesItem" data-ability="${key}">
+        <div id="heraldHud-npcAbilitiesItemTop" class="heraldHud-npcAbilitiesItemTop">
+          <div id="heraldHud-npcAbilitiesName" class="heraldHud-npcAbilitiesName">  ${key.toUpperCase()}</div>
+          <div id="heraldHud-npcAbilitiesValue" class="heraldHud-npcAbilitiesValue">&#9654; ${
+            abilityData.value
+          }</div>
+        
+        </div>
+        <div id="heraldHud-npcAbilitiesItemMiddle" class="heraldHud-npcAbilitiesItemMiddle">
+          ${abilityMod}
+        </div>
+        <div id="heraldHud-npcAbilitiesItemBot" class="heraldHud-npcAbilitiesItemBot">
+          <div id="heraldHud-npcAbilitiesSaveButton" class="heraldHud-npcAbilitiesSaveButton">
+            Save
+          </div>
+        </div>
+      </div>
+    </div>
+    `;
+  }
+
+  if (statsListAbilitiesDiv) {
+    statsListAbilitiesDiv.innerHTML = listAbilities;
+
+    document
+      .querySelectorAll(
+        ".heraldHud-npcAbilitiesItemTop, .heraldHud-npcAbilitiesItemMiddle"
+      )
+      .forEach((element) => {
+        element.addEventListener("click", (event) => {
+          let ability = event.target
+            .closest(".heraldHud-npcAbilitiesItem")
+            .getAttribute("data-ability");
+          actor.rollAbilityTest(ability);
+        });
+      });
+
+    document
+      .querySelectorAll(".heraldHud-npcAbilitiesSaveButton")
+      .forEach((button) => {
+        button.addEventListener("click", (event) => {
+          let ability = event.target
+            .closest(".heraldHud-npcAbilitiesItem")
+            .getAttribute("data-ability");
+          actor.rollAbilitySave(ability);
+        });
+      });
+  }
+  await heraldHud_renderNpcDataStatsSkill(id);
+}
+
+async function heraldHud_renderNpcDataStatsSkill(id) {
+  let actor = game.actors.get(id);
+
+  let skillsData = actor.system.skills;
+  let listSkills = ``;
+  let statsListSkillDiv = document.getElementById(
+    "heraldHud-npcStatsListSkills"
+  );
+  const skillsNames = {
+    acr: "Acrobatics",
+    ani: "Animal Handling",
+    arc: "Arcana",
+    ath: "Athletics",
+    dec: "Deception",
+    his: "History",
+    ins: "Insight",
+    itm: "Intimidation",
+    inv: "Investigation",
+    med: "Medicine",
+    nat: "Nature",
+    prc: "Perception",
+    prf: "Performance",
+    per: "Persuasion",
+    rel: "Religion",
+    slt: "Sleight of Hand",
+    ste: "Stealth",
+    sur: "Survival",
+  };
+
+  for (let [key, skillData] of Object.entries(skillsData)) {
+    let nameSkill = skillsNames[key];
+    let skillTotal =
+      skillData.total >= 0 ? `+${skillData.total}` : skillData.total;
+    let proficientData = ``;
+    if (skillData.proficient == 1) {
+      proficientData = `<i class="fa-solid fa-circle" style="color:#8f8f8f;"></i>`;
+    } else {
+      proficientData = `<i class="fa-regular fa-circle"  style="color:#8f8f8f;"></i>`;
+    }
+
+    let skillDivTop = `
+    <div id="heraldHud-npcSkillItemTop" class="heraldHud-npcSkillItemTop">
+      <div id="heraldHud-npcSkillName" class="heraldHud-npcSkillName">${nameSkill}</div>
+        <div class="heraldHud-npcSkillValueData">
+          <div id="heraldHud-npcSkillValueTotal" class="heraldHud-npcSkillValueTotal">${skillTotal}</div>
+          <div id="heraldHud-npcSkillValuePassive" class="heraldHud-npcSkillValuePassive">(${skillData.passive})</div>
+          <div id="heraldHud-npcSkillValueProficient" class="heraldHud-npcSkillValueProficient">${proficientData}</div>
+        </div>
+    </div>
+    
+    `;
+
+    // if (heraldHud_statsAbbreviations) {
+    //   let skillNameFormatted = key.charAt(0).toUpperCase() + key.slice(1);
+
+    //   skillDivTop = `
+    //   <div id="heraldHud-npcSkillItemTop" class="heraldHud-npcSkillItemTop">
+    //     <div id="heraldHud-npcSkillName" class="heraldHud-npcSkillName">${skillNameFormatted}</div>
+    //       <div class="heraldHud-npcSkillValueData">
+    //         <div id="heraldHud-npcSkillValueTotal" class="heraldHud-npcSkillValueTotal">${skillTotal}</div>
+    //         <div id="heraldHud-npcSkillValuePassive" class="heraldHud-npcSkillValuePassive">(${skillData.passive})</div>
+    //         <div id="heraldHud-npcSkillValueProficient" class="heraldHud-npcSkillValueProficient">${proficientData}</div>
+    //       </div>
+    //   </div>
+    //   `;
+
+    //   statsListSkillDiv.style.gridTemplateColumns = "repeat(4, 1fr)";
+    // }
+    listSkills += `
+    <div id="heraldHud-npcSkillContainer" class="heraldHud-npcSkillContainer">
+      <div id="heraldHud-npcSkillItem" class="heraldHud-npcSkillItem" data-skill="${key}">
+        ${skillDivTop}
+        <div id="heraldHud-npcSkillItemMiddle" class="heraldHud-npcSkillItemMiddle">
+        </div>
+        <div id="heraldHud-npcSkillItemBot" class="heraldHud-npcSkillItemBot">
+        </div>
+      </div>
+    </div>
+    `;
+  }
+
+  if (statsListSkillDiv) {
+    statsListSkillDiv.innerHTML = listSkills;
+
+    document.querySelectorAll(".heraldHud-npcSkillItem").forEach((element) => {
+      element.addEventListener("click", (event) => {
+        let skillKey = element.getAttribute("data-skill");
+        if (!skillKey) return;
+
+        actor.rollSkill(skillKey);
+      });
+    });
+  }
+}
 Hooks.on("updateActor", async (actor, data) => {
   await heraldHud_updateDataActor();
   await heraldHud_updateMovementsActor();
