@@ -899,12 +899,12 @@
 .heraldHud-endturnShortcutContainer {
     position: absolute;
     left: 95%;
-    top: -10%;
+    top: -40%;
 }
 
 .heraldHud-endturnButton {
-    width: 32px;
-    height: 32px;
+    width: 35px;
+    height: 35px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -1175,7 +1175,7 @@
     -o-border-radius: 5px;
 }
 
-.heraldHud-initiativeContainer {
+.heraldHud-shortcutButtonContainer {
     position: absolute;
     bottom: 70%;
     right: -4%;
@@ -2501,21 +2501,73 @@
     position: absolute;
     display: flex;
     gap: 3px;
-    background: rgba(0, 0, 0, 0.8);
     padding: 3px;
     border-radius: 5px;
+    background-color: #363636;
     z-index: 100;
-    top: -70%;
+    top: -90%;
+    margin-left:-10px;
 }
 
 .heraldHud-npcActionButton {
-    background: #444;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: white;
-    border: none;
-    padding: 2px 5px;
+    font-size: 12px;
+    font-weight: bold;
     cursor: pointer;
-    font-size: 9px;
-}
+    position: relative;
+    transition: transform 0.2s ease, background-color 0.3s ease;
+  }
+  
+  .heraldHud-npcActionButton[data-type="actions"] {
+    background-color: #3498db; /* Biru */
+  }
+  
+  .heraldHud-npcActionButton[data-type="passive"] {
+    background-color: #2ecc71; /* Hijau */
+  }
+  
+  .heraldHud-npcActionButton[data-type="status"] {
+    background-color: #f1c40f; /* Kuning */
+  }
+  
+  .heraldHud-npcActionButton[data-type="remove"] {
+    background-color: #e74c3c; /* Merah */
+  }
+  
+  /* Efek Hover */
+  .heraldHud-npcActionButton:hover {
+    /* transform: scale(1.1); */
+    opacity: 0.9;
+  }
+  
+  .heraldHud-npcActionButtonTooltip {
+    visibility: hidden;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    text-align: center;
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 5px;
+    position: absolute;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+  }
+  
+  /* Tooltip Muncul Saat Hover */
+  .heraldHud-npcActionButton:hover .heraldHud-npcActionButtonTooltip {
+    visibility: visible;
+    opacity: 1;
+  }
 
 
 .heraldHud-npcViewMiddle {
@@ -2688,15 +2740,16 @@
 .heraldHud-npcDialogDiv {}
 
 .heraldHud-npcDialog {
+    display: none;
     position: fixed;
     left: 46%;
     bottom: 27%;
     transform: translateX(-50%);
-    border: 3px solid gold;
     border-radius: 10px;
-    background-color: rgba(0, 0, 0, 0.8);
     z-index: 16;
     padding: 10px;
+    border: 3px solid gold;
+    background-color: rgba(0, 0, 0, 0.8);
     box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
 }
 
@@ -2704,15 +2757,18 @@
 .heraldHud-npcDialog.actions {
     width: 350px;
     height: 250px;
+ 
 }
 
 .heraldHud-npcDialog.passive {
     width: 350px;
     height: 250px;
+
 }
 .heraldHud-npcDialog.status {
     width: 350px;
     height: 250px;
+
 }
 /* NPC ACTIONS */
 .heraldHud-npcDialogActionsContainer {
@@ -2754,13 +2810,15 @@
     height: 100%;
     object-fit: cover;
 }
-
-
-.heraldHud-npcActionCategory {
+.heraldHud-npcActionMiddleMid{
+    display: flex;
+    align-items: center;
+    gap: 3px;
     font-size: 10px;
     color: rgb(200, 200, 200);
-    display: flex;
-    gap: 2px;
+}
+
+.heraldHud-npcActionCategory {
 }
 .heraldHud-npcActionProperti {
     font-size: 10px;
