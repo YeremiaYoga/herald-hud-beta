@@ -3470,7 +3470,7 @@ async function heraldHud_renderViewListNpc() {
                 <div class="heraldHud-npcActionButtonContainer">
                     <div class="heraldHud-npcActionButton" data-id="${id}" data-type="actions">Actions</div>
                      <div class="heraldHud-npcActionButton" data-id="${id}" data-type="passive">Passive</div>
-                    <div class="heraldHud-npcActionButton" data-id="${id}" data-type="stats">Stats</div>
+                    <div class="heraldHud-npcActionButton" data-id="${id}" data-type="status">Stats</div>
                 </div>
              
               </div>
@@ -3715,7 +3715,7 @@ async function heraldHud_showNpcDialog(id, kategori) {
     await heraldHud_npcRenderViewActions(id);
   } else if (kategori == "passive") {
     await heraldHud_npcRenderViewPassive(id);
-  } else if (kategori == "stats") {
+  } else if (kategori == "status") {
     await heraldHud_npcRenderViewStats(id);
   }
 }
