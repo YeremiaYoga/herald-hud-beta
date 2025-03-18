@@ -1,10 +1,29 @@
 let heraldHud_actorSelected = null;
+let heraldHud_npcPlayerOwned = [];
 let heraldHud_npcPlayerSelected = [];
 let heraldHud_checkerValue = null;
 let heraldHud_spellsTrackerOff = false;
 let heraldHud_dockHudToBottom = false;
 let heraldHud_statsAbbreviations = false;
 let heraldHud_displayChargeTracker = false;
+Hooks.once("ready", () => {
+  heraldHud_spellsTrackerOff = game.settings.get(
+    "herald-hud",
+    "spellsTrackerOff"
+  );
+  heraldHud_dockHudToBottom = game.settings.get(
+    "herald-hud",
+    "dockHudToBottom"
+  );
+  heraldHud_statsAbbreviations = game.settings.get(
+    "herald-hud",
+    "statsAbbreviations"
+  );
+  heraldHud_displayChargeTracker = game.settings.get(
+    "herald-hud",
+    "displayChargeTracker"
+  );
+});
 
 let heraldHud_gameVersion = ``;
 let hp0 = "#8B0000";
@@ -72,6 +91,7 @@ async function heraldHud_renderHeraldHud() {
     await heraldHud_updateItemFavoriteActor();
     await heraldHud_updateItemCosumablesActor();
     await heraldHud_updateShorcutButton();
+    await heraldHud_settingHudToBottom();
     await heraldHud_renderChargeTracker();
   }, 500);
 }
@@ -326,7 +346,9 @@ async function heraldHud_renderActorData() {
 
 async function heraldHud_updateShorcutButton() {
   let actor = heraldHud_actorSelected;
-  let shortcutButtonDiv = document.getElementById("heraldHud-shortcutButtonContainer");
+  let shortcutButtonDiv = document.getElementById(
+    "heraldHud-shortcutButtonContainer"
+  );
 
   if (!shortcutButtonDiv || !actor) {
     if (shortcutButtonDiv) shortcutButtonDiv.style.display = "none";
@@ -339,7 +361,6 @@ async function heraldHud_updateShorcutButton() {
 
   let rollTimeout;
 
-  // Jika dalam combat & giliran aktor → tampilkan End Turn
   if (combat && isActorTurn) {
     shortcutButtonDiv.innerHTML = `
       <div id="heraldHud-endturnContainer" class="heraldHud-endturnContainer">
@@ -347,43 +368,91 @@ async function heraldHud_updateShorcutButton() {
       </div>
     `;
 
-    document.getElementById("heraldHud-endturnButton").addEventListener("click", async () => {
-      await combat.nextTurn();
-    });
-  } 
-  // Jika tidak dalam combat atau bukan giliran aktor → tampilkan Initiative
+    document
+      .getElementById("heraldHud-endturnButton")
+      .addEventListener("click", async () => {
+        await combat.nextTurn();
+      });
+  }
   else {
     shortcutButtonDiv.innerHTML = `
       <div id="heraldHud-initiativeIconWrapper" class="heraldHud-initiativeIconWrapper">
-        <img src="/modules/herald-hud-beta/assets/shortcut_icon.png" alt="Shortcut Icon" class="heraldHud-initiativeIcon"/>
+        <img src="/modules/herald-hud-beta/assets/blued20_icon.png" alt="Shortcut Icon" class="heraldHud-initiativeIcon"/>
         <div id="heraldHud-initiativeValue" class="heraldHud-initiativeValue"></div>
         <div class="heraldHud-initiativeTooltip">Initiative</div>
       </div>
     `;
 
-    let initiativeValueDiv = document.getElementById("heraldHud-initiativeValue");
-    shortcutButtonDiv.querySelector("#heraldHud-initiativeIconWrapper").addEventListener("click", async () => {
-      clearTimeout(rollTimeout);
-      rollTimeout = setTimeout(async () => {
-        await actor.rollInitiativeDialog();
-      }, 1000);
-    });
+    let initiativeValueDiv = document.getElementById(
+      "heraldHud-initiativeValue"
+    );
+    shortcutButtonDiv
+      .querySelector("#heraldHud-initiativeIconWrapper")
+      .addEventListener("click", async () => {
+        clearTimeout(rollTimeout);
+        rollTimeout = setTimeout(async () => {
+          await actor.rollInitiativeDialog();
+        }, 1000);
+      });
 
     let initiativeValue = actor.system.attributes.init.total;
     if (initiativeValueDiv) {
-      initiativeValueDiv.innerText = initiativeValue >= 0 ? `+${initiativeValue}` : `${initiativeValue}`;
+      initiativeValueDiv.innerText =
+        initiativeValue >= 0 ? `+${initiativeValue}` : `${initiativeValue}`;
     }
   }
 
   shortcutButtonDiv.style.display = "flex";
 }
 
+// async function heraldHud_updateShorcutButton() {
+//   let actor = heraldHud_actorSelected;
+//   let shortcutButtonDiv = document.getElementById("heraldHud-shortcutButtonContainer");
+
+//   if (!shortcutButtonDiv || !actor) {
+//     if (shortcutButtonDiv) shortcutButtonDiv.style.display = "none";
+//     return;
+//   }
+
+//   const combat = game.combat;
+//   const currentCombatant = combat?.combatant;
+//   const isActorTurn = currentCombatant?.actor?.id === actor.id;
+//   let playerColor = game.user.color; // Warna pemain
+
+//   let rollTimeout;
+//   let initiativeValue = actor.system.attributes.init.total;
+//   let initiativeText = initiativeValue >= 0 ? `+${initiativeValue}` : `${initiativeValue}`;
+
+//   let buttonHtml = `
+//     <div class="heraldHud-shortcutButton" >
+//       <div class="heraldHud-shortcutBackground" style="background-color: ${playerColor};"></div>
+//       <img src="/modules/herald-hud-beta/assets/blued20_icon.png" alt="Shortcut Icon" class="heraldHud-shortcutIcon"/>
+//       <div class="heraldHud-shortcutText">${isActorTurn ? "End Turn" : initiativeText}</div>
+//       <div class="heraldHud-shortcutTooltip">${isActorTurn ? "End your turn" : "Roll Initiative"}</div>
+//     </div>
+//   `;
+
+//   shortcutButtonDiv.innerHTML = buttonHtml;
+
+//   let shortcutButton = shortcutButtonDiv.querySelector(".heraldHud-shortcutButton");
+//   shortcutButton.addEventListener("click", async () => {
+//     if (isActorTurn) {
+//       await combat.nextTurn();
+//     } else {
+//       clearTimeout(rollTimeout);
+//       rollTimeout = setTimeout(async () => {
+//         await actor.rollInitiativeDialog();
+//       }, 1000);
+//     }
+//   });
+
+//   shortcutButtonDiv.style.display = "flex";
+// }
+
 // Hooks untuk memperbarui tombol saat status combat berubah
 Hooks.on("updateCombat", heraldHud_updateShorcutButton);
 Hooks.on("createCombat", heraldHud_updateShorcutButton);
 Hooks.on("deleteCombat", heraldHud_updateShorcutButton);
-
-
 
 async function heraldHud_updateDataActor() {
   let actor = heraldHud_actorSelected;
@@ -662,8 +731,6 @@ async function heraldHud_updateDataActor() {
   if (acValueDiv) {
     acValueDiv.innerText = acValue;
   }
-
-
 }
 async function heraldHud_universalChecker() {
   if (heraldHud_checkerValue) {
@@ -1288,6 +1355,8 @@ async function heraldHud_updateItemCosumablesActor() {
 }
 let heraldHud_showDialogValue = false;
 async function heraldHud_showDialog(kategori) {
+  await heraldHud_resetNpcDialog();
+  heraldHud_showNpcDialogValue = false;
   let actor = heraldHud_actorSelected;
   if (heraldHud_showDialogValue) {
     await heraldHud_resetDialog(kategori);
@@ -2389,7 +2458,7 @@ async function heraldHud_renderContainerSpells() {
   }
   await heraldHud_getDataSpellsList();
 
-  if (!heraldHud_spellsTrackerOff) {
+  if (heraldHud_spellsTrackerOff == false) {
     if (heraldHud_dialog2Div) {
       heraldHud_dialog2Div.innerHTML = `
       <div id="heraldHud-dialogSpellsSlotContainer" class="heraldHud-dialogSpellsSlotContainer">
@@ -2409,6 +2478,8 @@ async function heraldHud_renderContainerSpells() {
     }
     await heraldHud_getDataSpellsSlot();
   } else {
+    heraldHud_dialog2Div.innerHTML = ``;
+    heraldHud_dialog2Div.style.display = "none";
   }
 }
 
@@ -2743,7 +2814,7 @@ async function heraldHud_getDataSpellsSlot() {
 
       let slotValue = actor.system?.spells?.[`spell${level}`]?.value || 0;
       let slotMax = actor.system?.spells?.[`spell${level}`]?.max || 0;
-      let spellSlotDisplay = `(${slotValue}/${slotMax})`;
+      let spellSlotDisplay = `${slotValue}/${slotMax}`;
       let spellSlotElement = document.querySelector(
         `.heraldHud-spellLevelSlot[data-level="${level}"]`
       );
@@ -2784,11 +2855,28 @@ async function heraldHud_renderContainerStats() {
       </div>
       <div id="heraldHud-statsSkillsContainer" class="heraldHud-statsSkillsContainer">
         <div id="heraldHud-statsSkillsTitle" class="heraldHud-statsSkillsTitle">Skills</div>
+        <div class="heraldHud-statsSkillsSearchContainer">
+          <input type="text" id="heraldHud-statsSkillsSearch" class="heraldHud-statsSkillsSearch" placeholder="Search Skills...">
+        </div>
         <div id="heraldHud-statsListSkills" class="heraldHud-statsListSkills">
       
         </div>
       </div>
     </div>`;
+
+    let searchInput = document.getElementById("heraldHud-statsSkillsSearch");
+    let skillsSearchTimeout;
+
+    if (searchInput) {
+      searchInput.addEventListener("input", () => {
+        console.log(searchInput.value);
+        clearTimeout(skillsSearchTimeout);
+
+        skillsSearchTimeout = setTimeout(() => {
+          heraldHud_renderDataStatsSkill();
+        }, 500);
+      });
+    }
   }
   await heraldHud_getDataStats();
 }
@@ -2870,6 +2958,8 @@ async function heraldHud_getDataStats() {
 
 async function heraldHud_renderDataStatsSkill() {
   let actor = heraldHud_actorSelected;
+  let searchInput = document.getElementById("heraldHud-statsSkillsSearch");
+  let filterSkills = searchInput?.value.trim().toLowerCase() || "";
   let skillsData = actor.system.skills;
   let listSkills = ``;
   let statsListSkillDiv = document.getElementById("heraldHud-statsListSkills");
@@ -2898,13 +2988,23 @@ async function heraldHud_renderDataStatsSkill() {
     let nameSkill = skillsNames[key];
     let skillTotal =
       skillData.total >= 0 ? `+${skillData.total}` : skillData.total;
-    let proficientData = ``;
-    if (skillData.proficient == 1) {
-      proficientData = `<i class="fa-solid fa-circle" style="color:#8f8f8f;"></i>`;
-    } else {
-      proficientData = `<i class="fa-regular fa-circle"  style="color:#8f8f8f;"></i>`;
-    }
-
+      let proficientData = ``;
+      if (skillData.proficient == 1) {
+        proficientData = `
+          <div class="heraldHud-skillProficientWrapper">
+            <i class="fa-solid fa-circle" style="color:#8f8f8f;"></i>
+            <span class="heraldHud-skillProficientTooltip">Proficient</span>
+          </div>`;
+      } else {
+        proficientData = `
+          <div class="heraldHud-skillProficientWrapper">
+            <i class="fa-regular fa-circle" style="color:#8f8f8f;"></i>
+            <span class="heraldHud-skillProficientTooltip">Not Proficient</span>
+          </div>`;
+      }
+      if (filterSkills && !nameSkill.toLowerCase().includes(filterSkills) && !key.toLowerCase().includes(filterSkills)) {
+        continue; 
+      }
     let skillDivTop = `
     <div id="heraldHud-skillItemTop" class="heraldHud-skillItemTop">
       <div id="heraldHud-skillName" class="heraldHud-skillName">${nameSkill}</div>
@@ -2914,7 +3014,6 @@ async function heraldHud_renderDataStatsSkill() {
           <div id="heraldHud-skillValueProficient" class="heraldHud-skillValueProficient">${proficientData}</div>
         </div>
     </div>
-    
     `;
 
     if (heraldHud_statsAbbreviations) {
@@ -3194,26 +3293,27 @@ async function heraldHud_openSettingHudDialog() {
 
       <div style="display: flex; align-items: center; gap: 10px;">
         <input type="checkbox" id="heraldHud-statsAbbreviationsToggle" ${
-          heraldHud_statsAbbreviations ? "checked" : ""
+          game.settings.get("herald-hud", "statsAbbreviations") ? "checked" : ""
         }>
         <label for="heraldHud-statsAbbreviationsToggle">Abbreviations Skill</label>
       </div>
       <div style="display: flex; align-items: center; gap: 10px;">
         <input type="checkbox" id="heraldHud-spellsTrackerToggle" ${
-          heraldHud_spellsTrackerOff ? "checked" : ""
+          game.settings.get("herald-hud", "spellsTrackerOff") ? "checked" : ""
         }>
         <label for="heraldHud-spellsTrackerToggle">Disable Spell Slot Tracker Box</label>
       </div>
       <div style="display: flex; align-items: center; gap: 10px;">
         <input type="checkbox" id="heraldHud-displayChargeTrackerToggle" ${
-          heraldHud_displayChargeTracker ? "checked" : ""
+          game.settings.get("herald-hud", "displayChargeTracker")
+            ? "checked"
+            : ""
         }>
         <label for="heraldHud-displayChargeTrackerToggle">Display Charge Tracker</label>
       </div>
-      
       <div style="display: flex; align-items: center; gap: 10px;">
         <input type="checkbox" id="heraldHud-dockHudToggle" ${
-          heraldHud_dockHudToBottom ? "checked" : ""
+          game.settings.get("herald-hud", "dockHudToBottom") ? "checked" : ""
         }>
         <label for="heraldHud-dockHudToggle">Dock Herald's HUD to Bottom</label>
       </div>
@@ -3226,7 +3326,7 @@ async function heraldHud_openSettingHudDialog() {
     buttons: {
       save: {
         label: "Save",
-        callback: (html) => {
+        callback: async (html) => {
           let spellTrackerCheckbox = html.find(
             "#heraldHud-spellsTrackerToggle"
           )[0];
@@ -3242,6 +3342,26 @@ async function heraldHud_openSettingHudDialog() {
           heraldHud_dockHudToBottom = dockHudCheckbox.checked;
           heraldHud_statsAbbreviations = statsAbbreviationsCheckbox.checked;
           heraldHud_displayChargeTracker = displayChargeTrackerCheckbox.checked;
+          await game.settings.set(
+            "herald-hud",
+            "statsAbbreviations",
+            heraldHud_statsAbbreviations
+          );
+          await game.settings.set(
+            "herald-hud",
+            "spellsTrackerOff",
+            heraldHud_spellsTrackerOff
+          );
+          await game.settings.set(
+            "herald-hud",
+            "displayChargeTracker",
+            heraldHud_displayChargeTracker
+          );
+          await game.settings.set(
+            "herald-hud",
+            "dockHudToBottom",
+            heraldHud_dockHudToBottom
+          );
 
           heraldHud_settingHudToBottom();
           heraldHud_renderChargeTracker();
@@ -3286,14 +3406,16 @@ async function heraldHud_settingHudToBottom() {
   }
 }
 async function heraldHud_renderChargeTracker() {
+  let chargeTrackerDiv = document.getElementById(
+    "heraldHud-chargeTrackerContainer"
+  );
   if (heraldHud_displayChargeTracker == false) {
+    chargeTrackerDiv.innerHTML = "";
     return;
   }
   let actor = heraldHud_actorSelected;
   let favoritesActor = actor.system?.favorites;
-  let chargeTrackerDiv = document.getElementById(
-    "heraldHud-chargeTrackerContainer"
-  );
+
   let chargeItems = actor.items.filter((item) =>
     heraldHud_listChargeTracker.some((trackerName) => trackerName === item.name)
   );
@@ -3358,16 +3480,93 @@ async function heraldHud_showDialogAddSummon() {
     .filter((t) => t.actor.type === "npc")
     .map((t) => t.actor);
   const user = game.user;
-  let listDataNpcPlayer = [];
+  heraldHud_npcPlayerOwned = [];
   for (let actor of sceneListActor) {
     if (actor.ownership[user.id]) {
       if (actor.ownership[user.id] == 3) {
-        listDataNpcPlayer.push(actor);
+        heraldHud_npcPlayerOwned.push(actor);
       }
     }
   }
+
+
+
+  let dialogContent = `
+  <div id="heraldHud-dialogListNpcContainer" class="heraldHud-dialogListNpcContainer">
+  <div id="heraldHud-dialogListNpcTop" class="heraldHud-dialogListNpcTop">
+    <div class="heraldHud-npcListSearchContainer">
+      <input type="text" id="heraldHud-npcListSearchInput" class="heraldHud-npcListSearchInput" placeholder="Search Skills...">
+    </div>
+  </div>
+  <div id="heraldHud-dialogListNpcMiddle" class="heraldHud-dialogListNpcMiddle">
+  </div>
+  <div id="heraldHud-dialogListNpcBottom" class="heraldHud-dialogListNpcBottom"></div>
+    
+  </div>`;
+  new Dialog({
+    title: "Add Summon",
+    content: dialogContent,
+    buttons: {
+      save: {
+        label: "Save",
+        callback: async (html) => {
+          heraldHud_npcPlayerSelected = [];
+          html.find(".heraldHud-dialogNpcCheckbox:checked").each(function () {
+            let npcId = this.value;
+            heraldHud_npcPlayerSelected.push(npcId);
+          });
+          await heraldHud_renderViewListNpc();
+        },
+      },
+      cancel: {
+        label: "Cancel",
+      },
+    },
+    default: "add",
+  }).render(true);
+  Hooks.once("renderDialog", async (app) => {
+    if (app instanceof Dialog && app.title === "Add Summon") {
+      const width = 500;
+      const height = 500;
+
+      app.setPosition({
+        left: (window.innerWidth - width) / 2,
+        top: (window.innerHeight - height) / 2,
+        width: width,
+        height: height,
+        scale: 1.0,
+      });
+    }
+    await heraldHud_renderDataDialogAddSummoner();
+
+    let searchInput = document.getElementById("heraldHud-npcListSearchInput");
+    let npcSearchTimeout;
+
+    if (searchInput) {
+      searchInput.addEventListener("input", () => {
+        console.log("Searching NPC:", searchInput.value);
+        clearTimeout(npcSearchTimeout);
+
+        npcSearchTimeout = setTimeout(() => {
+          heraldHud_renderDataDialogAddSummoner();
+        }, 500);
+      });
+    }
+  });
+}
+
+async function heraldHud_renderDataDialogAddSummoner() {
+  let dialogListNpcMiddleDiv = document.getElementById("heraldHud-dialogListNpcMiddle");
   let listNpcPlayer = ``;
-  for (let npc of listDataNpcPlayer) {
+
+  let searchInput = document.getElementById("heraldHud-npcListSearchInput");
+  let filterNpc = searchInput?.value.trim().toLowerCase() || "";
+  for (let npc of heraldHud_npcPlayerOwned) {
+    let npcName = npc.name.toLowerCase();
+    
+    if (filterNpc && npcName.indexOf(filterNpc) === -1) {
+      continue;
+    }
     let currentHp = npc.system.attributes.hp.value;
     let maxHp = npc.system.attributes.hp.max;
     let token = npc.getActiveTokens()[0];
@@ -3411,51 +3610,9 @@ async function heraldHud_showDialogAddSummon() {
         </div>
     </div>`;
   }
-
-  let dialogContent = `
-  <div id="heraldHud-dialogListNpcContainer" class="heraldHud-dialogListNpcContainer">
-  <div id="heraldHud-dialogListNpcTop" class="heraldHud-dialogListNpcTop"></div>
-  <div id="heraldHud-dialogListNpcMiddle" class="heraldHud-dialogListNpcMiddle">
-      ${listNpcPlayer}
-  </div>
-  <div id="heraldHud-dialogListNpcBottom" class="heraldHud-dialogListNpcBottom"></div>
-    
-  </div>`;
-  new Dialog({
-    title: "Add Summon",
-    content: dialogContent,
-    buttons: {
-      save: {
-        label: "Save",
-        callback: async (html) => {
-          heraldHud_npcPlayerSelected = [];
-          html.find(".heraldHud-dialogNpcCheckbox:checked").each(function () {
-            let npcId = this.value;
-            heraldHud_npcPlayerSelected.push(npcId);
-          });
-          await heraldHud_renderViewListNpc();
-        },
-      },
-      cancel: {
-        label: "Cancel",
-      },
-    },
-    default: "add",
-  }).render(true);
-  Hooks.once("renderDialog", (app) => {
-    if (app instanceof Dialog && app.title === "Add Summon") {
-      const width = 500;
-      const height = 500;
-
-      app.setPosition({
-        left: (window.innerWidth - width) / 2,
-        top: (window.innerHeight - height) / 2,
-        width: width,
-        height: height,
-        scale: 1.0,
-      });
-    }
-  });
+  if(dialogListNpcMiddleDiv){
+    dialogListNpcMiddleDiv.innerHTML = listNpcPlayer;
+  }
 }
 
 async function heraldHud_renderViewListNpc() {
@@ -3469,6 +3626,45 @@ async function heraldHud_renderViewListNpc() {
     let tokenDocument = await fromUuid(id);
     let token = tokenDocument.object;
     let npc = token.actor;
+    let npcTooltip = `
+    <div id="heraldHud-npcDataTooltipContainer" class="heraldHud-npcDataTooltipContainer" data-id="${id}" style="display:none;" >
+      <div id="heraldHud-npcDataTooltip" class="heraldHud-npcDataTooltip">
+        <div id="heraldHud-npcTooltipTop" class="heraldHud-npcTooltipTop" >
+          <div id="heraldHud-npcTooltipName" class="heraldHud-npcTooltipName" data-id="${id}">${
+      npc.name
+    }</div>
+          <hr style=" border: 1px solid grey; margin-top: 5px;">
+        </div>
+        <div id="heraldHud-npcTooltipMiddle" class="heraldHud-npcTooltipMiddle"">
+          <div id="heraldHud-npcTooltipMidLeft-${id}" class="heraldHud-npcTooltipMidLeft" data-id="${id}">
+          
+          </div>
+          <div id="heraldHud-npcTooltipMidRight-${id}" class="heraldHud-npcTooltipMidRight" data-id="${id}">
+          
+          </div>
+        </div>
+        <div id="heraldHud-npcTooltipBottom" class="heraldHud-npcTooltipBottom" data-id="${id}">
+           <div id="heraldHud-npcTooltipBotLeft" class="heraldHud-npcTooltipBotLeft" data-id="${id}">
+          
+          </div>
+            <div id="heraldHud-npcTooltipBotRight" class="heraldHud-npcTooltipBotRight" data-id="${id}">
+              <div>CR ${npc.system.details?.cr || "Unknown"}</div>
+              <div>-</div>
+              <div> ${
+                npc.system.details?.type.value
+                  ? npc.system.details.type.value.charAt(0).toUpperCase() +
+                    npc.system.details.type.value.slice(1)
+                  : "Unknown"
+              }</div>
+                    <div>${
+                      npc.system.details?.type?.subtype
+                        ? `(${npc.system.details.type.subtype})`
+                        : ""
+                    }</div>
+            </div>
+        </div>
+      </div>
+    </div>`;
     listNpcPlayer += `
        <div id="heraldHud-npcContainer" class="heraldHud-npcContainer">
           <div id="heraldHud-npcViewActor" class="heraldHud-npcViewActor">
@@ -3490,6 +3686,10 @@ async function heraldHud_renderViewListNpc() {
                   <div class="heraldHud-npcActionButton" data-id="${id}" data-type="remove">
                     
                     <span class="heraldHud-npcActionButtonTooltip">Remove</span>
+                  </div>
+                   <div class="heraldHud-npcActionButton" data-id="${id}" data-type="initiative">
+                      <img src="/modules/herald-hud-beta/assets/blued20_icon.png" alt="Initiative" style="width:20px;height:20px; border:none"/>
+                    <span class="heraldHud-npcActionButtonTooltip">Initiative</span>
                   </div>
                 </div>
               </div>
@@ -3532,6 +3732,7 @@ async function heraldHud_renderViewListNpc() {
                </div>
             </div>
           </div>
+          ${npcTooltip}
        </div>
     `;
   }
@@ -3604,6 +3805,34 @@ async function heraldHud_renderViewListNpc() {
           heraldHud_showNpcDialog(npcId, actionType);
         });
       });
+
+    document.body.addEventListener("mouseover", (event) => {
+      let npcImage = event.target.closest(".heraldHud-npcImageContainer");
+      if (!npcImage) return;
+
+      let npcId = npcImage.getAttribute("data-id");
+      let tooltip = document.querySelector(
+        `.heraldHud-npcDataTooltipContainer[data-id="${npcId}"]`
+      );
+
+      if (tooltip) {
+        tooltip.style.display = "block";
+      }
+    });
+
+    document.body.addEventListener("mouseout", (event) => {
+      let npcImage = event.target.closest(".heraldHud-npcImageContainer");
+      if (!npcImage) return;
+
+      let npcId = npcImage.getAttribute("data-id");
+      let tooltip = document.querySelector(
+        `.heraldHud-npcDataTooltipContainer[data-id="${npcId}"]`
+      );
+
+      if (tooltip) {
+        tooltip.style.display = "none";
+      }
+    });
 
     await heraldHud_getDataListNpc();
   }
@@ -3714,6 +3943,40 @@ async function heraldHud_getDataListNpc() {
         tempHpValueDiv.innerText = `+${tempHp}`;
       }
     }
+
+
+    // data tooltip npc
+    let npcTooltipMidLeftDiv = document.getElementById(`heraldHud-npcTooltipMidLeft-${id}`)
+    let npcTooltipMidRightDiv = document.getElementById(`heraldHud-npcTooltipMidRight-${id}`)
+
+    if(npcTooltipMidLeftDiv){
+      let tempmaxhptext = "";
+      if (tempmaxhp) {
+        if (tempmaxhp > 0) {
+          tempmaxhptext = `(+${tempmaxhp})`;
+        } else {
+          tempmaxhptext = `(${tempmaxhp})`;
+        }
+      }
+      let speedDcValue = npc.system.attributes.spelldc;
+      npcTooltipMidLeftDiv.innerHTML=`
+        <div class="heraldHud-npcTooltipValueData"><i class="fas fa-heart" style="margin-right: 5px;"></i>  ${hp}/${totalMaxHp} ${tempmaxhptext} HP</div>
+        <div class="heraldHud-npcTooltipValueData"><i class="fas fa-shield-alt" style="margin-right: 5px;"></i> ${acValue || 0} AC</div>
+        <div class="heraldHud-npcTooltipValueData"><i class="fas fa-magic" style="margin-right: 5px;"></i> ${speedDcValue || 0} Spell Save DC</div>
+      `;
+    }
+
+    if(npcTooltipMidRightDiv){
+      let perceptionValue = npc.system.skills.prc.passive;
+      let investigationValue = npc.system.skills.inv.passive;
+      let insightValue = npc.system.skills.ins.passive;
+      npcTooltipMidRightDiv.innerHTML =`
+       <div class="heraldHud-npcTooltipValueData"><i class="fa-solid fa-eye" style="margin-right: 5px;"></i> ${perceptionValue || 0}</div>
+        <div class="heraldHud-npcTooltipValueData"><i class="fa-solid fa-magnifying-glass" style="margin-right: 5px;"></i> ${investigationValue || 0}</div>
+        <div class="heraldHud-npcTooltipValueData"><i class="fa-solid fa-brain" style="margin-right: 5px;"></i> ${insightValue || 0} </div>
+      `
+    }
+
   }
 }
 
@@ -3739,7 +4002,7 @@ async function heraldHud_showNpcDialog(id, kategori) {
   await heraldHud_resetDialog();
   heraldHud_showDialogValue = false;
 
-  if (kategori != "remove") {
+  if (kategori != "remove" || kategori != "initiative") {
     if (heraldHud_showDialogValue) {
       await heraldHud_resetNpcDialog();
       heraldHud_showNpcDialogValue = false;
@@ -3756,6 +4019,10 @@ async function heraldHud_showNpcDialog(id, kategori) {
     await heraldHud_npcRenderViewStats(id);
   } else if (kategori == "remove") {
     await heraldHud_deleteNpcFromList(id);
+    await heraldHud_resetNpcDialog();
+    heraldHud_showNpcDialogValue = false;
+  } else if (kategori == "initiative") {
+    await heraldHud_npcRollInitiatve(id);
     await heraldHud_resetNpcDialog();
     heraldHud_showNpcDialogValue = false;
   }
@@ -4121,7 +4388,9 @@ async function heraldHud_renderNpcDataOther(id) {
   let actionsListDiv = document.getElementById("heraldHud-npcOtherList");
   let otherActions = npc.items.filter(
     (item) =>
-      !["action", "bonus", "reaction"].includes(item.system.activation?.type) &&
+      item.system.activation?.type &&
+      item.system.activation.type !== "none" &&
+      !["action", "bonus", "reaction"].includes(item.system.activation.type) &&
       !(item.type === "feat" && item.labels.featType === "Passive")
   );
 
@@ -4247,10 +4516,71 @@ async function heraldHud_npcGetDataPassive(id) {
   let npc = token.actor;
   let passiveListDiv = document.getElementById("heraldHud-npcPassiveList");
   let passiveItems = npc.items.filter(
-    (item) => !item.system.activation || !item.system.activation.type
+    (item) =>
+      !item.system.activation ||
+      !item.system.activation.type ||
+      item.system.activation.type === "none"
   );
   let listPassive = ``;
-  // console.log(passiveItems);
+
+  for (let item of passiveItems) {
+    let isPassive = item.type === "feat" && item.labels.featType === "Passive";
+
+    listPassive += `
+     <div id="heraldHud-npcPassiveItemContainer" class="heraldHud-npcPassiveItemContainer">
+        <div id="heraldHud-npcPassiveItem" class="heraldHud-npcPassiveItem" data-item-id="${
+          item.id
+        }">
+            <div id="heraldHud-npcPassiveLeft" class="heraldHud-npcPassiveLeft">
+                <div class="heraldHud-npcPassiveImageContainer">
+                   <img src="${item.img}" alt="${
+      item.name
+    }" class="heraldHud-npcPassiveImage">
+                </div>
+            </div>
+            <div id="heraldHud-npcPassiveMiddle" class="heraldHud-npcPassiveMiddle">
+              <div id="heraldHud-npcPassiveName" class="heraldHud-npcPassiveName" >${
+                item.name
+              }</div>
+              <div class="heraldHud-npcPassiveMiddleMid">
+                <div id="heraldHud-npcPassiveCategory-${
+                  item.id
+                }" class="heraldHud-npcPassiveCategory">
+                  ${isPassive ? "Passive" : ""}
+                </div>
+                <div class="heraldHud-npcPassiveRange">
+                  
+                </div>
+              </div>
+              <div id class="heraldHud-npcPassiveProperti"></div>
+            </div>
+            <div id="heraldHud-npcPassiveRight" class="heraldHud-npcPassiveRight">
+            </div>
+        </div>
+      </div>
+    `;
+  }
+  if (passiveListDiv) {
+    if (listPassive) {
+      passiveListDiv.innerHTML = listPassive;
+
+      document
+        .querySelectorAll(".heraldHud-npcPassiveItem")
+        .forEach((passiveItem) => {
+          passiveItem.addEventListener("click", async function () {
+            let itemId = passiveItem.getAttribute("data-item-id");
+
+            let item =
+              npc.items.get(itemId) || npc.getEmbeddedDocument("Item", itemId);
+            if (item) {
+              await item.use();
+            }
+          });
+        });
+    } else {
+      passiveListDiv.innerHTML = `<div>-</div>`;
+    }
+  }
 }
 
 async function heraldHud_npcRenderViewStats(id) {
@@ -4427,12 +4757,41 @@ async function heraldHud_renderNpcDataStatsSkill(id) {
 }
 
 async function heraldHud_deleteNpcFromList(id) {
-  heraldHud_npcPlayerSelected = heraldHud_npcPlayerSelected.filter(
-    (npcId) => npcId !== id
-  );
-
-  await heraldHud_renderViewListNpc();
+  let tokenDocument = await fromUuid(id);
+  let token = tokenDocument.object;
+  let npc = token.actor;
+  new Dialog({
+    title: "Confirm Remove NPC",
+    content: `<p>Would you like to remove <strong>${npc.name}</strong> from your Summon Tracker?</p>`,
+    buttons: {
+      remove: {
+        label: "Remove",
+        callback: async () => {
+          heraldHud_npcPlayerSelected = heraldHud_npcPlayerSelected.filter(
+            (npcId) => npcId !== id
+          );
+          await heraldHud_renderViewListNpc();
+        },
+      },
+      cancel: {
+        label: "Cancel",
+      },
+    },
+    default: "cancel",
+  }).render(true);
 }
+
+async function heraldHud_npcRollInitiatve(id) {
+  let tokenDocument = await fromUuid(id);
+  let token = tokenDocument.object;
+  let npc = token.actor;
+  let rollTimeout;
+  clearTimeout(rollTimeout);
+  rollTimeout = setTimeout(async () => {
+    await npc.rollInitiativeDialog();
+  }, 1000);
+}
+
 Hooks.on("updateActor", async (actor, data) => {
   await heraldHud_updateDataActor();
   await heraldHud_updateMovementsActor();

@@ -1227,8 +1227,50 @@
     visibility: visible;
 }
 
+.heraldHud-shortcutButton {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px; 
+    height: 50px;
 
+    cursor: pointer;
+    overflow: hidden; 
+    border: none;
+  }
 
+  .heraldHud-shortcutBackground {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    border: none;
+  }
+  
+  
+  .heraldHud-shortcutIcon {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    position: absolute;
+    overflow: hidden;
+    border: none;
+    filter: invert(100%) brightness(200%);
+  }
+  
+  .heraldHud-shortcutText {
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    z-index: 2;
+    text-align: center;
+    width: 100%;
+  }
+  
 
 
 
@@ -2142,6 +2184,7 @@
     width: 100%;
     color: white;
     overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .heraldHud-statsAbilitiesContainer {
@@ -2232,6 +2275,22 @@
     cursor: pointer;
 }
 
+.heraldHud-statsSkillsSearchContainer {
+    padding: 5px;
+}
+
+
+.heraldHud-statsSkillsSearch {
+    color: white !important;
+
+    outline: 2px solid gold;
+}
+
+
+.heraldHud-statsSkillsSearch::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
 .heraldHud-statsListSkills {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -2267,6 +2326,36 @@
     justify-content: center;
 }
 
+.heraldHud-skillProficientWrapper {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+  }
+  
+  .heraldHud-skillProficientWrapper .heraldHud-skillProficientTooltip {
+    visibility: hidden;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    text-align: center;
+    padding: 5px;
+    border-radius: 5px;
+    
+    position: absolute;
+    z-index: 1;
+    bottom: 125%; /* Posisikan tooltip di atas ikon */
+    left: 50%;
+    transform: translateX(-50%);
+    
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+  }
+  
+  .heraldHud-skillProficientWrapper:hover .heraldHud-skillProficientTooltip {
+    visibility: visible;
+    opacity: 1;
+  }
+  
+
 /* Spells Prepared */
 .heraldHud-dialogSpellsPrepContainer {
     max-height: 100%;
@@ -2276,9 +2365,6 @@
 
 }
 
-.heraldHud-spellsPrepSearchContainer {
-    padding: 5px;
-}
 
 .heraldHud-spellsPrepContainerDiv {
     font-size: 12px;
@@ -2289,6 +2375,11 @@
     padding: 2px;
     padding-bottom: 5px;
 }
+
+.heraldHud-spellsPrepSearchContainer {
+    padding: 5px;
+}
+
 
 .heraldHud-spellsPrepSearch {
     color: white !important;
@@ -2505,8 +2596,8 @@
     border-radius: 5px;
     background-color: #363636;
     z-index: 100;
-    top: -90%;
-    margin-left:-10px;
+    top: -100%;
+    margin-left: -10px;
 }
 
 .heraldHud-npcActionButton {
@@ -2522,31 +2613,35 @@
     cursor: pointer;
     position: relative;
     transition: transform 0.2s ease, background-color 0.3s ease;
-  }
-  
-  .heraldHud-npcActionButton[data-type="actions"] {
-    background-color: #3498db; /* Biru */
-  }
-  
-  .heraldHud-npcActionButton[data-type="passive"] {
-    background-color: #2ecc71; /* Hijau */
-  }
-  
-  .heraldHud-npcActionButton[data-type="status"] {
-    background-color: #f1c40f; /* Kuning */
-  }
-  
-  .heraldHud-npcActionButton[data-type="remove"] {
-    background-color: #e74c3c; /* Merah */
-  }
-  
-  /* Efek Hover */
-  .heraldHud-npcActionButton:hover {
+}
+
+.heraldHud-npcActionButton[data-type="actions"] {
+    background-color: #3498db;
+    /* Biru */
+}
+
+.heraldHud-npcActionButton[data-type="passive"] {
+    background-color: #2ecc71;
+    /* Hijau */
+}
+
+.heraldHud-npcActionButton[data-type="status"] {
+    background-color: #f1c40f;
+    /* Kuning */
+}
+
+.heraldHud-npcActionButton[data-type="remove"] {
+    background-color: #e74c3c;
+    /* Merah */
+}
+
+/* Efek Hover */
+.heraldHud-npcActionButton:hover {
     /* transform: scale(1.1); */
     opacity: 0.9;
-  }
-  
-  .heraldHud-npcActionButtonTooltip {
+}
+
+.heraldHud-npcActionButtonTooltip {
     visibility: hidden;
     background-color: rgba(0, 0, 0, 0.8);
     color: white;
@@ -2561,13 +2656,13 @@
     white-space: nowrap;
     opacity: 0;
     transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
-  }
-  
-  /* Tooltip Muncul Saat Hover */
-  .heraldHud-npcActionButton:hover .heraldHud-npcActionButtonTooltip {
+}
+
+/* Tooltip Muncul Saat Hover */
+.heraldHud-npcActionButton:hover .heraldHud-npcActionButtonTooltip {
     visibility: visible;
     opacity: 1;
-  }
+}
 
 
 .heraldHud-npcViewMiddle {
@@ -2728,7 +2823,8 @@
     font-size: 10px;
     margin-left: 15px;
 }
-.heraldHud-npcTempHpValue{
+
+.heraldHud-npcTempHpValue {
     color: rgb(70, 196, 255);
 }
 
@@ -2757,7 +2853,7 @@
 .heraldHud-npcDialog.actions {
     width: 350px;
     height: 250px;
- 
+
 }
 
 .heraldHud-npcDialog.passive {
@@ -2765,11 +2861,13 @@
     height: 250px;
 
 }
+
 .heraldHud-npcDialog.status {
     width: 350px;
     height: 250px;
 
 }
+
 /* NPC ACTIONS */
 .heraldHud-npcDialogActionsContainer {
     width: 100%;
@@ -2795,6 +2893,7 @@
     transition: background-color 0.2s ease-in-out;
     border-radius: 5px;
 }
+
 .heraldHud-npcActionImageContainer {
     width: 30px;
     height: 30px;
@@ -2810,7 +2909,8 @@
     height: 100%;
     object-fit: cover;
 }
-.heraldHud-npcActionMiddleMid{
+
+.heraldHud-npcActionMiddleMid {
     display: flex;
     align-items: center;
     gap: 3px;
@@ -2818,8 +2918,8 @@
     color: rgb(200, 200, 200);
 }
 
-.heraldHud-npcActionCategory {
-}
+.heraldHud-npcActionCategory {}
+
 .heraldHud-npcActionProperti {
     font-size: 10px;
     color: rgb(200, 200, 200);
@@ -2838,7 +2938,66 @@
 /* ACTION OTHER */
 
 /* NPC PASSIVE */
+.heraldHud-npcDialogPassiveContainer {
+    width: 100%;
+    max-height: 100%;
+    color: white;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+}
 
+.heraldHud-npcPassiveItem {
+    display: flex;
+    gap: 10px;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 12px;
+    z-index: 16;
+}
+
+.heraldHud-npcPassiveItem:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transition: background-color 0.2s ease-in-out;
+    border-radius: 5px;
+}
+
+.heraldHud-npcPassiveImageContainer {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+
+.heraldHud-npcPassiveImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.heraldHud-npcPassiveMiddleMid {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 10px;
+    color: rgb(200, 200, 200);
+}
+
+.heraldHud-npcPassiveCategory {}
+
+.heraldHud-npcPassiveProperti {
+    font-size: 10px;
+    color: rgb(200, 200, 200);
+}
+
+.heraldHud-npcPassiveRight {
+    display: flex;
+    margin-left: auto;
+    gap: 10px;
+}
 
 
 /* NPC STATS */
@@ -2851,7 +3010,7 @@
     justify-content: center;
 }
 
-.heraldHud-npcStatsAbilitiesContainer{
+.heraldHud-npcStatsAbilitiesContainer {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -2945,9 +3104,10 @@
     display: flex;
     justify-content: center;
 }
-.heraldHud-npcSkillItemTop{
+
+.heraldHud-npcSkillItemTop {
     display: flex;
-    gap:3px;
+    gap: 3px;
 }
 
 .heraldHud-npcSkillItem:hover {
@@ -2972,6 +3132,54 @@
 }
 
 
+/* NPC TOOLTIP */
+
+.heraldHud-npcDataTooltipContainer {
+    position: absolute;
+    bottom: 150%;
+    color: white;
+}
+
+.heraldHud-npcDataTooltip {
+    width: 250px;
+    height: 150px;
+    background-color: rgb(0, 0, 0, 0.8);
+    padding: 10px;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+
+.heraldHud-npcTooltipMiddle{
+    display: flex;
+    gap: 10px;
+}
+
+.heraldHud-npcTooltipBottom {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 5px;
+}
+
+.heraldHud-npcTooltipBotLeft {
+    flex: 1;
+}
+
+.heraldHud-npcTooltipBotRight {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: flex-end;
+    text-align: right;
+    gap: 2px;
+    margin-right: 10px;
+}
 
 /* damage icon */
 .heraldHud-damageIcon {
