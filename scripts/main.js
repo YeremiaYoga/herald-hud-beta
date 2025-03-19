@@ -43,4 +43,12 @@ Hooks.once("init", () => {
     type: Boolean,
     default: false,
   });
+  game.settings.register("herald-hud", "displayInformationButton", {
+    name: "Show Information Button",
+    hint: "Display Information Button",
+    scope: "client",
+    config: true,
+    type: Boolean,
+    default: false,
+  });
 });
