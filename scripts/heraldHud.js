@@ -58,6 +58,31 @@ let heraldHud_listChargeTracker = [
   "Relentless Endurance",
   "Stone’s Endurance",
   "Fury of the Small",
+  "Starlight Steps",
+  "Fey Step",
+  "Hidden Steps",
+  "Draconic Cry",
+  "Blessing of the Raven Queen",
+  "Blessing of the Moon Maiden",
+  "Blessing of Limia",
+  "Shift: Wildhunt",
+  "Starry Form",
+  "Giant's Might",
+  "Runic Shield",
+  "Fighting Spirit",
+  "Arcane Ward",
+  "Bladesong",
+  "Hexblade's Curse",
+  "Form of Dread",
+  "Dark One's Blessing",
+  "Healing Light",
+  "Favored by the Gods",
+  "Celestial Revelation (Necrotic Shroud)",
+  "Celestial Revelation (Radiant Consumption)",
+  "Celestial Revelation (Radiant Soul)",
+  "Healing Hands",
+  "Fanged Bite",
+  "Wrath of the Storm",
 ];
 
 Hooks.on("ready", () => {
@@ -99,6 +124,7 @@ async function heraldHud_renderHeraldHud() {
     await heraldHud_settingHudToBottom();
     await heraldHud_renderChargeTracker();
     await heraldHud_renderActorInfo();
+  
   }, 500);
 }
 
@@ -405,9 +431,20 @@ async function heraldHud_updateShorcutButton() {
 }
 
 // Hooks untuk memperbarui tombol saat status combat berubah
-Hooks.on("updateCombat", heraldHud_updateShorcutButton);
-Hooks.on("createCombat", heraldHud_updateShorcutButton);
-Hooks.on("deleteCombat", heraldHud_updateShorcutButton);
+Hooks.on("updateCombat", () => {
+  heraldHud_updateShorcutButton();
+  heraldHud_npcInitiativeEndturn();
+});
+
+Hooks.on("createCombat", () => {
+  heraldHud_updateShorcutButton();
+  heraldHud_npcInitiativeEndturn();
+});
+
+Hooks.on("deleteCombat", () => {
+  heraldHud_updateShorcutButton();
+  heraldHud_npcInitiativeEndturn();
+});
 
 async function heraldHud_updateDataActor() {
   let actor = heraldHud_actorSelected;
@@ -2353,6 +2390,16 @@ async function heraldHud_getDataFeatures() {
             if (chargeValueDiv) {
               chargeValueDiv.textContent = `${item.system.uses.value}/${item.system.uses.max}`;
             }
+            let overlayChargeValueDiv = document.getElementById(
+              `heraldHud-overlayChargeValue-${item.id}`
+            );
+            let heightOverlay =
+              item.system.uses.max > 0
+                ? `${
+                    (1 - item.system.uses.value / item.system.uses.max) * 100
+                  }%`
+                : "100%";
+            overlayChargeValueDiv.style.height = heightOverlay;
           }
         });
       });
@@ -3291,7 +3338,9 @@ async function heraldHud_openSettingHudDialog() {
       </div>
        <div style="display: flex; align-items: center; gap: 10px;">
         <input type="checkbox" id="heraldHud-informationButtonToggle" ${
-          game.settings.get("herald-hud", "displayInformationButton") ? "checked" : ""
+          game.settings.get("herald-hud", "displayInformationButton")
+            ? "checked"
+            : ""
         }>
         <label for="heraldHud-informationButtonToggle">Disable Information Button</label>
       </div>
@@ -3343,7 +3392,8 @@ async function heraldHud_openSettingHudDialog() {
           heraldHud_dockHudToBottom = dockHudCheckbox.checked;
           heraldHud_statsAbbreviations = statsAbbreviationsCheckbox.checked;
           heraldHud_displayChargeTracker = displayChargeTrackerCheckbox.checked;
-          heraldHud_displayInformationButton = informationButtonCheckbox.checked;
+          heraldHud_displayInformationButton =
+            informationButtonCheckbox.checked;
           await game.settings.set(
             "herald-hud",
             "statsAbbreviations",
@@ -3391,41 +3441,6 @@ async function heraldHud_renderViewInformation() {
   if (heraldHud_dialogDiv) {
     heraldHud_dialogDiv.innerHTML = `
     <div id="heraldHud-dialogActorInformation" class="heraldHud-dialogActorInformation">
-      <div id="heraldHud-sensesInfoContainer" class="heraldHud-sensesInfoContainer">
-        <div id="heraldHud-sensesInfoTitle" class="heraldHud-sensesInfoTitle">Senses</div>
-        <hr style=" border: 1px solid grey; margin-top: 5px;">
-        <div id="heraldHud-sensesInfoList" class="heraldHud-sensesInfoList">
-      
-        </div>
-      </div>
-      <div id="heraldHud-immunitiesInfoContainer" class="heraldHud-immunitiesInfoContainer">
-        <div id="heraldHud-immunitiesInfoTitle" class="heraldHud-immunitiesInfoTitle">Immunities</div>
-        <hr style=" border: 1px solid grey; margin-top: 5px;">
-        <div id="heraldHud-immunitiesInfoList" class="heraldHud-immunitiesInfoList">
-      
-        </div>
-      </div>
-      <div id="heraldHud-armorInfoContainer" class="heraldHud-armorInfoContainer">
-        <div id="heraldHud-armorInfoTitle" class="heraldHud-armorInfoTitle">Armor</div>
-        <hr style=" border: 1px solid grey; margin-top: 5px;">
-        <div id="heraldHud-armorInfoList" class="heraldHud-armorInfoList">
-      
-        </div>
-      </div>
-       <div id="heraldHud-weaponsInfoContainer" class="heraldHud-weaponsInfoContainer">
-        <div id="heraldHud-weaponsInfoTitle" class="heraldHud-weaponsInfoTitle">Weapons</div>
-        <hr style=" border: 1px solid grey; margin-top: 5px;">
-        <div id="heraldHud-weaponsInfoList" class="heraldHud-weaponsInfoList">
-      
-        </div>
-      </div>
-       <div id="heraldHud-languagesInfoContainer" class="heraldHud-languagesInfoContainer">
-        <div id="heraldHud-languagesInfoTitle" class="heraldHud-languagesInfoTitle">Languages</div>
-        <hr style=" border: 1px solid grey; margin-top: 5px;">
-        <div id="heraldHud-languagesInfoList" class="heraldHud-languagesInfoList">
-      
-        </div>
-      </div>
     </div>`;
   }
   await heraldHud_getDataInformation();
@@ -3433,126 +3448,334 @@ async function heraldHud_renderViewInformation() {
 
 async function heraldHud_getDataInformation() {
   let actor = heraldHud_actorSelected;
+  let dialogInformationDiv = document.getElementById(
+    "heraldHud-dialogActorInformation"
+  );
   console.log(actor.system.traits);
-  let senses = actor.system?.attributes?.senses || {};
-  let filteredSenses = Object.entries(senses).filter(
+  let sensesDiv = ``;
+  let resistancesDiv = ``;
+  let damageImmunitiesDiv = ``;
+  let conditionImmunitiesDiv = ``;
+  let vulnerabilitiesDiv = ``;
+  let damageModificationDiv = ``;
+  let armorDiv = ``;
+  let weaponsDiv = ``;
+  let languagesDiv = ``;
+
+  let sensesValue = actor.system?.attributes?.senses || {};
+  let sensesArray = Object.entries(sensesValue).filter(
     ([key, value]) => typeof value === "number" && value > 0
   );
-  await heraldHud_renderDataInfoKeyValue(
-    filteredSenses,
-    "heraldHud-sensesInfoList"
+  if (sensesArray.length > 0) {
+    let sensesItems = ``;
+    for (let [key, value] of sensesArray) {
+      let formattedKey = key.replace(/([A-Z])/g, " $1").trim();
+      formattedKey =
+        formattedKey.charAt(0).toUpperCase() + formattedKey.slice(1);
+      sensesItems += `<div class="heraldHud-infoBadge">${formattedKey} | ${value}</div>`;
+    }
+    sensesDiv = `
+    <div id="heraldHud-informationContainer" class="heraldHud-informationContainer">
+      <div id="heraldHud-informationTitle" class="heraldHud-informationTitle">Senses</div>
+      <hr style=" border: 1px solid grey; margin-top: 5px;">
+      <div id="heraldHud-informationList" class="heraldHud-informationList">
+        ${sensesItems}
+      </div>
+    </div>
+    `;
+  }
+
+  let resistancesCustom = actor.system?.traits?.dr.custom || "";
+  let resistancesValue = actor.system?.traits?.dr.value || new Set();
+
+  let resistancesArray = [...resistancesValue].map(
+    (item) => item.charAt(0).toUpperCase() + item.slice(1)
+  );
+  // if (resistancesCustom) {
+  //   resistancesArray = resistancesArray.concat(resistancesCustom.split(";").map(item => item.trim()));
+  // }
+
+  if (resistancesArray.length > 0) {
+    let resistancesItems = ``;
+    for (let item of resistancesArray) {
+      resistancesItems += `<div class="heraldHud-infoBadge">${item}</div>`;
+    }
+    resistancesDiv = `
+    <div id="heraldHud-informationContainer" class="heraldHud-informationContainer">
+      <div id="heraldHud-informationTitle" class="heraldHud-informationTitle">Resistances</div>
+      <hr style=" border: 1px solid grey; margin-top: 5px;">
+      <div id="heraldHud-informationList" class="heraldHud-informationList">
+        ${resistancesItems}
+      </div>
+    </div>
+    `;
+  }
+
+  let damageImmunitiesCustom = actor.system?.traits?.di.custom || "";
+  let damageImmunitiesValue = actor.system?.traits?.di.value || new Set();
+
+  let damageImmunitiesArray = [...damageImmunitiesValue].map(
+    (item) => item.charAt(0).toUpperCase() + item.slice(1)
   );
 
-  let immunities = actor.system?.traits?.ci.custom || {};
+  // if (damageImmunitiesCustom) {
+  //   damageImmunitiesArray = damageImmunitiesArray.concat(damageImmunitiesCustom.split(";").map(item => item.trim()));
+  // }
+  if (damageImmunitiesArray.length > 0) {
+    let damageImmunitiesItems = ``;
+    for (let item of damageImmunitiesArray) {
+      damageImmunitiesItems += `<div class="heraldHud-infoBadge">${item}</div>`;
+    }
+    damageImmunitiesDiv = `
+    <div id="heraldHud-informationContainer" class="heraldHud-informationContainer">
+      <div id="heraldHud-informationTitle" class="heraldHud-informationTitle">Damage Immunities</div>
+      <hr style=" border: 1px solid grey; margin-top: 5px;">
+      <div id="heraldHud-informationList" class="heraldHud-informationList">
+        ${damageImmunitiesItems}
+      </div>
+    </div>
+    `;
+  }
 
-  let immunityList = immunities.split(";");
+  let conditionImmunitiesCustom = actor.system?.traits?.ci.custom || "";
+  let conditionImmunitiesValue = actor.system?.traits?.ci.value || new Set();
 
-  await heraldHud_renderDatainfoValue(
-    immunityList,
-    "heraldHud-immunitiesInfoList"
+  let conditionImmunitiesArray = [...conditionImmunitiesValue].map(
+    (item) => item.charAt(0).toUpperCase() + item.slice(1)
   );
 
+  // if (conditionImmunitiesCustom) {
+  //   conditionImmunitiesArray = conditionImmunitiesArray.concat(conditionImmunitiesCustom.split(";").map(item => item.trim()));
+  // }
+  if (conditionImmunitiesArray.length > 0) {
+    let conditionImmunitiesItems = ``;
+    for (let item of conditionImmunitiesArray) {
+      conditionImmunitiesItems += `<div class="heraldHud-infoBadge">${item}</div>`;
+    }
+    conditionImmunitiesDiv = `
+    <div id="heraldHud-informationContainer" class="heraldHud-informationContainer">
+      <div id="heraldHud-informationTitle" class="heraldHud-informationTitle">Condition Immunities</div>
+      <hr style=" border: 1px solid grey; margin-top: 5px;">
+      <div id="heraldHud-informationList" class="heraldHud-informationList">
+        ${conditionImmunitiesItems}
+      </div>
+    </div>
+    `;
+  }
 
-  let armor = actor.system?.traits.armorProf.value || {};
+  let vulnerabilitiesCustom = actor.system?.traits?.dv.custom || "";
+  let vulnerabilitiesValue = actor.system?.traits?.dv.value || new Set();
 
+  let vulnerabilitiesArray = [...vulnerabilitiesValue].map(
+    (item) => item.charAt(0).toUpperCase() + item.slice(1)
+  );
+
+  // if (vulnerabilitiesCustom) {
+  //   vulnerabilitiesArray = vulnerabilitiesArray.concat(vulnerabilitiesCustom.split(";").map(item => item.trim()));
+  // }
+  if (vulnerabilitiesArray.length > 0) {
+    let vulnerabilitiesItems = ``;
+    for (let item of vulnerabilitiesArray) {
+      vulnerabilitiesItems += `<div class="heraldHud-infoBadge">${item}</div>`;
+    }
+    vulnerabilitiesDiv = `
+    <div id="heraldHud-informationContainer" class="heraldHud-informationContainer">
+      <div id="heraldHud-informationTitle" class="heraldHud-informationTitle">Vulnerabilities</div>
+      <hr style=" border: 1px solid grey; margin-top: 5px;">
+      <div id="heraldHud-informationList" class="heraldHud-informationList">
+        ${vulnerabilitiesItems}
+      </div>
+    </div>
+    `;
+  }
+
+  let damageModificationValue = actor.system?.traits?.dm.amount || new Set();
+  let damageModificationArray = Object.entries(damageModificationValue);
+
+  if (damageModificationArray.length > 0) {
+    let damageModificationItems = ``;
+    for (let [key, value] of damageModificationArray) {
+      let formattedKey = key.replace(/([A-Z])/g, " $1").trim();
+      formattedKey =
+        formattedKey.charAt(0).toUpperCase() + formattedKey.slice(1);
+
+      if (!value.startsWith("-")) {
+        value = `+${value}`;
+      }
+
+      damageModificationItems += `<div class="heraldHud-infoBadge">${formattedKey} | ${value}</div>`;
+    }
+    damageModificationDiv = `
+    <div id="heraldHud-informationContainer" class="heraldHud-informationContainer">
+      <div id="heraldHud-informationTitle" class="heraldHud-informationTitle">Damage Modification</div>
+      <hr style=" border: 1px solid grey; margin-top: 5px;">
+      <div id="heraldHud-informationList" class="heraldHud-informationList">
+        ${damageModificationItems}
+      </div>
+    </div>
+    `;
+  }
+
+  let armorCustom = actor.system?.traits?.armorProf.custom || "";
+  let armorValue = actor.system?.traits?.armorProf.value || new Set();
   let armorTypes = {
-    "lgt": "Light",
-    "med": "Medium",
-    "hvy": "Heavy",
-    "shld": "Shields"
+    lgt: "Light",
+    med: "Medium",
+    hvy: "Heavy",
+    shld: "Shields",
   };
-  let armorList = Array.from(armor).map(type => armorTypes[type] || type);
-  await heraldHud_renderDatainfoValue(
-    armorList,
-    "heraldHud-armorInfoList"
+  let armorArray = Array.from(armorValue).map(
+    (type) => armorTypes[type] || type
   );
 
-  let weapon = actor.system?.traits.weaponProf.value || {};
+  // if (armorCustom) {
+  //   armorArray = armorArray.concat(armorCustom.split(";").map(item => item.trim()));
+  // }
+
+  if (armorArray.length > 0) {
+    let armorItems = ``;
+    for (let item of armorArray) {
+      armorItems += `<div class="heraldHud-infoBadge">${item}</div>`;
+    }
+    armorDiv = `
+    <div id="heraldHud-informationContainer" class="heraldHud-informationContainer">
+      <div id="heraldHud-informationTitle" class="heraldHud-informationTitle">Armor</div>
+      <hr style=" border: 1px solid grey; margin-top: 5px;">
+      <div id="heraldHud-informationList" class="heraldHud-informationList">
+        ${armorItems}
+      </div>
+    </div>
+    `;
+  }
+
+  let weaponCustom = actor.system?.traits?.weaponProf.custom || "";
+  let weaponValue = actor.system?.traits?.weaponProf.value || new Set();
   let weaponTypes = {
-    // General categories
-    "sim": "Simple",
-    "mar": "Martial",
-    "ranged": "Ranged",
-    "mele": "Melee",
-  
-    // Simple Melee Weapons
-    "club": "Club",
-    "dagger": "Dagger",
-    "greatclub": "Greatclub",
-    "handaxe": "Handaxe",
-    "javelin": "Javelin",
-    "lightHammer": "Light Hammer",
-    "mace": "Mace",
-    "quarterstaff": "Quarterstaff",
-    "sickle": "Sickle",
-    "spear": "Spear",
-  
-    // Simple Ranged Weapons
-    "lightCrossbow": "Light Crossbow",
-    "dart": "Dart",
-    "shortbow": "Shortbow",
-    "sling": "Sling",
-  
-    // Martial Melee Weapons
-    "battleaxe": "Battleaxe",
-    "flail": "Flail",
-    "glaive": "Glaive",
-    "greataxe": "Greataxe",
-    "greatsword": "Greatsword",
-    "halberd": "Halberd",
-    "lance": "Lance",
-    "longsword": "Longsword",
-    "maul": "Maul",
-    "morningstar": "Morningstar",
-    "pike": "Pike",
-    "rapier": "Rapier",
-    "scimitar": "Scimitar",
-    "shortsword": "Shortsword",
-    "trident": "Trident",
-    "warhammer": "Warhammer",
-    "whip": "Whip",
-  
-    // Martial Ranged Weapons
-    "blowgun": "Blowgun",
-    "handcrossbow": "Hand Crossbow",
-    "heavycrossbow": "Heavy Crossbow",
-    "longbow": "Longbow",
-    "net": "Net"
+    sim: "Simple",
+    mar: "Martial",
+    ranged: "Ranged",
+    mele: "Melee",
+    club: "Club",
+    dagger: "Dagger",
+    greatclub: "Greatclub",
+    handaxe: "Handaxe",
+    javelin: "Javelin",
+    lightHammer: "Light Hammer",
+    mace: "Mace",
+    quarterstaff: "Quarterstaff",
+    sickle: "Sickle",
+    spear: "Spear",
+    lightCrossbow: "Light Crossbow",
+    dart: "Dart",
+    shortbow: "Shortbow",
+    sling: "Sling",
+    battleaxe: "Battleaxe",
+    flail: "Flail",
+    glaive: "Glaive",
+    greataxe: "Greataxe",
+    greatsword: "Greatsword",
+    halberd: "Halberd",
+    lance: "Lance",
+    longsword: "Longsword",
+    maul: "Maul",
+    morningstar: "Morningstar",
+    pike: "Pike",
+    rapier: "Rapier",
+    scimitar: "Scimitar",
+    shortsword: "Shortsword",
+    trident: "Trident",
+    warhammer: "Warhammer",
+    whip: "Whip",
+    blowgun: "Blowgun",
+    handcrossbow: "Hand Crossbow",
+    heavycrossbow: "Heavy Crossbow",
+    longbow: "Longbow",
+    net: "Net",
   };
 
-  let weaponList = Array.from(weapon).map(type => weaponTypes[type] || type);
-  await heraldHud_renderDatainfoValue(
-    weaponList,
-    "heraldHud-weaponsInfoList"
+  let weaponArray = Array.from(weaponValue).map(
+    (type) => weaponTypes[type] || type
   );
 
+  // if (weaponCustom) {
+  //   weaponArray = weaponArray.concat(weaponCustom.split(";").map(item => item.trim()));
+  // }
 
-  let languages = actor.system?.traits.languages.value || {};
-  let languageNames = {
-    "common": "Common",
-    "dwarvish": "Dwarvish",
-    "elvish": "Elvish",
-    "giant": "Giant",
-    "gnomish": "Gnomish",
-    "goblin": "Goblin",
-    "halfling": "Halfling",
-    "orc": "Orc",
-    "abyssal": "Abyssal",
-    "celestial": "Celestial",
-    "draconic": "Draconic",
-    "deep": "Deep Speech",
-    "infernal": "Infernal",
-    "primordial": "Primordial",
-    "sylvan": "Sylvan",
-    "undercommon": "Undercommon",
-    "telepathy": "Telepathy"
+  if (weaponArray.length > 0) {
+    let weaponItems = ``;
+    for (let item of weaponArray) {
+      weaponItems += `<div class="heraldHud-infoBadge">${item}</div>`;
+    }
+    weaponsDiv = `
+    <div id="heraldHud-informationContainer" class="heraldHud-informationContainer">
+      <div id="heraldHud-informationTitle" class="heraldHud-informationTitle">Weapons</div>
+      <hr style=" border: 1px solid grey; margin-top: 5px;">
+      <div id="heraldHud-informationList" class="heraldHud-informationList">
+        ${weaponItems}
+      </div>
+    </div>
+    `;
+  }
+
+  let languagesCustom = actor.system?.traits?.languages.custom || "";
+  let languagesValue = actor.system?.traits?.languages.value || new Set();
+  let languagesTypes = {
+    common: "Common",
+    dwarvish: "Dwarvish",
+    elvish: "Elvish",
+    giant: "Giant",
+    gnomish: "Gnomish",
+    goblin: "Goblin",
+    halfling: "Halfling",
+    orc: "Orc",
+    abyssal: "Abyssal",
+    celestial: "Celestial",
+    draconic: "Draconic",
+    deep: "Deep Speech",
+    infernal: "Infernal",
+    primordial: "Primordial",
+    sylvan: "Sylvan",
+    undercommon: "Undercommon",
+    telepathy: "Telepathy",
   };
 
-  let languageList = Array.from(languages).map(lang => languageNames[lang] || lang);
-  await heraldHud_renderDatainfoValue(
-    languageList,
-    "heraldHud-languagesInfoList"
+  let languagesArray = Array.from(languagesValue).map(
+    (type) => languagesTypes[type] || type
   );
+
+  // if (languagesCustom) {
+  //   languagesArray = languagesArray.concat(languagesCustom.split(";").map(item => item.trim()));
+  // }
+
+  if (languagesArray.length > 0) {
+    let languagesItems = ``;
+    for (let item of languagesArray) {
+      languagesItems += `<div class="heraldHud-infoBadge">${item}</div>`;
+    }
+    languagesDiv = `
+    <div id="heraldHud-informationContainer" class="heraldHud-informationContainer">
+      <div id="heraldHud-informationTitle" class="heraldHud-informationTitle">Languages</div>
+      <hr style=" border: 1px solid grey; margin-top: 5px;">
+      <div id="heraldHud-informationList" class="heraldHud-informationList">
+        ${languagesItems}
+      </div>
+    </div>
+    `;
+  }
+
+  if (dialogInformationDiv) {
+    dialogInformationDiv.innerHTML = `
+    ${sensesDiv}
+    ${resistancesDiv}
+    ${damageImmunitiesDiv}
+    ${conditionImmunitiesDiv}
+    ${vulnerabilitiesDiv}
+    ${damageModificationDiv}
+    ${armorDiv}
+    ${weaponsDiv}
+    ${languagesDiv}
+  `;
+  }
 }
 
 async function heraldHud_renderDataInfoKeyValue(data, containerId) {
@@ -3676,10 +3899,19 @@ async function heraldHud_renderChargeTracker() {
     let charges = item.system.uses?.value ?? 0;
     let maxCharges = item.system.uses?.max ?? 0;
     let isFavorite = favoriteItems.some((fav) => fav.id === item.id);
+
+    let heightOverlay =
+      maxCharges > 0 ? `${(1 - charges / maxCharges) * 100}%` : "100%";
     listChargeItem += `
-       <div class="heraldHud-chargeItem" data-item-id="${item.id}" title="${
-      item.name
-    }">
+       <div class="heraldHud-chargeItem" data-item-id="${item.id}">
+        <div id="heraldHud-overlayChargeContainer-${
+          item.id
+        }" class="heraldHud-overlayChargeContainer" >
+            <div id="heraldHud-overlayChargeValue-${
+              item.id
+            }" class="heraldHud-overlayChargeValue" style="height:${heightOverlay}"></div>
+        </div>
+      
         <img src="${imgSrc}" class="heraldHud-chargeImage" alt="${item.name}">
         <div id="heraldHud-chargeValue-${
           item.id
@@ -3708,10 +3940,21 @@ async function heraldHud_renderChargeTracker() {
 
           if (item) {
             await item.use();
-            let chargeText = itemElement.querySelector(
-              ".heraldHud-chargeValue"
+            let chargeValueDiv = document.getElementById(
+              `heraldHud-chargeValue-${item.id}`
             );
-            chargeText.textContent = `${item.system.uses.value}/${item.system.uses.max}`;
+
+            chargeValueDiv.textContent = `${item.system.uses.value}/${item.system.uses.max}`;
+            let overlayChargeValueDiv = document.getElementById(
+              `heraldHud-overlayChargeValue-${item.id}`
+            );
+            let heightOverlay =
+              item.system.uses.max > 0
+                ? `${
+                    (1 - item.system.uses.value / item.system.uses.max) * 100
+                  }%`
+                : "100%";
+            overlayChargeValueDiv.style.height = heightOverlay;
           }
         });
       });
@@ -3927,12 +4170,15 @@ async function heraldHud_renderViewListNpc() {
                     <span class="heraldHud-npcActionButtonTooltip">Stats</span>
                   </div>
                   <div class="heraldHud-npcActionButton" data-id="${id}" data-type="remove">
-                    
                     <span class="heraldHud-npcActionButtonTooltip">Remove</span>
                   </div>
-                   <div class="heraldHud-npcActionButton" data-id="${id}" data-type="initiative">
-                      <img src="/modules/herald-hud-beta/assets/blued20_icon.png" alt="Initiative" style="width:20px;height:20px; border:none"/>
+                  <div id="heraldHud-npcActionButton" class="heraldHud-npcActionButton" data-id="${id}" data-type="initiative" >
+                    <img src="/modules/herald-hud-beta/assets/blued20_icon.png" alt="Initiative" style="width:20px;height:20px; border:none"/>
                     <span class="heraldHud-npcActionButtonTooltip">Initiative</span>
+                  </div>
+                  <div id="heraldHud-npcActionButton" class="heraldHud-npcActionButton" data-id="${id}" data-type="endturn">
+                    <img src="/modules/herald-hud-beta/assets/blued20_icon.png" alt="End Turn" style="width:20px;height:20px; border:none"/>
+                    <span class="heraldHud-npcActionButtonTooltip">End Turn</span>
                   </div>
                 </div>
               </div>
@@ -4078,7 +4324,51 @@ async function heraldHud_renderViewListNpc() {
     });
 
     await heraldHud_getDataListNpc();
+    await heraldHud_npcInitiativeEndturn();
   }
+}
+
+async function heraldHud_npcInitiativeEndturn() {
+  if (!game.combat || !game.combat.started) {
+    console.log("Tidak ada combat aktif.");
+    return;
+  }
+
+  let currentCombatant = game.combat.combatant; 
+  if (!currentCombatant) {
+    console.log("Tidak ada combatant yang sedang beraksi.");
+    return;
+  }
+
+  let currentNpcId = currentCombatant.actor.id;
+  document
+    .querySelectorAll(".heraldHud-npcActionButton")
+    .forEach(async (actionButton) => {
+      let npcId = actionButton.getAttribute("data-id");
+      let type = actionButton.getAttribute("data-type");
+
+      let tokenDocument = await fromUuid(npcId);
+      let token = tokenDocument.object;
+      let npc = token.actor;
+
+      if (npc.id === currentNpcId) {
+        // NPC ini sedang beraksi → tampilkan "End Turn", sembunyikan "Initiative"
+        if (type === "endturn") {
+          actionButton.style.display = "block";
+        }
+        if (type === "initiative") {
+          actionButton.style.display = "none";
+        }
+      } else {
+        // NPC lain → tampilkan "Initiative", sembunyikan "End Turn"
+        if (type === "initiative") {
+          actionButton.style.display = "block";
+        }
+        if (type === "endturn") {
+          actionButton.style.display = "none";
+        }
+      }
+    });
 }
 
 async function heraldHud_getDataListNpc() {
@@ -4280,6 +4570,11 @@ async function heraldHud_showNpcDialog(id, kategori) {
     await heraldHud_npcRollInitiatve(id);
     await heraldHud_resetNpcDialog();
     heraldHud_showNpcDialogValue = false;
+  }else if (kategori == "endturn") {
+    const combat = game.combat;
+    await combat.nextTurn();
+    await heraldHud_resetNpcDialog();
+    heraldHud_showNpcDialogValue = false;
   }
 }
 
@@ -4290,6 +4585,29 @@ async function heraldHud_renderNpcDialog(kategori) {
     heraldHud_npcDialogDiv.className = "heraldHud-npcDialog";
     heraldHud_npcDialogDiv.classList.add(`${kategori}`);
   }
+
+  let heraldHud_npcDialogCloseButtonDiv = document.getElementById(
+    "heraldHud-npcDialogClose"
+  );
+  if (heraldHud_npcDialogCloseButtonDiv) {
+    heraldHud_npcDialogCloseButtonDiv.innerHTML = `
+     <div id="heraldHud-npcDialogCloseButtonContainer" class="heraldHud-npcDialogCloseButtonContainer">
+        <div id="heraldHud-npcDialogCloseButton" class="heraldHud-npcDialogCloseButton">
+          <i class="fa-solid fa-xmark"></i>
+        </div>
+     </div>
+    `;
+
+    let npcCloseButtonDiv = document.getElementById(
+      "heraldHud-npcDialogCloseButtonContainer"
+    );
+    if (npcCloseButtonDiv) {
+      npcCloseButtonDiv.addEventListener("click", async function () {
+        await heraldHud_resetNpcDialog();
+        heraldHud_showNpcDialogValue = false;
+      });
+    }
+  }
 }
 
 async function heraldHud_resetNpcDialog() {
@@ -4297,6 +4615,13 @@ async function heraldHud_resetNpcDialog() {
   if (heraldHud_npcDialogDiv) {
     heraldHud_npcDialogDiv.className = "heraldHud-npcDialog";
     heraldHud_npcDialogDiv.style.display = "none";
+  }
+
+  let heraldHud_npcDialogCloseButtonDiv = document.getElementById(
+    "heraldHud-npcDialogClose"
+  );
+  if (heraldHud_npcDialogCloseButtonDiv) {
+    heraldHud_npcDialogCloseButtonDiv.innerHTML = ``;
   }
 }
 
@@ -4356,6 +4681,19 @@ async function heraldHud_npcGetDataActions(id) {
           npc.items.get(itemId) || npc.getEmbeddedDocument("Item", itemId);
         if (item) {
           await item.use();
+
+          let updateItem =
+            npc.items.get(itemId) || npc.getEmbeddedDocument("Item", itemId);
+
+          let chargeValue = ``;
+          if (updateItem.system.uses.max > 0) {
+            chargeValue = `${updateItem.system.uses.value} / ${updateItem.system.uses.max} |`;
+
+            let actionChargeDiv = document.getElementById(
+              `heraldHud-npcActionCharge-${itemId}`
+            );
+            actionChargeDiv.innerText = chargeValue;
+          }
         }
       });
     });
@@ -4400,6 +4738,11 @@ async function heraldHud_renderNpcDataActions(id) {
       labelProperti = arrProperti.join(" | ");
     }
 
+    let chargeValue = ``;
+    if (item.system.uses.max > 0) {
+      chargeValue = `${item.system.uses.value} / ${item.system.uses.max} |`;
+    }
+
     let actionRange = item.system.range?.units
       ? `${item.system.range.value || ""}${
           item.system.range.long ? `/${item.system.range.long}` : ""
@@ -4430,6 +4773,9 @@ async function heraldHud_renderNpcDataActions(id) {
               <div class="heraldHud-npcActionMiddleMid">
                 <div id="heraldHud-npcActionCategory-${item.id}" class="heraldHud-npcActionCategory">
                   
+                </div>
+                <div id="heraldHud-npcActionCharge-${item.id}" class="heraldHud-npcActionCharge">
+                  ${chargeValue}
                 </div>
                 <div class="heraldHud-npcActionRange">
                   ${displayRange}
@@ -4492,6 +4838,10 @@ async function heraldHud_renderNpcDataBonus(id) {
     if (arrProperti.length > 0) {
       labelProperti = arrProperti.join(" | ");
     }
+    let chargeValue = ``;
+    if (item.system.uses.max > 0) {
+      chargeValue = `${item.system.uses.value} / ${item.system.uses.max} |`;
+    }
 
     let actionRange = item.system.range?.units
       ? `${item.system.range.value || ""}${
@@ -4522,6 +4872,9 @@ async function heraldHud_renderNpcDataBonus(id) {
               <div class="heraldHud-npcActionMiddleMid">
                 <div id="heraldHud-npcActionCategory-${item.id}" class="heraldHud-npcActionCategory">
                   
+                </div>
+                <div id="heraldHud-npcActionCharge-${item.id}" class="heraldHud-npcActionCharge">
+                  ${chargeValue}
                 </div>
                 <div class="heraldHud-npcActionRange">
                   ${displayRange}
@@ -4584,6 +4937,10 @@ async function heraldHud_renderNpcDataReaction(id) {
     if (arrProperti.length > 0) {
       labelProperti = arrProperti.join(" | ");
     }
+    let chargeValue = ``;
+    if (item.system.uses.max > 0) {
+      chargeValue = `${item.system.uses.value} / ${item.system.uses.max} |`;
+    }
     let actionRange = item.system.range?.units
       ? `${item.system.range.value || ""}${
           item.system.range.long ? `/${item.system.range.long}` : ""
@@ -4613,6 +4970,9 @@ async function heraldHud_renderNpcDataReaction(id) {
              <div class="heraldHud-npcActionMiddleMid">
                 <div id="heraldHud-npcActionCategory-${item.id}" class="heraldHud-npcActionCategory">
                   
+                </div>
+                <div id="heraldHud-npcActionCharge-${item.id}" class="heraldHud-npcActionCharge">
+                  ${chargeValue}
                 </div>
                 <div class="heraldHud-npcActionRange">
                   ${displayRange}
@@ -4696,7 +5056,10 @@ async function heraldHud_renderNpcDataOther(id) {
     if (arrProperti.length > 0) {
       labelProperti = arrProperti.join(" | ");
     }
-
+    let chargeValue = ``;
+    if (item.system.uses.max > 0) {
+      chargeValue = `${item.system.uses.value} / ${item.system.uses.max} |`;
+    }
     let actionRange = item.system.range?.units
       ? `${item.system.range.value || ""}${
           item.system.range.long ? `/${item.system.range.long}` : ""
@@ -4726,6 +5089,9 @@ async function heraldHud_renderNpcDataOther(id) {
               <div class="heraldHud-npcActionMiddleMid">
                 <div id="heraldHud-npcActionCategory-${item.id}" class="heraldHud-npcActionCategory">
                   ${category}
+                </div>
+                 <div id="heraldHud-npcActionCharge-${item.id}" class="heraldHud-npcActionCharge">
+                  ${chargeValue}
                 </div>
                 <div class="heraldHud-npcActionRange">
                   ${displayRange}
