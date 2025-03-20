@@ -4352,7 +4352,6 @@ async function heraldHud_npcInitiativeEndturn() {
       let npc = token.actor;
 
       if (npc.id === currentNpcId) {
-        // NPC ini sedang beraksi → tampilkan "End Turn", sembunyikan "Initiative"
         if (type === "endturn") {
           actionButton.style.display = "block";
         }
@@ -4360,7 +4359,6 @@ async function heraldHud_npcInitiativeEndturn() {
           actionButton.style.display = "none";
         }
       } else {
-        // NPC lain → tampilkan "Initiative", sembunyikan "End Turn"
         if (type === "initiative") {
           actionButton.style.display = "block";
         }
