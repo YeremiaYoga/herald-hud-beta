@@ -46,7 +46,7 @@ let heraldHud_listChargeTracker = [
   "Second Wind",
   "Action Surge",
   "Ki",
-  "Ki Point",
+  "Ki Points",
   "Lay on Hands",
   "Favored Foe",
   "Arcane Recovery",
@@ -291,6 +291,30 @@ async function heraldHud_renderActorData() {
       <div class="heraldHud-longRestTooltip">Long Rest</div>
     </div>`;
   }
+  setTimeout(() => {
+    const shortRestButton = document.getElementById(
+      "heraldHud-shortRestContainer"
+    );
+    const longRestButton = document.getElementById(
+      "heraldHud-longRestContainer"
+    );
+
+    if (shortRestButton) {
+      shortRestButton.addEventListener("click", async () => {
+        if (heraldHud_actorSelected) {
+          await heraldHud_actorSelected.shortRest();
+        }
+      });
+    }
+
+    if (longRestButton) {
+      longRestButton.addEventListener("click", async () => {
+        if (heraldHud_actorSelected) {
+          await heraldHud_actorSelected.longRest();
+        }
+      });
+    }
+  }, 500);
 
   let equipmentShortcutContainerDiv = document.getElementById(
     "heraldHud-equipmentShortcutContainer"
@@ -305,6 +329,15 @@ async function heraldHud_renderActorData() {
       <div class="heraldHud-equipmentTooltip">Equipment</div>
     </div>
     `;
+
+    let equipmentButton = document.getElementById("heraldHud-equipmentContainer");
+
+    if (equipmentButton) {
+      equipmentButton.addEventListener("click", (event) => {
+        event.stopPropagation();
+        heraldHud_showDialog("equipment");
+      });
+    }
   }
 
   let settingHudContainerDiv = document.getElementById(
@@ -331,30 +364,7 @@ async function heraldHud_renderActorData() {
     }
   }
 
-  setTimeout(() => {
-    const shortRestButton = document.getElementById(
-      "heraldHud-shortRestContainer"
-    );
-    const longRestButton = document.getElementById(
-      "heraldHud-longRestContainer"
-    );
 
-    if (shortRestButton) {
-      shortRestButton.addEventListener("click", async () => {
-        if (heraldHud_actorSelected) {
-          await heraldHud_actorSelected.shortRest();
-        }
-      });
-    }
-
-    if (longRestButton) {
-      longRestButton.addEventListener("click", async () => {
-        if (heraldHud_actorSelected) {
-          await heraldHud_actorSelected.longRest();
-        }
-      });
-    }
-  }, 500);
 
   const summonContainer = document.getElementById(
     "heraldHud-addSummonContainer"
@@ -1371,6 +1381,8 @@ async function heraldHud_showDialog(kategori) {
     await heraldHud_renderContainerSpellsPrep();
   } else if (kategori == "information") {
     await heraldHud_renderViewInformation();
+  } else if (kategori == "equipment") {
+    await heraldHud_renderViewEquipment();
   }
 }
 async function heraldHud_renderDialog(kategori) {
@@ -3622,7 +3634,20 @@ async function heraldHud_getDataInformation() {
     lgt: "Light",
     med: "Medium",
     hvy: "Heavy",
-    shld: "Shields",
+    shl: "Shields",
+    leather: "Leather Armor",
+    padded: "Padded Armor",
+    studded: "Studded Leather Armor",
+    breastplate: "Breastplate",
+    chainshirt: "Chain Shirt",
+    halfplate: "Half Plate Armor",
+    hide: "Hide Armor",
+    scalemail: "Scale Mail",
+    chainmail: "Chain Mail",
+    plate: "Plate Armor",
+    ringmail: "Ring Mail",
+    splint: "Splint Armor",
+    shield: "Shield",
   };
   let armorArray = Array.from(armorValue).map(
     (type) => armorTypes[type] || type
@@ -3720,6 +3745,7 @@ async function heraldHud_getDataInformation() {
   let languagesCustom = actor.system?.traits?.languages.custom || "";
   let languagesValue = actor.system?.traits?.languages.value || new Set();
   let languagesTypes = {
+    // Standard Languages
     common: "Common",
     dwarvish: "Dwarvish",
     elvish: "Elvish",
@@ -3728,16 +3754,28 @@ async function heraldHud_getDataInformation() {
     goblin: "Goblin",
     halfling: "Halfling",
     orc: "Orc",
+    aarakocra: "Aarakocra",
     abyssal: "Abyssal",
     celestial: "Celestial",
-    draconic: "Draconic",
     deep: "Deep Speech",
+    draconic: "Draconic",
+    gith: "Gith",
+    gnoll: "Gnoll",
     infernal: "Infernal",
     primordial: "Primordial",
+    aquan: "Aquan",
+    auran: "Auran",
+    ignan: "Ignan",
+    terran: "Terran",
     sylvan: "Sylvan",
     undercommon: "Undercommon",
-    telepathy: "Telepathy",
+    druidic: "Druidic",
+    cant: "Thieves' Cant",
+    standard:"Standard Languages",
+    exotic:"Exotic Languages",
   };
+  
+  
 
   let languagesArray = Array.from(languagesValue).map(
     (type) => languagesTypes[type] || type
@@ -3778,45 +3816,248 @@ async function heraldHud_getDataInformation() {
   }
 }
 
-async function heraldHud_renderDataInfoKeyValue(data, containerId) {
-  let container = document.getElementById(containerId);
-  if (!container) return;
-
-  let listItems = "";
-
-  if (data.length === 0) {
-    listItems = `<div class="heraldHud-noInfo">-</div>`;
-  } else {
-    listItems = data
-      .map(([key, value]) => {
-        let formattedKey = key.replace(/([A-Z])/g, " $1").trim();
-        formattedKey =
-          formattedKey.charAt(0).toUpperCase() + formattedKey.slice(1);
-
-        return `<div class="heraldHud-infoBadge">${formattedKey} | ${value}</div>`;
-      })
-      .join("");
+async function heraldHud_renderViewEquipment() {
+  let heraldHud_dialogDiv = document.getElementById("heraldHud-dialog");
+  if (heraldHud_dialogDiv) {
+    heraldHud_dialogDiv.innerHTML = `
+    <div id="heraldHud-dialogEquipmentContainer" class="heraldHud-dialogEquipmentContainer">
+    </div>`;
   }
-
-  container.innerHTML = listItems;
+  await heraldHud_getDataEquipment();
 }
-
-async function heraldHud_renderDatainfoValue(data, containerId) {
-  let container = document.getElementById(containerId);
-  if (!container) return;
-
-  let listItems = "";
-
-  if (data.length === 0) {
-    listItems = `<div class="heraldHud-noInfo">-</div>`;
-  } else {
-    for (let item of data) {
-      listItems += `<div class="heraldHud-infoBadge">${item}</div>`;
+async function heraldHud_getDataEquipment() {
+  let actor = heraldHud_actorSelected;
+  let favoritesActor = actor.system?.favorites;
+  let equipmentContainer = document.getElementById("heraldHud-dialogEquipmentContainer");
+  let equipmentItems = actor.items.filter((item) => item.type === "equipment");
+  let equipmentCategories = {};
+  equipmentItems.forEach((item) => {
+    let category = item.system?.type?.label || "misc"; // Default ke "misc" jika tidak ada kategori
+    if (!equipmentCategories[category]) {
+      equipmentCategories[category] = [];
     }
+    equipmentCategories[category].push(item);
+  });
+
+  let listEquipment = "";
+
+  Object.keys(equipmentCategories).forEach((key) => {
+    let title = key.replace(/-/g, " ");
+    let items = equipmentCategories[key];
+    if (items.length > 0) {
+      listEquipment += `
+      <div class="heraldHud-equipmentCategoryDiv">
+        <div class="heraldHud-equipmentCategoryTitle">${title}</div>
+        <hr style=" border: 1px solid grey; margin-top: 5px;"></div>
+      </div>`;
+    }
+
+    items.forEach((item) => {
+      let rawItemId = `.Item.${item.id}`;
+      let isFavorited = favoritesActor.some(
+        (favorite) => favorite.id === rawItemId
+      )
+        ? "favorited"
+        : "";
+      let isEquipped = item.system.equipped ? "equipped" : "";
+      let properties = [];
+      let labelProperties = "";
+
+      let category = ``;
+      if (item.system.activation.type == "action") {
+        category = `<i class="fa-solid fa-circle" style="color:#1f6237;"></i> Action`;
+      } else if (item.system.activation.type.includes("bonus")) {
+        category = `<i class="fa-solid fa-square-plus" style="color:#d5530b;"></i> Bonus Action`;
+      } else if (item.system.activation.type.includes("reaction")) {
+        category = `<i class="fa-solid fa-rotate-right" style="color:#fe85f6;"></i> Reaction`;
+      } else if (item.system.activation.type.includes("legendary")) {
+        category = `<i class="fa-solid fa-dragon" style="color:#0a35d1;"></i> Legendary Action`;
+      } else if (item.system.activation.type.includes("lair")) {
+        category = `<i class="fa-solid fa-chess-rook" style="color:#c7cad6;"></i> Lair Action`;
+      } else if (item.system.activation.type.includes("mythic")) {
+        category = `<i class="fa-solid fa-spaghetti-monster-flying" style="color:#adffeb;"></i> Mythic Action`;
+      } else if (item.system.activation.type.includes("minute")) {
+        category = `<i class="fa-solid fa-hourglass-start" style="color:#0ad1c4;"></i> ${item.system.activation.cost} Minute`;
+      } else if (item.system.activation.type.includes("hour")) {
+        category = `<i class="fa-solid fa-hourglass-start" style="color:#0ad1c4;"></i> ${item.system.activation.cost} Hour`;
+      } else if (item.system.activation.type.includes("day")) {
+        category = `<i class="fa-solid fa-hourglass-start" style="color:#0ad1c4;"></i> ${item.system.activation.cost} Day`;
+      } else if (item.system.activation.type.includes("special")) {
+        category = `<i class="fa-solid fa-sparkles" style="color:#d0f4fc;"></i> Special`;
+      }
+      let itemRarity = item.system?.rarity;
+      let rarityColors = {
+        common: "#b5bda6",
+        uncommon: "#78c178",
+        rare: "#6464bd",
+        veryrare: "#62c1ad",
+        legendary: "#bb9348",
+        artifact: "#a46b43",
+      };
+      let nameColor = ``;
+      let borderColor = ``;
+      if (rarityColors[itemRarity.toLowerCase()]) {
+        let color = rarityColors[itemRarity.toLowerCase()];
+        nameColor = `color:${color};`;
+        borderColor = `border:2px solid ${color};`;
+      }
+
+      let htmlDescription = item.system.description?.value || "";
+      let acValue = ``;
+      if (item.system.armor?.value) {
+        acValue =`${item.system.armor.value} AC`;
+      }
+      let arrPropertiTooltip = [];
+      let labelPropertiTooltip = "";
+
+      if (item.system.type.label) {
+        arrPropertiTooltip.push(item.system.type.label);
+      }
+      if (item.system.equipped) {
+        arrPropertiTooltip.push("Equipped");
+      } else {
+        arrPropertiTooltip.push("Not Equipped");
+      }
+      if (item.system.type.value === "clothing") {
+        arrPropertiTooltip.push("Proficient");
+      } else if (item.system.proficient == 1) {
+        arrPropertiTooltip.push("Proficient");
+      } else if (item.system.proficient == 0) {
+        arrPropertiTooltip.push("Not Proficient");
+      } else {
+        let armorProficiency = new Set(actor.system.traits.armorProf?.value || []);
+        if (
+          (item.system.type.value &&
+            armorProficiency.some((prof) => item.system.type.value.includes(prof))) ||
+          (item.system.type.baseItem &&
+            armorProficiency.some((prof) => item.system.type.baseItem.includes(prof)))
+        ) {
+          arrPropertiTooltip.push("Proficient");
+        } else {
+          arrPropertiTooltip.push("Not Proficient");
+        }
+      }
+
+      if (arrPropertiTooltip.length > 0) {
+        labelPropertiTooltip = arrPropertiTooltip.join(" | ");
+      }
+      listEquipment += `
+        <div class="heraldHud-equipmentContainer">
+          <div class="heraldHud-equipmentItem" data-item-id="${item.id}">
+              <div class="heraldHud-equipmentLeftContainer">
+                  <div class="heraldHud-equipmentImageContainer">
+                    <img src="${item.img}" alt="${item.name}" class="heraldHud-equipmentImage" style="${borderColor}"> 
+                  </div>
+              </div>
+              <div class="heraldHud-equipmentMiddleContainer">
+                <div class="heraldHud-equipmentMiddleTop">
+                  <div class="heraldHud-equipmentName" style="${nameColor}">${item.name}</div>
+                </div>
+                <div class="heraldHud-equipmentMiddleMid">
+                
+                  <div class="heraldHud-equipmentCategory">${category}</div>
+                  
+                </div>
+                 <div class="heraldHud-equipmentMiddleBot">
+                  <div class="heraldHud-equipmentAcValue">${acValue}</div>
+                </div>
+              </div>
+              <div class="heraldHud-equipmentRightContainer">
+                  <div class="heraldHud-equipmentEquipButton ${isEquipped}" data-item-id="${item.id}">
+                    <i class="fa-solid fa-shield-halved"></i>
+                  </div>
+                  <div class="heraldHud-equipmentFavoriteButton ${isFavorited}" data-item-id="${item.id}">
+                      <i class="fa-solid fa-star"></i>
+                  </div>
+              </div>
+          </div>
+            <div id="heraldHud-dialogEquipmentTooltip" class="heraldHud-dialogEquipmentTooltip">
+              <div class="heraldHud-equipmentTooltipTop">
+                <div class="heraldHud-equipmentTooltipTop">${item.name}  
+                <hr style=" border: 1px solid grey; margin-top: 5px;"></div>
+              </div>
+              <div class="heraldHud-equipmentTooltipMiddle">
+                ${htmlDescription}
+                <hr style=" border: 1px solid grey; margin-top: 5px;">
+              </div>
+              <div class="heraldHud-equipmentTooltipBottom">
+                ${labelPropertiTooltip}
+              </div>
+            </div>
+        </div>
+      `;
+    });
+  })
+
+  if(equipmentContainer){
+    equipmentContainer.innerHTML = listEquipment;
+
+    document
+    .querySelectorAll(".heraldHud-equipmentItem")
+    .forEach((weaponItem) => {
+      weaponItem.addEventListener("click", async function () {
+        let itemId = this.getAttribute("data-item-id");
+
+        let item =
+          actor.items.get(itemId) ||
+          actor.getEmbeddedDocument("Item", itemId);
+        if (item) {
+          await item.use();
+  
+        }
+      });
+    });
+    document.querySelectorAll(".heraldHud-equipmentEquipButton").forEach((div) => {
+      div.addEventListener("click", async (event) => {
+        event.stopPropagation();
+        let itemId = div.getAttribute("data-item-id");
+        let item = actor.items.get(itemId);
+
+        if (item) {
+          let equipped = item.system.equipped;
+          await item.update({ "system.equipped": !equipped });
+          div.classList.toggle("equipped", !equipped);
+        }
+      });
+
+    });
+    document
+    .querySelectorAll(".heraldHud-equipmentFavoriteButton")
+    .forEach((button) => {
+      button.addEventListener("click", async (event) => {
+        event.stopPropagation();
+        let itemId = button.getAttribute("data-item-id");
+        let rawItemId = `.Item.${itemId}`;
+        let isCurrentlyFavorite = favoritesActor.some(
+          (fav) => fav.id === rawItemId
+        );
+
+        if (isCurrentlyFavorite) {
+          favoritesActor = favoritesActor.filter(
+            (fav) => fav.id !== rawItemId
+          );
+        } else {
+          let maxSort =
+            favoritesActor.length > 0
+              ? Math.max(...favoritesActor.map((fav) => fav.sort))
+              : 0;
+          favoritesActor.push({
+            type: "item",
+            id: rawItemId,
+            sort: maxSort + 100000,
+          });
+        }
+        if (Array.isArray(favoritesActor)) {
+          await actor.update({ "system.favorites": favoritesActor });
+        }
+
+        button.classList.toggle("favorited", !isCurrentlyFavorite);
+      });
+    });
   }
 
-  container.innerHTML = listItems;
 }
+
 
 async function heraldHud_settingHudToBottom() {
   let heraldHud = document.getElementById("heraldHud");
