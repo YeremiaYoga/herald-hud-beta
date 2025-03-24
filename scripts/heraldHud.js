@@ -97,6 +97,7 @@ let heraldHud_listChargeTracker = [
   "Wails from the Grave",
   "Superiority Dice",
   "Magical Tinkering",
+  "Sorcerous Restoration",
 ];
 
 Hooks.on("ready", () => {
