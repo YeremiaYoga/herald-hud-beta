@@ -83,6 +83,20 @@ let heraldHud_listChargeTracker = [
   "Healing Hands",
   "Fanged Bite",
   "Wrath of the Storm",
+  "Lay On Hands",
+  "Gem Flight",
+  "Daunting Roar",
+  "War Priest",
+  "Awakened Spellbook",
+  "Runic Mark",
+  "Monk's Focus",
+  "Starlight Step",
+  "Favored Foe",
+  "Mutagencraft - Consume Mutagen",
+  "Blood Maledict",
+  "Wails from the Grave",
+  "Superiority Dice",
+  "Magical Tinkering",
 ];
 
 Hooks.on("ready", () => {
@@ -124,7 +138,6 @@ async function heraldHud_renderHeraldHud() {
     await heraldHud_settingHudToBottom();
     await heraldHud_renderChargeTracker();
     await heraldHud_renderActorInfo();
-  
   }, 500);
 }
 
@@ -330,7 +343,9 @@ async function heraldHud_renderActorData() {
     </div>
     `;
 
-    let equipmentButton = document.getElementById("heraldHud-equipmentContainer");
+    let equipmentButton = document.getElementById(
+      "heraldHud-equipmentContainer"
+    );
 
     if (equipmentButton) {
       equipmentButton.addEventListener("click", (event) => {
@@ -363,8 +378,6 @@ async function heraldHud_renderActorData() {
       });
     }
   }
-
-
 
   const summonContainer = document.getElementById(
     "heraldHud-addSummonContainer"
@@ -3771,11 +3784,9 @@ async function heraldHud_getDataInformation() {
     undercommon: "Undercommon",
     druidic: "Druidic",
     cant: "Thieves' Cant",
-    standard:"Standard Languages",
-    exotic:"Exotic Languages",
+    standard: "Standard Languages",
+    exotic: "Exotic Languages",
   };
-  
-  
 
   let languagesArray = Array.from(languagesValue).map(
     (type) => languagesTypes[type] || type
@@ -3828,7 +3839,9 @@ async function heraldHud_renderViewEquipment() {
 async function heraldHud_getDataEquipment() {
   let actor = heraldHud_actorSelected;
   let favoritesActor = actor.system?.favorites;
-  let equipmentContainer = document.getElementById("heraldHud-dialogEquipmentContainer");
+  let equipmentContainer = document.getElementById(
+    "heraldHud-dialogEquipmentContainer"
+  );
   let equipmentItems = actor.items.filter((item) => item.type === "equipment");
   let equipmentCategories = {};
   equipmentItems.forEach((item) => {
@@ -3905,7 +3918,7 @@ async function heraldHud_getDataEquipment() {
       let htmlDescription = item.system.description?.value || "";
       let acValue = ``;
       if (item.system.armor?.value) {
-        acValue =`${item.system.armor.value} AC`;
+        acValue = `${item.system.armor.value} AC`;
       }
       let arrPropertiTooltip = [];
       let labelPropertiTooltip = "";
@@ -3925,12 +3938,18 @@ async function heraldHud_getDataEquipment() {
       } else if (item.system.proficient == 0) {
         arrPropertiTooltip.push("Not Proficient");
       } else {
-        let armorProficiency = new Set(actor.system.traits.armorProf?.value || []);
+        let armorProficiency = new Set(
+          actor.system.traits.armorProf?.value || []
+        );
         if (
           (item.system.type.value &&
-            armorProficiency.some((prof) => item.system.type.value.includes(prof))) ||
+            armorProficiency.some((prof) =>
+              item.system.type.value.includes(prof)
+            )) ||
           (item.system.type.baseItem &&
-            armorProficiency.some((prof) => item.system.type.baseItem.includes(prof)))
+            armorProficiency.some((prof) =>
+              item.system.type.baseItem.includes(prof)
+            ))
         ) {
           arrPropertiTooltip.push("Proficient");
         } else {
@@ -3987,77 +4006,75 @@ async function heraldHud_getDataEquipment() {
         </div>
       `;
     });
-  })
+  });
 
-  if(equipmentContainer){
+  if (equipmentContainer) {
     equipmentContainer.innerHTML = listEquipment;
 
     document
-    .querySelectorAll(".heraldHud-equipmentItem")
-    .forEach((weaponItem) => {
-      weaponItem.addEventListener("click", async function () {
-        let itemId = this.getAttribute("data-item-id");
+      .querySelectorAll(".heraldHud-equipmentItem")
+      .forEach((weaponItem) => {
+        weaponItem.addEventListener("click", async function () {
+          let itemId = this.getAttribute("data-item-id");
 
-        let item =
-          actor.items.get(itemId) ||
-          actor.getEmbeddedDocument("Item", itemId);
-        if (item) {
-          await item.use();
-  
-        }
+          let item =
+            actor.items.get(itemId) ||
+            actor.getEmbeddedDocument("Item", itemId);
+          if (item) {
+            await item.use();
+          }
+        });
       });
-    });
-    document.querySelectorAll(".heraldHud-equipmentEquipButton").forEach((div) => {
-      div.addEventListener("click", async (event) => {
-        event.stopPropagation();
-        let itemId = div.getAttribute("data-item-id");
-        let item = actor.items.get(itemId);
-
-        if (item) {
-          let equipped = item.system.equipped;
-          await item.update({ "system.equipped": !equipped });
-          div.classList.toggle("equipped", !equipped);
-        }
-      });
-
-    });
     document
-    .querySelectorAll(".heraldHud-equipmentFavoriteButton")
-    .forEach((button) => {
-      button.addEventListener("click", async (event) => {
-        event.stopPropagation();
-        let itemId = button.getAttribute("data-item-id");
-        let rawItemId = `.Item.${itemId}`;
-        let isCurrentlyFavorite = favoritesActor.some(
-          (fav) => fav.id === rawItemId
-        );
+      .querySelectorAll(".heraldHud-equipmentEquipButton")
+      .forEach((div) => {
+        div.addEventListener("click", async (event) => {
+          event.stopPropagation();
+          let itemId = div.getAttribute("data-item-id");
+          let item = actor.items.get(itemId);
 
-        if (isCurrentlyFavorite) {
-          favoritesActor = favoritesActor.filter(
-            (fav) => fav.id !== rawItemId
-          );
-        } else {
-          let maxSort =
-            favoritesActor.length > 0
-              ? Math.max(...favoritesActor.map((fav) => fav.sort))
-              : 0;
-          favoritesActor.push({
-            type: "item",
-            id: rawItemId,
-            sort: maxSort + 100000,
-          });
-        }
-        if (Array.isArray(favoritesActor)) {
-          await actor.update({ "system.favorites": favoritesActor });
-        }
-
-        button.classList.toggle("favorited", !isCurrentlyFavorite);
+          if (item) {
+            let equipped = item.system.equipped;
+            await item.update({ "system.equipped": !equipped });
+            div.classList.toggle("equipped", !equipped);
+          }
+        });
       });
-    });
+    document
+      .querySelectorAll(".heraldHud-equipmentFavoriteButton")
+      .forEach((button) => {
+        button.addEventListener("click", async (event) => {
+          event.stopPropagation();
+          let itemId = button.getAttribute("data-item-id");
+          let rawItemId = `.Item.${itemId}`;
+          let isCurrentlyFavorite = favoritesActor.some(
+            (fav) => fav.id === rawItemId
+          );
+
+          if (isCurrentlyFavorite) {
+            favoritesActor = favoritesActor.filter(
+              (fav) => fav.id !== rawItemId
+            );
+          } else {
+            let maxSort =
+              favoritesActor.length > 0
+                ? Math.max(...favoritesActor.map((fav) => fav.sort))
+                : 0;
+            favoritesActor.push({
+              type: "item",
+              id: rawItemId,
+              sort: maxSort + 100000,
+            });
+          }
+          if (Array.isArray(favoritesActor)) {
+            await actor.update({ "system.favorites": favoritesActor });
+          }
+
+          button.classList.toggle("favorited", !isCurrentlyFavorite);
+        });
+      });
   }
-
 }
-
 
 async function heraldHud_settingHudToBottom() {
   let heraldHud = document.getElementById("heraldHud");
@@ -4575,7 +4592,7 @@ async function heraldHud_npcInitiativeEndturn() {
     return;
   }
 
-  let currentCombatant = game.combat.combatant; 
+  let currentCombatant = game.combat.combatant;
   if (!currentCombatant) {
     console.log("Tidak ada combatant yang sedang beraksi.");
     return;
@@ -4809,7 +4826,7 @@ async function heraldHud_showNpcDialog(id, kategori) {
     await heraldHud_npcRollInitiatve(id);
     await heraldHud_resetNpcDialog();
     heraldHud_showNpcDialogValue = false;
-  }else if (kategori == "endturn") {
+  } else if (kategori == "endturn") {
     const combat = game.combat;
     await combat.nextTurn();
     await heraldHud_resetNpcDialog();
