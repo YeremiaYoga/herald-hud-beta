@@ -98,6 +98,7 @@ let heraldHud_listChargeTracker = [
   "Superiority Dice",
   "Magical Tinkering",
   "Sorcerous Restoration",
+  "War Priest",
 ];
 
 Hooks.on("ready", () => {
@@ -5707,7 +5708,6 @@ Hooks.on("updateActor", async (actor, data) => {
   await heraldHud_updateItemCosumablesActor();
   await heraldHud_getDataSpellsSlot();
   await heraldHud_getDataListNpc();
-  console.log("test update actor");
 });
 
 function darkenHex(hex, percent) {
