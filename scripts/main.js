@@ -51,4 +51,21 @@ Hooks.once("init", () => {
     type: Boolean,
     default: false,
   });
+  game.settings.register("herald-hud", "speedHudbarOff", {
+    name: "Show Speed Hud Bar",
+    hint: "Display Speed Hud Bar",
+    scope: "client",
+    config: true,
+    type: Boolean,
+    default: false,
+  });
+  game.settings.register("herald-hud", "hudbarImageFrame", {
+    name: "Hud Bar Image Frame",
+    hint: "Hud Bar Image Frame",
+    scope: "client",
+    config: true,
+    type: String,
+    default: "basic_frame",
+  });
+
 });

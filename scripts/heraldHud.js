@@ -7,6 +7,30 @@ let heraldHud_dockHudToBottom = false;
 let heraldHud_statsAbbreviations = false;
 let heraldHud_displayChargeTracker = false;
 let heraldHud_displayInformationButton = false;
+let heraldHud_speedHudbarOff = false;
+let heraldHud_overlayHudbarNameImage = "";
+let heraldHud_listOverlayHudbarFrame = [
+  "basic_frame",
+  "blue_frame",
+  "cyber_frame",
+  "floral_frame",
+  "magic_frame",
+  "mystical_frame",
+];
+// let heraldHud_listOverlayHudbarFrame = [
+//   "basic_frame",
+//   "basic_frame_with_middle_line",
+//   "blue_frame",
+//   "blue_frame_with_middle_line",
+//   "cyber_frame",
+//   "cyber_frame_with_middle_line",
+//   "floral_frame",
+//   "floral_frame_with_middle_line",
+//   "magic_frame",
+//   "magic_frame_with_middle_line",
+//   "mystical_frame",
+//   "mystical_frame_with_middle_line",
+// ];
 Hooks.once("ready", () => {
   heraldHud_spellsTrackerOff = game.settings.get(
     "herald-hud",
@@ -27,6 +51,11 @@ Hooks.once("ready", () => {
   heraldHud_displayInformationButton = game.settings.get(
     "herald-hud",
     "displayInformationButton"
+  );
+  heraldHud_speedHudbarOff = game.settings.get("herald-hud", "speedHudbarOff");
+  heraldHud_overlayHudbarNameImage = game.settings.get(
+    "herald-hud",
+    "hudbarImageFrame"
   );
 });
 
@@ -99,6 +128,7 @@ let heraldHud_listChargeTracker = [
   "Magical Tinkering",
   "Sorcerous Restoration",
   "War Priest",
+  "Knowledge from a Past Life"
 ];
 
 Hooks.on("ready", () => {
@@ -140,7 +170,29 @@ async function heraldHud_renderHeraldHud() {
     await heraldHud_settingHudToBottom();
     await heraldHud_renderChargeTracker();
     await heraldHud_renderActorInfo();
+    await heraldHud_renderOverlayHudbarFrame();
+    await heraldHud_viewHudbarWithoutSpeed();
   }, 500);
+}
+
+async function heraldHud_renderOverlayHudbarFrame() {
+  let overlayDiv = document.getElementById(
+    "heraldHud-hudOverlayImageContainer"
+  );
+  let imageName = heraldHud_overlayHudbarNameImage;
+  if (overlayDiv) {
+    let suffix = heraldHud_speedHudbarOff ? "_without_middle_line" : "_with_middle_line";
+    let imageFileName = `${imageName}${suffix}`;
+
+      overlayDiv.innerHTML = `
+      <img
+       src="/modules/herald-hud-beta/assets/hudbar-frame/${imageFileName}.png"
+       alt=""
+       class="heraldHud-hudOverlayImage"/>
+     `;
+
+
+  }
 }
 
 async function heraldHud_getActorData() {
@@ -1073,16 +1125,27 @@ async function heraldHud_updateItemFavoriteActor() {
   let favoritesActor = actor.system?.favorites;
   let favoritesListDiv = document.getElementById("heraldHud-favoritesListItem");
   let listFavorites = ``;
+  let newFavorites = [];
+  console.log(favoritesActor);
   for (let favorite of favoritesActor) {
-    let rawItemId = favorite.id.replace(".Item.", "");
+    let rawItemId = favorite.id.split(".Item.")[1];
     let item =
       actor.items.get(rawItemId) ||
       actor.getEmbeddedDocument("Item", rawItemId);
+    if (!item) {
+      continue;
+    }
+    console.log(item);
+    newFavorites.push(favorite);
     listFavorites += `
     <div class="heraldHud-favoriteItem" data-item-id="${item.id}" data-name="${item.name}">
       <img src="${item.img}" alt="${item.name}" class="heraldHud-favoriteItemImage">
     </div>`;
   }
+  if (newFavorites.length !== favoritesActor.length) {
+    await actor.update({ "system.favorites.items": newFavorites });
+  }
+  console.log(actor.system?.favorites);
 
   if (favoritesListDiv) {
     favoritesListDiv.innerHTML = listFavorites;
@@ -3354,8 +3417,24 @@ async function heraldHud_getDataSpellsPrep() {
 }
 
 async function heraldHud_openSettingHudDialog() {
+  const user = game.user;
+  let selectedActor = user.character;
+  let currentHudFrame =
+    game.settings.get("herald-hud", "hudbarImageFrame") ?? "basic_frame";
+  let hudFrameOptions = heraldHud_listOverlayHudbarFrame
+    .map((frame) => {
+      let label = frame
+        .split("_")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+      return `<option value="${frame}" ${
+        currentHudFrame === frame ? "selected" : ""
+      }>${label}</option>`;
+    })
+    .join("");
+
   let dialogContent = `
-    <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="display: flex; flex-direction: column; gap: 10px; padding-top:10px;padding-bottom:10px;">
 
       <div style="display: flex; align-items: center; gap: 10px;">
         <input type="checkbox" id="heraldHud-statsAbbreviationsToggle" ${
@@ -3391,6 +3470,18 @@ async function heraldHud_openSettingHudDialog() {
         }>
         <label for="heraldHud-dockHudToggle">Dock Herald's HUD to Bottom</label>
       </div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <input type="checkbox" id="heraldHud-speedHudbarToggle" ${
+          game.settings.get("herald-hud", "speedHudbarOff") ? "checked" : ""
+        }>
+        <label for="heraldHud-speedHudbarToggle">Disable Speed HUD Bar</label>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <label for="heraldHud-hudFrameSelect">HUD Bar Frame Style:</label>
+        <select id="heraldHud-hudFrameSelect">
+           ${hudFrameOptions}
+        </select>
+      </div>
     </div>
   `;
 
@@ -3414,6 +3505,10 @@ async function heraldHud_openSettingHudDialog() {
           let informationButtonCheckbox = html.find(
             "#heraldHud-informationButtonToggle"
           )[0];
+          let speedHudbarCheckbox = html.find(
+            "#heraldHud-speedHudbarToggle"
+          )[0];
+          let hudFrameSelect = html.find("#heraldHud-hudFrameSelect")[0];
 
           heraldHud_spellsTrackerOff = spellTrackerCheckbox.checked;
           heraldHud_dockHudToBottom = dockHudCheckbox.checked;
@@ -3421,6 +3516,8 @@ async function heraldHud_openSettingHudDialog() {
           heraldHud_displayChargeTracker = displayChargeTrackerCheckbox.checked;
           heraldHud_displayInformationButton =
             informationButtonCheckbox.checked;
+          heraldHud_speedHudbarOff = speedHudbarCheckbox.checked;
+          heraldHud_overlayHudbarNameImage = hudFrameSelect.value;
           await game.settings.set(
             "herald-hud",
             "statsAbbreviations",
@@ -3446,10 +3543,44 @@ async function heraldHud_openSettingHudDialog() {
             "displayInformationButton",
             heraldHud_displayInformationButton
           );
+          await game.settings.set(
+            "herald-hud",
+            "speedHudbarOff",
+            heraldHud_speedHudbarOff
+          );
+          await game.settings.set(
+            "herald-hud",
+            "hudbarImageFrame",
+            heraldHud_overlayHudbarNameImage
+          );
 
           heraldHud_settingHudToBottom();
           heraldHud_renderChargeTracker();
           heraldHud_renderActorInfo();
+          heraldHud_renderOverlayHudbarFrame();
+          heraldHud_viewHudbarWithoutSpeed();
+        },
+      },
+      clearFavorites: {
+        label: "Reset Favorites",
+        callback: async () => {
+          if (!selectedActor) {
+            ui.notifications.warn("No actor selected.");
+            return;
+          }
+
+          let confirmed = await Dialog.confirm({
+            title: "Reset Favorites",
+            content: `<p>Are you sure you want to remove all favorites from <strong>${selectedActor.name}</strong>?</p>`,
+          });
+
+          if (!confirmed) return;
+          await selectedActor.update({
+            [`system.favorites.items`]: [],
+          });
+
+          ui.notifications.info(`Favorites cleared for ${selectedActor.name}.`);
+          await heraldHud_updateItemFavoriteActor();
         },
       },
       cancel: {
@@ -3461,6 +3592,36 @@ async function heraldHud_openSettingHudDialog() {
     },
     default: "save",
   }).render(true);
+}
+
+async function heraldHud_viewHudbarWithoutSpeed() {
+  const walkSpeedContainer = document.getElementById(
+    "heraldHud-walkSpeedContainer"
+  );
+  const speedIconContainer = document.getElementById(
+    "heraldHud-speedIconContainer"
+  );
+  let favoritesListItemDiv = document.getElementById("heraldHud-favoritesListItem");
+  if (heraldHud_speedHudbarOff == true) {
+    
+    if (walkSpeedContainer) {
+      walkSpeedContainer.style.display = "none";
+    }
+    if (speedIconContainer) {
+      speedIconContainer.style.display = "none";
+    }
+    favoritesListItemDiv.style.left = "7%";
+    favoritesListItemDiv.style.gridTemplateColumns = "repeat(9, 25px)";
+  } else {
+    if (walkSpeedContainer) {
+      walkSpeedContainer.style.display = "block";
+    }
+    if (speedIconContainer) {
+      speedIconContainer.style.display = "flex";
+    }
+    favoritesListItemDiv.style.left = "45%";
+    favoritesListItemDiv.style.gridTemplateColumns = "repeat(5, 25px)";
+  }
 }
 
 async function heraldHud_renderViewInformation() {

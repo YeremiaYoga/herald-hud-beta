@@ -279,7 +279,6 @@
     opacity: 0;
     transition: opacity 0.2s ease-in-out;
     pointer-events: none;
-    /* Supaya tidak mengganggu klik */
     z-index: 19;
 }
 
@@ -439,6 +438,7 @@
 .heraldHud-hudBoxRight {
     flex: 1;
     height: 100%;
+    z-index: 19;
 }
 
 .heraldHud-hudBoxleft {
@@ -984,7 +984,6 @@
     text-align: center;
     width: 100%;
     appearance: none;
-
 }
 
 .heraldHud-tempHpMaxValue {
