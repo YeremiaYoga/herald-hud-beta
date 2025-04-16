@@ -13,24 +13,13 @@ let heraldHud_listOverlayHudbarFrame = [
   "basic_frame",
   "blue_frame",
   "cyber_frame",
+  "fire_frame",
   "floral_frame",
   "magic_frame",
   "mystical_frame",
+  "necromancy_frame",
+  "water_frame",
 ];
-// let heraldHud_listOverlayHudbarFrame = [
-//   "basic_frame",
-//   "basic_frame_with_middle_line",
-//   "blue_frame",
-//   "blue_frame_with_middle_line",
-//   "cyber_frame",
-//   "cyber_frame_with_middle_line",
-//   "floral_frame",
-//   "floral_frame_with_middle_line",
-//   "magic_frame",
-//   "magic_frame_with_middle_line",
-//   "mystical_frame",
-//   "mystical_frame_with_middle_line",
-// ];
 Hooks.once("ready", () => {
   heraldHud_spellsTrackerOff = game.settings.get(
     "herald-hud",
@@ -128,7 +117,7 @@ let heraldHud_listChargeTracker = [
   "Magical Tinkering",
   "Sorcerous Restoration",
   "War Priest",
-  "Knowledge from a Past Life"
+  "Knowledge from a Past Life",
 ];
 
 Hooks.on("ready", () => {
@@ -181,17 +170,18 @@ async function heraldHud_renderOverlayHudbarFrame() {
   );
   let imageName = heraldHud_overlayHudbarNameImage;
   if (overlayDiv) {
-    let suffix = heraldHud_speedHudbarOff ? "_without_middle_line" : "_with_middle_line";
+    let suffix = heraldHud_speedHudbarOff ? "_1_line" : "_2_line";
+    let urlImg = heraldHud_speedHudbarOff
+      ? "/modules/herald-hud-beta/assets/hudbar-frame/1-line/"
+      : "/modules/herald-hud-beta/assets/hudbar-frame/2-line/";
     let imageFileName = `${imageName}${suffix}`;
 
-      overlayDiv.innerHTML = `
+    overlayDiv.innerHTML = `
       <img
-       src="/modules/herald-hud-beta/assets/hudbar-frame/${imageFileName}.png"
+       src="${urlImg}${imageFileName}.png"
        alt=""
        class="heraldHud-hudOverlayImage"/>
      `;
-
-
   }
 }
 
@@ -1126,7 +1116,7 @@ async function heraldHud_updateItemFavoriteActor() {
   let favoritesListDiv = document.getElementById("heraldHud-favoritesListItem");
   let listFavorites = ``;
   let newFavorites = [];
-  console.log(favoritesActor);
+
   for (let favorite of favoritesActor) {
     let rawItemId = favorite.id.split(".Item.")[1];
     let item =
@@ -1135,7 +1125,7 @@ async function heraldHud_updateItemFavoriteActor() {
     if (!item) {
       continue;
     }
-    console.log(item);
+
     newFavorites.push(favorite);
     listFavorites += `
     <div class="heraldHud-favoriteItem" data-item-id="${item.id}" data-name="${item.name}">
@@ -1145,7 +1135,6 @@ async function heraldHud_updateItemFavoriteActor() {
   if (newFavorites.length !== favoritesActor.length) {
     await actor.update({ "system.favorites.items": newFavorites });
   }
-  console.log(actor.system?.favorites);
 
   if (favoritesListDiv) {
     favoritesListDiv.innerHTML = listFavorites;
@@ -2560,7 +2549,6 @@ async function heraldHud_renderContainerSpells() {
 
     if (searchInput) {
       searchInput.addEventListener("input", () => {
-        console.log(searchInput.value);
         clearTimeout(skillsSearchTimeout);
 
         skillsSearchTimeout = setTimeout(() => {
@@ -2991,7 +2979,6 @@ async function heraldHud_renderContainerStats() {
 
     if (searchInput) {
       searchInput.addEventListener("input", () => {
-        console.log(searchInput.value);
         clearTimeout(skillsSearchTimeout);
 
         skillsSearchTimeout = setTimeout(() => {
@@ -3601,9 +3588,10 @@ async function heraldHud_viewHudbarWithoutSpeed() {
   const speedIconContainer = document.getElementById(
     "heraldHud-speedIconContainer"
   );
-  let favoritesListItemDiv = document.getElementById("heraldHud-favoritesListItem");
+  let favoritesListItemDiv = document.getElementById(
+    "heraldHud-favoritesListItem"
+  );
   if (heraldHud_speedHudbarOff == true) {
-    
     if (walkSpeedContainer) {
       walkSpeedContainer.style.display = "none";
     }
@@ -3639,7 +3627,7 @@ async function heraldHud_getDataInformation() {
   let dialogInformationDiv = document.getElementById(
     "heraldHud-dialogActorInformation"
   );
-  console.log(actor.system.traits);
+
   let sensesDiv = ``;
   let resistancesDiv = ``;
   let damageImmunitiesDiv = ``;
@@ -4449,7 +4437,6 @@ async function heraldHud_showDialogAddSummon() {
 
     if (searchInput) {
       searchInput.addEventListener("input", () => {
-        console.log("Searching NPC:", searchInput.value);
         clearTimeout(npcSearchTimeout);
 
         npcSearchTimeout = setTimeout(() => {
@@ -5657,7 +5644,6 @@ async function heraldHud_npcRenderViewStats(id) {
 
     if (searchInput) {
       searchInput.addEventListener("input", () => {
-        console.log(searchInput.value);
         clearTimeout(skillsSearchTimeout);
 
         skillsSearchTimeout = setTimeout(() => {
