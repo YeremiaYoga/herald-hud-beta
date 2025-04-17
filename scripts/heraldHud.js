@@ -465,7 +465,7 @@ async function heraldHud_updateShorcutButton() {
     initiativeValue >= 0 ? `+${initiativeValue}` : `${initiativeValue}`;
 
   let buttonHtml = `
-    <div class="heraldHud-shortcutButtonView" >
+    <div id="heraldHud-shortcutButtonView" class="heraldHud-shortcutButtonView" >
       <div class="heraldHud-shortcutButtonBackground" style="background-color: ${playerColor};"></div>
       <img src="/modules/herald-hud-beta/assets/d20_icon.png" alt="Shortcut Icon" class="heraldHud-shortcutButtonImg"/>
       <div class="heraldHud-shortcutButtonText">${
@@ -473,16 +473,14 @@ async function heraldHud_updateShorcutButton() {
       }</div>
      
     </div>
-     <div class="heraldHud-shortcutButtonTooltip">${
-       isActorTurn ? "End turn" : "Roll Initiative"
-     }</div>
+    <div class="heraldHud-shortcutButtonTooltip">${
+      isActorTurn ? "End turn" : "Roll Initiative"
+    }</div>
   `;
 
   shortcutButtonDiv.innerHTML = buttonHtml;
 
-  let shortcutButton = shortcutButtonDiv.querySelector(
-    ".heraldHud-shortcutButtonView"
-  );
+  let shortcutButton = document.getElementById("heraldHud-shortcutButtonView");
   shortcutButton.addEventListener("click", async () => {
     if (isActorTurn) {
       await combat.nextTurn();
