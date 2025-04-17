@@ -2511,6 +2511,7 @@ async function heraldHud_getDataFeatures() {
           }
           if (Array.isArray(favoritesActor)) {
             await actor.update({ "system.favorites": favoritesActor });
+            await heraldHud_renderChargeTracker();
           }
 
           button.classList.toggle("favorited", !isCurrentlyFavorite);
