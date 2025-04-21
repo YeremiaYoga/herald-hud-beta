@@ -1,3 +1,5 @@
+import * as md from "./menuDetail.js";
+
 let heraldHud_actorSelected = null;
 let heraldHud_npcPlayerOwned = [];
 let heraldHud_npcPlayerSelected = [];
@@ -22,7 +24,7 @@ let heraldHud_listOverlayHudbarFrame = [
   "ashen_void_frame",
   "butterfly_frame",
   "lightning_frame",
-  "radiant_frame"
+  "radiant_frame",
 ];
 Hooks.once("ready", () => {
   heraldHud_spellsTrackerOff = game.settings.get(
@@ -332,6 +334,27 @@ async function heraldHud_renderActorData() {
     if (preparedSpellsActionContainerDiv) {
       preparedSpellsActionContainerDiv.innerHTML = ``;
     }
+  }
+  let menuDetailContainerDiv = document.getElementById(
+    "heraldHud-menuDetailContainer"
+  );
+
+  if (menuDetailContainerDiv) {
+    menuDetailContainerDiv.innerHTML = `
+    <div id="heraldHud-menuDetailWrapper" class="heraldHud-menuDetailWrapper">
+      <div id="heraldHud-menuDetailButton" class="heraldHud-menuDetailButton"></div>
+    </div>
+    `;
+  }
+
+  let menuDetailWrapper = document.getElementById(
+    "heraldHud-menuDetailWrapper"
+  );
+  if (menuDetailWrapper) {
+    menuDetailWrapper.addEventListener("click", (event) => {
+      event.stopPropagation();
+      heraldHud_showDialog("menu");
+    });
   }
 
   let restShortcutContainerDiv = document.getElementById(
@@ -1452,6 +1475,8 @@ async function heraldHud_showDialog(kategori) {
     await heraldHud_renderViewInformation();
   } else if (kategori == "equipment") {
     await heraldHud_renderViewEquipment();
+  } else if (kategori == "menu") {
+    await md.heraldHud_renderListMenu();
   }
 }
 async function heraldHud_renderDialog(kategori) {
