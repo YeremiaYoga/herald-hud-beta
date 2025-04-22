@@ -281,7 +281,7 @@ async function heraldHud_getDataBiographyBottom() {
 
 async function heraldHud_gmCreateJournalFolder() {
   let heraldHudFolder = game.folders.find(
-    (f) => f.name === "Herald Hud" && f.type === "JournalEntry" && !f.parent
+    (f) => f.name === "Herald Hud" && f.type === "JournalEntry" && !f.folder
   );
 
   if (!heraldHudFolder) {
@@ -291,27 +291,18 @@ async function heraldHud_gmCreateJournalFolder() {
     });
   }
 
-  let personalNotesFolder = false;
-  for (let subFolder of heraldHudFolder.children) {
-    console.log();
-    if (subFolder.folder.name) {
-      personalNotesFolder = true;
-      break;
-    }
-  }
-  if (!personalNotesFolder) {
-    heraldHudFolder = game.folders.find(
-      (f) => f.name === "Herald Hud" && f.type === "JournalEntry" && !f.parent
-    );
-    const newFolder = await Folder.create({
-      name: "New Subfolder",
-      type: "JournalEntry",
-      parent: heraldHudFolder.id,
-    });
-
-    heraldHudFolder.children.push(newFolder);
-  }
+  // let personalNotesFolder = game.folders.some(
+  //   (f) => f.folder?.id === heraldHudFolder.id
+  // );
+  // if (!personalNotesFolder) {
+  //   personalNotesFolder = await Folder.create({
+  //     name: "Personal Notes",
+  //     type: "JournalEntry",
+  //     folder: heraldHudFolder.id,
+  //   });
+  // }
 }
+
 
 async function heraldHud_gmCreateJournal() {
   let journalEntry = game.journal.find((j) => j.name === "Herald Hud");

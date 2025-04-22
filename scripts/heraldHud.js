@@ -25,6 +25,16 @@ let heraldHud_listOverlayHudbarFrame = [
   "butterfly_frame",
   "lightning_frame",
   "radiant_frame",
+  "fire_flies_frame",
+  "golden_gears_frame",
+  "lily_flower_frame",
+  "music_note_frame",
+  "red_spider_lily_frame",
+  "black_hole_frame",
+  "blood_bone_frame",
+  "raven_frame",
+  "dragon_frame"
+ 
 ];
 Hooks.once("ready", () => {
   heraldHud_spellsTrackerOff = game.settings.get(
