@@ -4,8 +4,15 @@ Hooks.once("socketlib.ready", () => {
   heraldHud_menuDetailSocket = socketlib.registerModule("herald-hud-beta");
   heraldHud_menuDetailSocket.register(
     "createFolderHeraldHudJournal",
-    async () => {
-      await heraldHud_gmCreateJournalFolder();
+    async (user) => {
+      await heraldHud_gmCreateJournalFolder(user);
+    }
+  );
+
+  heraldHud_menuDetailSocket.register(
+    "heraldHudCreatePersonalNotes",
+    async (user, input) => {
+      await heraldHud_createPersonalNotes(user, input);
     }
   );
 });
@@ -281,19 +288,8 @@ async function heraldHud_getDataBiographyBottom() {
 
 async function heraldHud_getViewPersonalNotes() {
   const user = game.user;
-  heraldHud_menuDetailSocket.executeAsGM("createFolderHeraldHudJournal");
+  heraldHud_menuDetailSocket.executeAsGM("createFolderHeraldHudJournal", user);
   let heraldHud_dialog2Div = document.getElementById("heraldHud-dialog2");
-
-  let heraldHudFolder = game.folders.find(
-    (f) => f.name === "Herald Hud" && f.type === "JournalEntry"
-  );
-
-  let personalNotesFolder = game.folders.find(
-    (f) =>
-      f.name === "Personal Notes" &&
-      f.type === "JournalEntry" &&
-      f.folder?.id === heraldHudFolder.id
-  );
 
   if (heraldHud_dialog2Div) {
     heraldHud_dialog2Div.innerHTML = `
@@ -333,24 +329,14 @@ async function heraldHud_getViewPersonalNotes() {
               if (!personalNotesInput)
                 return ui.notifications.warn("Please enter a note name.");
 
-              const playerFolder = game.folders.find(
-                (f) =>
-                  f.name === user.name &&
-                  f.type === "JournalEntry" &&
-                  f.folder?.id === personalNotesFolder.id
+              heraldHud_menuDetailSocket.executeAsGM(
+                "heraldHudCreatePersonalNotes",
+                user,
+                personalNotesInput
               );
-
-              if (!playerFolder) {
-                return ui.notifications.error("Player folder not found.");
-              }
-
-              await JournalEntry.create({
-                name: personalNotesInput,
-                content: "",
-                folder: playerFolder.id,
-              });
-
-              await heraldHud_renderListPersonalNotesMiddleContainer();
+              setTimeout(async () => {
+                await heraldHud_renderListPersonalNotesMiddleContainer();
+              }, 500);
             },
           },
           cancel: {
@@ -363,6 +349,36 @@ async function heraldHud_getViewPersonalNotes() {
     });
   }
   await heraldHud_renderListPersonalNotesMiddleContainer();
+}
+
+async function heraldHud_createPersonalNotes(user, input) {
+  let heraldHudFolder = game.folders.find(
+    (f) => f.name === "Herald Hud" && f.type === "JournalEntry"
+  );
+
+  let personalNotesFolder = game.folders.find(
+    (f) =>
+      f.name === "Personal Notes" &&
+      f.type === "JournalEntry" &&
+      f.folder?.id === heraldHudFolder.id
+  );
+  const playerFolder = game.folders.find(
+    (f) =>
+      f.name === user.name &&
+      f.type === "JournalEntry" &&
+      f.folder?.id === personalNotesFolder.id
+  );
+
+  if (!playerFolder) {
+    return ui.notifications.error("Player folder not found.");
+  }
+  let userId = user.id;
+  await JournalEntry.create({
+    name: input,
+    content: "",
+    folder: playerFolder.id,
+    ownership: { default: 3 },
+  });
 }
 
 async function heraldHud_renderListPersonalNotesMiddleContainer() {
@@ -398,7 +414,7 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
   for (let journal of personalNotesJournal) {
     let journalName = journal.name;
     listPersonalNotes += `
-      <div id="heraldHud-personalNotesContainer" class="heraldHud-personalNotesContainer">
+      <div id="heraldHud-personalNotesContainer" class="heraldHud-personalNotesContainer" data-id="${journal.id}">
         <div id="heraldHud-personalNotesLeftContainer" class="heraldHud-personalNotesLeftContainer">
           <div id="heraldHud-personalNotesName" class="heraldHud-personalNotesName">${journalName}</div>
         </div>
@@ -415,6 +431,25 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
 
   if (dialogMiddle) {
     dialogMiddle.innerHTML = listPersonalNotes;
+
+    const noteContainers = dialogMiddle.querySelectorAll(
+      ".heraldHud-personalNotesContainer"
+    );
+
+    noteContainers.forEach((container) => {
+      container.addEventListener("click", async (event) => {
+        if (
+          event.target.closest(".heraldHud-buttonDeletePersonalNotesContainer")
+        )
+          return;
+
+        const journalId = container.getAttribute("data-id");
+        const journal = game.journal.get(journalId);
+        if (journal) {
+          journal.sheet.render(true);
+        }
+      });
+    });
 
     const deleteButtons = dialogMiddle.querySelectorAll(
       ".heraldHud-buttonDeletePersonalNotesContainer"
@@ -448,8 +483,7 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
   }
 }
 
-async function heraldHud_gmCreateJournalFolder() {
-  const user = game.user;
+async function heraldHud_gmCreateJournalFolder(user) {
   let heraldHudFolder = game.folders.find(
     (f) => f.name === "Herald Hud" && f.type === "JournalEntry" && !f.folder
   );
@@ -461,7 +495,7 @@ async function heraldHud_gmCreateJournalFolder() {
     });
   }
 
-  let personalNotesFolder = game.folders.some(
+  let personalNotesFolder = game.folders.find(
     (f) => f.folder?.id === heraldHudFolder.id
   );
   if (!personalNotesFolder) {
@@ -482,13 +516,6 @@ async function heraldHud_gmCreateJournalFolder() {
       folder: personalNotesFolder.id,
     });
   }
-}
-
-async function heraldHud_gmCreateJournal() {
-  const user = game.user;
-  let selectedActor = user.character;
-  let journalEntry = game.journal.find((j) => j.name === user.name);
-  console.log(journalEntry);
 }
 
 export { heraldHud_renderListMenu };
