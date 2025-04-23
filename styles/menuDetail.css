@@ -1,144 +1,210 @@
 .heraldHud-menuDetailContainer {
-    position: absolute;
-    left: 94%;
-    z-index: 16;
-    cursor: pointer;
+  position: absolute;
+  left: 94%;
+  z-index: 16;
+  cursor: pointer;
 }
 
 .heraldHud-menuDetailWrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 30px;
-    background-color: green;
-    border-radius: 50%;
-    -webkit-border-radius: 50%;
-    -moz-border-radius: 50%;
-    -ms-border-radius: 50%;
-    -o-border-radius: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background-color: green;
+  border-radius: 50%;
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
+  -ms-border-radius: 50%;
+  -o-border-radius: 50%;
 }
 
 .heraldHud-menuDetailButton {}
 
 .heraldHud-menuDetailListItem {
-    gap: 5px;
+  gap: 5px;
 }
 
 .heraldHud-menuDetailItem {
-    color: white;
-    padding: 5px;
-    background-color: rgb(0, 0, 0, 0.5);
-    border: 2px solid rgb(207, 207, 207);
-    border-radius: 5px;
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    -ms-border-radius: 5px;
-    -o-border-radius: 5px;
-    margin-bottom: 10px;
-    cursor: pointer;
+  color: white;
+  padding: 5px;
+  background-color: rgb(0, 0, 0, 0.5);
+  border: 2px solid rgb(207, 207, 207);
+  border-radius: 5px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+  margin-bottom: 10px;
+  cursor: pointer;
 }
 
 .heraldHud-menuDetailItem:hover {
-    background-color: rgba(75, 75, 75, 0.8);
+  background-color: rgba(75, 75, 75, 0.8);
 }
 
 .heraldHud-menuDetailName {
-    font-size: 18px;
-    text-align: center;
+  font-size: 18px;
+  text-align: center;
 }
 
 
 .heraldHud-dialog2.biography {
-    left: 43%;
-    width: 550px;
-    height: 350px;
+  left: 43%;
+  width: 550px;
+  height: 350px;
 }
-.heraldHud-menuBiographyContainer{
-    padding: 5px;
-    overflow-y: auto;
-    height: 100%;
-    color: white;
+
+.heraldHud-menuBiographyContainer {
+  padding: 5px;
+  overflow-y: auto;
+  height: 100%;
+  color: white;
 }
+
 .heraldHud-biographyTopContainer {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px 16px; 
-  }
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px 16px;
+}
 
 .heraldHud-topInputBiographyWrapper {
-    color: white;
-    display: flex;
-    align-items: center;
-    margin-bottom: 8px;
+  color: white;
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
 }
 
 .heraldHud-topInputBiographyLabel {
-    padding-right: 2px;
-    font-weight: bold;
-    text-transform: uppercase;
-    font-size: 10px;
+  padding-right: 2px;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 10px;
 }
 
 .heraldHud-topInputBiographyField {
-    color: white !important;
-    flex: 1;
-    padding: 2px 4px;
-    border: 1px solid #999;
-    border-radius: 4px;
-    font-size: 10px;
+  color: white !important;
+  flex: 1;
+  padding: 2px 4px;
+  border: 1px solid #999;
+  border-radius: 4px;
+  font-size: 10px;
 }
 
-.heraldHud-biographyMiddleContainer{
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px 16px; 
+.heraldHud-biographyMiddleContainer {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px 16px;
 }
 
 .heraldHud-middleInputBiographyWrapper {
-    margin-bottom: 5px;
-  }
-  
-  .heraldHud-middleInputBiographyLabel {
-    display: block;
-    font-weight: bold;
-    font-size: 12px;
-    margin-bottom: 5px;
-  }
-  
-  .heraldHud-middleInputBiographyField {
-    width: 100%;
-    resize: vertical;
-    color: white !important;
-    border: 1px solid white !important;
-  }
-  
-  .heraldHud-middleInputBiographyDivider {
-    border: none;
-    border-top: 1px solid #ccc;
-  }
+  margin-bottom: 5px;
+}
 
-  .heraldHud-bottomInputBiographyWrapper {
-    margin-bottom: 1rem;
-  }
-  
-  .heraldHud-bottomInputBiographyLabel {
-    display: block;
-    font-weight: bold;
-    font-size: 12px;
-    margin-bottom: 5px;
-  }
-  
-  .heraldHud-bottomInputBiographyField {
-    width: 100%;
-    resize: vertical;
-    color: white !important;
-    border: 1px solid white !important;
-    height: 100px;
-  }
-  
-  .heraldHud-bottomInputBiographyDivider {
-    border: none;
-    border-top: 1px solid #ccc;
-  }
+.heraldHud-middleInputBiographyLabel {
+  display: block;
+  font-weight: bold;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.heraldHud-middleInputBiographyField {
+  width: 100%;
+  resize: vertical;
+  color: white !important;
+  border: 1px solid white !important;
+}
+
+.heraldHud-middleInputBiographyDivider {
+  border: none;
+  border-top: 1px solid #ccc;
+}
+
+.heraldHud-bottomInputBiographyWrapper {
+  margin-bottom: 1rem;
+}
+
+.heraldHud-bottomInputBiographyLabel {
+  display: block;
+  font-weight: bold;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.heraldHud-bottomInputBiographyField {
+  width: 100%;
+  resize: vertical;
+  color: white !important;
+  border: 1px solid white !important;
+  height: 100px;
+}
+
+.heraldHud-bottomInputBiographyDivider {
+  border: none;
+  border-top: 1px solid #ccc;
+}
+
+/* ---------------------------------------------
+   DIALOG PERSONAL NOTES
+--------------------------------------------- */
+
+.heraldHud-dialog2.personal_notes {
+  left: 48%;
+  width: 300px;
+  height: 350px;
+}
+
+.heraldHud-personalNotesContainer {
+  color: white;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  padding: 5px;
+  margin-bottom: 5px;
+  border: 2px solid gold;
+  border-radius: 5px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+}
+
+.heraldHud-personalNotesName {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.heraldHud-personalNotesRightContainer {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.heraldHud-buttonDeletePersonalNotesContainer {
+  color: red;
+  cursor: pointer;
+}
+
+.heraldHud-listPersonalNotesBottomContainer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 10px;
+  z-index: 14;
+}
+
+.heraldHud-buttonAddPersonalNotesContainer {
+  width: 30px;
+  height: 30px;
+  border: 2px solid gold;
+  color: gold;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  cursor: pointer;
+}
