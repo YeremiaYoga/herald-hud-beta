@@ -35,7 +35,7 @@ async function heraldHud_renderListMenu() {
   let arrMenu = [
     `biography`,
     `personal_notes`,
-    `party_notes`,
+    `party_journal`,
     `mission`,
     `npcs`,
   ];
@@ -76,8 +76,8 @@ async function heraldHud_showDialogSubMenuDetail(kategori) {
     await heraldHud_getViewBiography();
   } else if (kategori == `personal_notes`) {
     await heraldHud_getViewPersonalNotes();
-  } else if (kategori == `party_notes`) {
-    await heraldHud_getViewPartyNotes();
+  } else if (kategori == `party_journal`) {
+    await heraldHud_getViewPartyJournal();
   } else if (kategori == `mission`) {
   }
 }
@@ -774,7 +774,7 @@ async function heraldHud_createPartyJournal(user, input, type) {
   });
 }
 
-async function heraldHud_getViewPartyNotes() {
+async function heraldHud_getViewPartyJournal() {
   const user = game.user;
   const selectedActor = user.character;
   // heraldHud_menuDetailSocket.executeAsGM("createPartyJournalFolder", user);
