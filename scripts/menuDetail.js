@@ -3,16 +3,30 @@ let heraldHud_menuDetailSocket;
 Hooks.once("socketlib.ready", () => {
   heraldHud_menuDetailSocket = socketlib.registerModule("herald-hud-beta");
   heraldHud_menuDetailSocket.register(
-    "createFolderHeraldHudJournal",
+    "createPersonalNotesFolder",
     async (user) => {
-      await heraldHud_gmCreateJournalFolder(user);
+      await heraldHud_gmCreatePersonalNotesFolder(user);
     }
   );
 
   heraldHud_menuDetailSocket.register(
     "heraldHudCreatePersonalNotes",
-    async (user, input) => {
-      await heraldHud_createPersonalNotes(user, input);
+    async (user, input, type) => {
+      await heraldHud_createPersonalNotes(user, input, type);
+    }
+  );
+
+  heraldHud_menuDetailSocket.register(
+    "createPartyJournalFolder",
+    async (user) => {
+      await heraldHud_gmCreatePartyJournalFolder(user);
+    }
+  );
+
+  heraldHud_menuDetailSocket.register(
+    "heraldHudCreatePartyJournal",
+    async (user, input, type) => {
+      await heraldHud_createPartyJournal(user, input, type);
     }
   );
 });
@@ -63,6 +77,7 @@ async function heraldHud_showDialogSubMenuDetail(kategori) {
   } else if (kategori == `personal_notes`) {
     await heraldHud_getViewPersonalNotes();
   } else if (kategori == `party_notes`) {
+    await heraldHud_getViewPartyNotes();
   } else if (kategori == `mission`) {
   }
 }
@@ -288,7 +303,7 @@ async function heraldHud_getDataBiographyBottom() {
 
 async function heraldHud_getViewPersonalNotes() {
   const user = game.user;
-  heraldHud_menuDetailSocket.executeAsGM("createFolderHeraldHudJournal", user);
+  heraldHud_menuDetailSocket.executeAsGM("createPersonalNotesFolder", user);
   let heraldHud_dialog2Div = document.getElementById("heraldHud-dialog2");
 
   if (heraldHud_dialog2Div) {
@@ -297,11 +312,26 @@ async function heraldHud_getViewPersonalNotes() {
         <div id="heraldHud-listPersonalNotesTopContiner" class="heraldHud-listPersonalNotesTopContiner"></div>
         <div id="heraldHud-listPersonalNotesMiddleContainer" class="heraldHud-listPersonalNotesMiddleContainer"></div>
         <div id="heraldHud-listPersonalNotesBottomContainer" class="heraldHud-listPersonalNotesBottomContainer">
+          <div class="heraldHud-searchPersonalNotesContainer">
+            <input type="text" id="heraldHud-searchPersonalNotes" class="heraldHud-searchPersonalNotes" placeholder="Search notes..." />
+          </div>
           <div id="heraldHud-buttonAddPersonalNotesContainer" class="heraldHud-buttonAddPersonalNotesContainer">
             <i class="fa-solid fa-plus"></i>
           </div>
         </div>
       </div>`;
+
+    let searchPersonalNotes = document.getElementById(
+      "heraldHud-searchPersonalNotes"
+    );
+    let inputSearchTimeOut;
+    searchPersonalNotes.addEventListener("input", () => {
+      clearTimeout(inputSearchTimeOut);
+
+      inputSearchTimeOut = setTimeout(async () => {
+        await heraldHud_renderListPersonalNotesMiddleContainer();
+      }, 500);
+    });
 
     let addPersonalNotes = document.getElementById(
       "heraldHud-buttonAddPersonalNotesContainer"
@@ -315,6 +345,11 @@ async function heraldHud_getViewPersonalNotes() {
             <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom:10px;">
               <label for="heraldHud-personalNotesInput"><strong>Name for Journal</strong></label>
               <textarea id="heraldHud-personalNotesInput" rows="3" style="width: 100%;" placeholder="Enter Name ..."></textarea>
+              <div>
+                <label for="heraldHud-personalNotesType"><strong>Type</strong></label>
+                <input id="heraldHud-personalNotesType" type="text" style="width: 100%;" placeholder="Enter Type ..."/>
+              </div>
+            
             </div>
           </form>
         `,
@@ -326,13 +361,19 @@ async function heraldHud_getViewPersonalNotes() {
                 .find("#heraldHud-personalNotesInput")
                 .val()
                 ?.trim();
+
+              const typeInput = html
+                .find("#heraldHud-personalNotesType")
+                .val()
+                ?.trim();
               if (!personalNotesInput)
                 return ui.notifications.warn("Please enter a note name.");
 
               heraldHud_menuDetailSocket.executeAsGM(
                 "heraldHudCreatePersonalNotes",
                 user,
-                personalNotesInput
+                personalNotesInput,
+                typeInput
               );
               setTimeout(async () => {
                 await heraldHud_renderListPersonalNotesMiddleContainer();
@@ -351,7 +392,7 @@ async function heraldHud_getViewPersonalNotes() {
   await heraldHud_renderListPersonalNotesMiddleContainer();
 }
 
-async function heraldHud_createPersonalNotes(user, input) {
+async function heraldHud_createPersonalNotes(user, input, type) {
   let heraldHudFolder = game.folders.find(
     (f) => f.name === "Herald Hud" && f.type === "JournalEntry"
   );
@@ -372,11 +413,13 @@ async function heraldHud_createPersonalNotes(user, input) {
   if (!playerFolder) {
     return ui.notifications.error("Player folder not found.");
   }
-  let userId = user.id;
   await JournalEntry.create({
     name: input,
     content: "",
     folder: playerFolder.id,
+    flags: {
+      type: type,
+    },
     ownership: { default: 3 },
   });
 }
@@ -410,23 +453,97 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
   let personalNotesJournal = game.journal.filter(
     (j) => j.folder?.id === playerFolder.id
   );
-  let listPersonalNotes = ``;
-  for (let journal of personalNotesJournal) {
+
+  let searchPersonalNotes = document.getElementById(
+    "heraldHud-searchPersonalNotes"
+  );
+  let valueSearch = "";
+  if (searchPersonalNotes) {
+    valueSearch = searchPersonalNotes.value.toLowerCase();
+  }
+
+  let filteredPersonalNotes = [];
+
+  for (let data of personalNotesJournal) {
+    let journalName = data.name.toLowerCase();
+    if (journalName.indexOf(valueSearch) !== -1) {
+      filteredPersonalNotes.push(data);
+    }
+  }
+  let groupedNotes = {};
+  let notesWithoutType = [];
+
+  for (let journal of filteredPersonalNotes) {
+    console.log(journal.flags);
     let journalName = journal.name;
-    listPersonalNotes += `
-      <div id="heraldHud-personalNotesContainer" class="heraldHud-personalNotesContainer" data-id="${journal.id}">
-        <div id="heraldHud-personalNotesLeftContainer" class="heraldHud-personalNotesLeftContainer">
-          <div id="heraldHud-personalNotesName" class="heraldHud-personalNotesName">${journalName}</div>
-        </div>
-        <div id="heraldHud-personalNotesMiddleContainer" class="heraldHud-personalNotesMiddleContainer">
-        </div>
-        <div id="heraldHud-personalNotesRightContainer" class="heraldHud-personalNotesRightContainer">
-          <div id="heraldHud-buttonDeletePersonalNotesContainer" class="heraldHud-buttonDeletePersonalNotesContainer" data-id="${journal.id}">
-            <i class="fa-solid fa-trash"></i>
+    let type = journal.flags?.type || "";
+
+    if (type) {
+      if (!groupedNotes[type]) {
+        groupedNotes[type] = "";
+      }
+
+      groupedNotes[type] += `
+        <div id="heraldHud-personalNotesContainer" class="heraldHud-personalNotesContainer" data-id="${journal.id}">
+          <div id="heraldHud-personalNotesLeftContainer" class="heraldHud-personalNotesLeftContainer">
+            <div id="heraldHud-personalNotesName" class="heraldHud-personalNotesName">${journalName}</div>
+          </div>
+          <div id="heraldHud-personalNotesMiddleContainer" class="heraldHud-personalNotesMiddleContainer">
+          </div>
+          <div id="heraldHud-personalNotesRightContainer" class="heraldHud-personalNotesRightContainer">
+            <div id="heraldHud-buttonEditPersonalNotesContainer" class="heraldHud-buttonEditPersonalNotesContainer" data-id="${journal.id}">
+              <i class="fa-solid fa-pen-to-square"></i>
+            </div>
+            <div id="heraldHud-buttonDeletePersonalNotesContainer" class="heraldHud-buttonDeletePersonalNotesContainer" data-id="${journal.id}">
+              <i class="fa-solid fa-trash"></i>
+            </div>
           </div>
         </div>
-      </div>
+      `;
+    } else {
+      notesWithoutType.push(`
+        <div id="heraldHud-personalNotesContainer" class="heraldHud-personalNotesContainer" data-id="${journal.id}">
+          <div id="heraldHud-personalNotesLeftContainer" class="heraldHud-personalNotesLeftContainer">
+            <div id="heraldHud-personalNotesName" class="heraldHud-personalNotesName">${journalName}</div>
+          </div>
+          <div id="heraldHud-personalNotesMiddleContainer" class="heraldHud-personalNotesMiddleContainer">
+          </div>
+          <div id="heraldHud-personalNotesRightContainer" class="heraldHud-personalNotesRightContainer">
+            <div id="heraldHud-buttonEditPersonalNotesContainer" class="heraldHud-buttonEditPersonalNotesContainer" data-id="${journal.id}">
+              <i class="fa-solid fa-pen-to-square"></i>
+            </div>
+            <div id="heraldHud-buttonDeletePersonalNotesContainer" class="heraldHud-buttonDeletePersonalNotesContainer" data-id="${journal.id}">
+              <i class="fa-solid fa-trash"></i>
+            </div>
+          </div>
+        </div>
+      `);
+    }
+  }
+
+  let listPersonalNotes = "";
+  let sortedTypes = Object.keys(groupedNotes).sort();
+  for (let type of sortedTypes) {
+    listPersonalNotes += `
+     <div style="display:flex; align-items:center;" >
+      <div style="color:white; font-size:18px; padding-bottom:5px; font-weight:bold;">${
+        type.charAt(0).toUpperCase() + type.slice(1)
+      }</div>
+      <hr style="flex-grow: 1; border: none; border-top: 2px solid white; margin-left:5px;" />
+    </div>
+    
     `;
+    listPersonalNotes += groupedNotes[type];
+  }
+
+  if (notesWithoutType.length > 0) {
+    listPersonalNotes += `
+    <div style="display:flex;">
+      <div style="color:white; font-size:18px; padding-bottom:5px; font-weight:bold;">Other</div>
+      <hr style="flex-grow: 1; border: none; border-top: 2px solid white; margin-left:5px;" />
+    </div>
+    `;
+    listPersonalNotes += notesWithoutType.join("");
   }
 
   if (dialogMiddle) {
@@ -439,7 +556,10 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
     noteContainers.forEach((container) => {
       container.addEventListener("click", async (event) => {
         if (
-          event.target.closest(".heraldHud-buttonDeletePersonalNotesContainer")
+          event.target.closest(
+            ".heraldHud-buttonDeletePersonalNotesContainer"
+          ) ||
+          event.target.closest(".heraldHud-buttonEditPersonalNotesContainer")
         )
           return;
 
@@ -448,6 +568,69 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
         if (journal) {
           journal.sheet.render(true);
         }
+      });
+    });
+
+    const editButtons = dialogMiddle.querySelectorAll(
+      ".heraldHud-buttonEditPersonalNotesContainer"
+    );
+
+    editButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        let journalId = this.dataset.id;
+        let journal = filteredPersonalNotes.find((j) => j.id === journalId);
+
+        const dialogContent = `
+          <form>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom:10px;">
+              <label for="heraldHud-personalNotesEditNameInput"><strong>Name for Journal</strong></label>
+              <textarea id="heraldHud-personalNotesEditNameInput" rows="3" style="width: 100%;">${
+                journal.name
+              }</textarea>
+              <div>
+                <label for="heraldHud-personaleNotesEditTypeInput"><strong>Type</strong></label>
+                <input id="heraldHud-personaleNotesEditTypeInput" type="text" style="width: 100%;" value="${
+                  journal.flags?.type || ""
+                }" />
+              </div>
+            </div>
+          </form>
+        `;
+
+        const dialogOptions = {
+          title: `Edit Journal`,
+          content: dialogContent,
+          buttons: {
+            save: {
+              label: "Save",
+              callback: async (html) => {
+                let newName = html
+                  .find("#heraldHud-personalNotesEditNameInput")
+                  .val();
+                let newType = html
+                  .find("#heraldHud-personaleNotesEditTypeInput")
+                  .val();
+
+                journal.name = newName;
+                journal.flags = journal.flags || {};
+                journal.flags.type = newType;
+                await game.journal.get(journal.id).update({
+                  name: newName,
+                  flags: { type: newType },
+                });
+
+                await heraldHud_renderListPersonalNotesMiddleContainer();
+              },
+            },
+            cancel: {
+              label: "Cancel",
+              callback: () => {},
+            },
+          },
+          default: "save",
+          render: async (html) => {},
+        };
+        new Dialog(dialogOptions).render(true);
       });
     });
 
@@ -483,7 +666,7 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
   }
 }
 
-async function heraldHud_gmCreateJournalFolder(user) {
+async function heraldHud_gmCreatePersonalNotesFolder(user) {
   let heraldHudFolder = game.folders.find(
     (f) => f.name === "Herald Hud" && f.type === "JournalEntry" && !f.folder
   );
@@ -508,12 +691,182 @@ async function heraldHud_gmCreateJournalFolder(user) {
   let playerFolder = game.folders.find(
     (f) => f.name === user.name && f.type === "JournalEntry"
   );
-
+  const hexColor = `${user.color.toString(16).padStart(6, "0")}`;
   if (!playerFolder) {
     playerFolder = await Folder.create({
       name: user.name,
       type: "JournalEntry",
       folder: personalNotesFolder.id,
+      color: hexColor,
+    });
+  }
+}
+
+/* ---------------------------------------------
+   DIALOG PARTY NOTES
+--------------------------------------------- */
+
+async function heraldHud_gmCreatePartyJournalFolder(user) {
+  let heraldHudFolder = game.folders.find(
+    (f) => f.name === "Herald Hud" && f.type === "JournalEntry" && !f.folder
+  );
+
+  if (!heraldHudFolder) {
+    heraldHudFolder = await Folder.create({
+      name: "Herald Hud",
+      type: "JournalEntry",
+    });
+  }
+
+  let partyJournalFolder = game.folders.find(
+    (f) => f.folder?.id === heraldHudFolder.id
+  );
+  if (!partyJournalFolder) {
+    partyJournalFolder = await Folder.create({
+      name: "Party Journal",
+      type: "JournalEntry",
+      folder: heraldHudFolder.id,
+    });
+  }
+  let playerFolder = game.folders.find(
+    (f) => f.name === user.name && f.type === "JournalEntry"
+  );
+  const hexColor = `${user.color.toString(16).padStart(6, "0")}`;
+  if (!playerFolder) {
+    playerFolder = await Folder.create({
+      name: user.name,
+      type: "JournalEntry",
+      folder: partyJournalFolder.id,
+      color: hexColor,
+    });
+  }
+}
+
+async function heraldHud_createPartyJournal(user, input, type) {
+  let heraldHudFolder = game.folders.find(
+    (f) => f.name === "Herald Hud" && f.type === "JournalEntry"
+  );
+
+  let personalNotesFolder = game.folders.find(
+    (f) =>
+      f.name === "Personal Notes" &&
+      f.type === "JournalEntry" &&
+      f.folder?.id === heraldHudFolder.id
+  );
+  const playerFolder = game.folders.find(
+    (f) =>
+      f.name === user.name &&
+      f.type === "JournalEntry" &&
+      f.folder?.id === personalNotesFolder.id
+  );
+
+  if (!playerFolder) {
+    return ui.notifications.error("Player folder not found.");
+  }
+  await JournalEntry.create({
+    name: input,
+    content: "",
+    folder: playerFolder.id,
+    flags: {
+      type: type,
+    },
+    ownership: { default: 3 },
+  });
+}
+
+async function heraldHud_getViewPartyNotes() {
+  const user = game.user;
+  const selectedActor = user.character;
+  // heraldHud_menuDetailSocket.executeAsGM("createPartyJournalFolder", user);
+  let heraldHud_dialog2Div = document.getElementById("heraldHud-dialog2");
+
+  if (heraldHud_dialog2Div) {
+    heraldHud_dialog2Div.innerHTML = `
+      <div id="heraldHud-dialogListPartyJournalContainer" class="heraldHud-dialogListPartyJournalContainer">
+        <div id="heraldHud-listPartyJournalTopContiner" class="heraldHud-listPartyJournalTopContiner"></div>
+        <div id="heraldHud-listPartyJournalMiddleContainer" class="heraldHud-listPartyJournalMiddleContainer"></div>
+        <div id="heraldHud-listPartyJournalBottomContainer" class="heraldHud-listPartyJournalBottomContainer">
+          <div class="heraldHud-searchPartyJournalContainer" style="display:none;">
+            <input type="text" id="heraldHud-searchPartyJournal" class="heraldHud-searchPartyJournal" placeholder="Search notes..." />
+          </div>
+          <div id="heraldHud-buttonAddPartyJournalContainer" class="heraldHud-buttonAddPersonalNotesContainer">
+            <i class="fa-solid fa-plus"></i>
+          </div>
+        </div>
+      </div>
+    `;
+
+    let addPartyJournal = document.getElementById(
+      "heraldHud-buttonAddPersonalNotesContainer"
+    );
+
+    addPersonalNotes.addEventListener("click", async () => {
+      const heraldCoreFolder = game.folders.find(
+        (f) => f.name === "Herald Core" && f.type === "JournalEntry"
+      );
+      if (!heraldCoreFolder) {
+        console.warn("Herald Core folder not found.");
+        return;
+      }
+      const partyFolder = game.folders.find(
+        (f) =>
+          f.name === "Party" &&
+          f.type === "JournalEntry" &&
+          f.folder?.id === heraldCoreFolder.id
+      );
+
+      const partyJournals = game.journal.filter(
+        (j) => j.folder?.id === partyFolder.id
+      );
+      new Dialog({
+        title: "Personal Notes",
+        content: `
+          <form>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom:10px;">
+              <label for="heraldHud-personalNotesInput"><strong>Name for Journal</strong></label>
+              <textarea id="heraldHud-personalNotesInput" rows="3" style="width: 100%;" placeholder="Enter Name ..."></textarea>
+              <div>
+                <label for="heraldHud-personalNotesType"><strong>Type</strong></label>
+                <input id="heraldHud-personalNotesType" type="text" style="width: 100%;" placeholder="Enter Type ..."/>
+              </div>
+            
+            </div>
+          </form>
+        `,
+        buttons: {
+          save: {
+            label: "Save",
+            callback: async (html) => {
+              const personalNotesInput = html
+                .find("#heraldHud-personalNotesInput")
+                .val()
+                ?.trim();
+
+              const typeInput = html
+                .find("#heraldHud-personalNotesType")
+                .val()
+                ?.trim();
+              if (!personalNotesInput)
+                return ui.notifications.warn("Please enter a note name.");
+
+              heraldHud_menuDetailSocket.executeAsGM(
+                "heraldHudCreatePersonalNotes",
+                user,
+                personalNotesInput,
+                typeInput
+              );
+              setTimeout(async () => {
+                await heraldHud_renderListPersonalNotesMiddleContainer();
+              }, 500);
+            },
+          },
+          cancel: {
+            label: "Cancel",
+            callback: () => {},
+          },
+        },
+        default: "save",
+      }).render(true);
     });
   }
 }

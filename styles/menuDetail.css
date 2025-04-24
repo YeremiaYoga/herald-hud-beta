@@ -155,6 +155,16 @@
   height: 350px;
 }
 
+.heraldHud-dialogListPersonalNotesContainer {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.heraldHud-listPersonalNotesMiddleContainer {
+  padding-bottom: 40px;
+
+}
+
 .heraldHud-personalNotesContainer {
   color: white;
   padding: 5px;
@@ -170,6 +180,8 @@
   -o-border-radius: 5px;
   cursor: pointer;
 }
+
+
 
 .heraldHud-personalNotesName {
   font-size: 16px;
@@ -195,9 +207,78 @@
   width: 100%;
   padding: 10px;
   z-index: 14;
+  display: flex;
+  background-color: black;
+  gap: 10px;
 }
 
+.heraldHud-searchPersonalNotesContainer {
+  width: 100%;
+}
+
+.heraldHud-searchPersonalNotes {
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 14px;
+  border: 2px solid gold !important;
+  border-radius: 4px;
+  color: white !important;
+  background-color: #222;
+}
+
+.heraldHud-searchPersonalNotes::placeholder {
+  color: white !important;
+  opacity: 1;
+}
+
+
 .heraldHud-buttonAddPersonalNotesContainer {
+  width: 30px;
+  height: 30px;
+  border: 2px solid gold;
+  color: gold;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  cursor: pointer;
+}
+
+/* ---------------------------------------------
+   DIALOG PARTY NOTES
+--------------------------------------------- */
+
+.heraldHud-dialog2.party_notes {
+  left: 48%;
+  width: 300px;
+  height: 350px;
+}
+
+.heraldHud-dialogListPartyJournalContainer {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.heraldHud-listPartyJournalMiddleContainer {
+  padding-bottom: 40px;
+
+}
+
+.heraldHud-listPartyJournalBottomContainer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 10px;
+  z-index: 14;
+  display: flex;
+  background-color: black;
+  gap: 10px;
+}
+
+
+.heraldHud-buttonAddPartyJournalContainer {
   width: 30px;
   height: 30px;
   border: 2px solid gold;
