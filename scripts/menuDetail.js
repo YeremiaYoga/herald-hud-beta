@@ -679,7 +679,7 @@ async function heraldHud_gmCreatePersonalNotesFolder(user) {
   }
 
   let personalNotesFolder = game.folders.find(
-    (f) => f.folder?.id === heraldHudFolder.id
+    (f) => f.name === "Personal Notes" && f.type === "JournalEntry"
   );
   if (!personalNotesFolder) {
     personalNotesFolder = await Folder.create({
@@ -689,7 +689,10 @@ async function heraldHud_gmCreatePersonalNotesFolder(user) {
     });
   }
   let playerFolder = game.folders.find(
-    (f) => f.name === user.name && f.type === "JournalEntry"
+    (f) =>
+      f.name === user.name &&
+      f.type === "JournalEntry" &&
+      f.folder === personalNotesFolder.id
   );
   const hexColor = `${user.color.toString(16).padStart(6, "0")}`;
   if (!playerFolder) {
@@ -719,7 +722,7 @@ async function heraldHud_gmCreatePartyJournalFolder(user) {
   }
 
   let partyJournalFolder = game.folders.find(
-    (f) => f.folder?.id === heraldHudFolder.id
+    (f) => f.name === "Party Journal" && f.type === "JournalEntry"
   );
   if (!partyJournalFolder) {
     partyJournalFolder = await Folder.create({
@@ -729,7 +732,10 @@ async function heraldHud_gmCreatePartyJournalFolder(user) {
     });
   }
   let playerFolder = game.folders.find(
-    (f) => f.name === user.name && f.type === "JournalEntry"
+    (f) =>
+      f.name === user.name &&
+      f.type === "JournalEntry" &&
+      f.folder === partyJournalFolder.id
   );
   const hexColor = `${user.color.toString(16).padStart(6, "0")}`;
   if (!playerFolder) {
@@ -749,7 +755,7 @@ async function heraldHud_createPartyJournal(user, input, type) {
 
   let personalNotesFolder = game.folders.find(
     (f) =>
-      f.name === "Personal Notes" &&
+      f.name === "Party Journal" &&
       f.type === "JournalEntry" &&
       f.folder?.id === heraldHudFolder.id
   );
@@ -777,7 +783,7 @@ async function heraldHud_createPartyJournal(user, input, type) {
 async function heraldHud_getViewPartyJournal() {
   const user = game.user;
   const selectedActor = user.character;
-  // heraldHud_menuDetailSocket.executeAsGM("createPartyJournalFolder", user);
+  heraldHud_menuDetailSocket.executeAsGM("createPartyJournalFolder", user);
   let heraldHud_dialog2Div = document.getElementById("heraldHud-dialog2");
 
   if (heraldHud_dialog2Div) {
@@ -797,78 +803,138 @@ async function heraldHud_getViewPartyJournal() {
     `;
 
     let addPartyJournal = document.getElementById(
-      "heraldHud-buttonAddPersonalNotesContainer"
+      "heraldHud-buttonAddPartyJournalContainer"
     );
+    if (addPartyJournal) {
+      addPartyJournal.addEventListener("click", async () => {
+        const heraldCoreFolder = game.folders.find(
+          (f) => f.name === "Herald Core" && f.type === "JournalEntry"
+        );
+        if (!heraldCoreFolder) {
+          console.warn("Herald Core folder not found.");
+          return;
+        }
+        const partyFolder = game.folders.find(
+          (f) =>
+            f.name === "Party" &&
+            f.type === "JournalEntry" &&
+            f.folder?.id === heraldCoreFolder.id
+        );
 
-    addPersonalNotes.addEventListener("click", async () => {
-      const heraldCoreFolder = game.folders.find(
-        (f) => f.name === "Herald Core" && f.type === "JournalEntry"
-      );
-      if (!heraldCoreFolder) {
-        console.warn("Herald Core folder not found.");
-        return;
-      }
-      const partyFolder = game.folders.find(
-        (f) =>
-          f.name === "Party" &&
-          f.type === "JournalEntry" &&
-          f.folder?.id === heraldCoreFolder.id
-      );
+        const partyJournals = game.journal.filter(
+          (j) => j.folder?.id === partyFolder.id
+        );
+        let userUuid = user.uuid;
+        let actorUuid = selectedActor.uuid;
+        let listRadioButton = ``;
+        for (let journal of partyJournals) {
+          for (let page of journal.pages) {
+            if (page.name === `${userUuid} | ${actorUuid}`) {
+              listRadioButton += `
+          <div style="margin-bottom:4px;">
+            <input
+              type="radio"
+              id="heraldHud-partyJournal-${journal.id}"
+              name="heraldHud-partyJournalType"
+              value="${journal.name}"
+            />
+            <label
+              for="heraldHud-partyJournal-${journal.id}"
+              style=""
+            >${journal.name}</label>
+          </div>
+        `;
+            }
+          }
+        }
 
-      const partyJournals = game.journal.filter(
-        (j) => j.folder?.id === partyFolder.id
-      );
-      new Dialog({
-        title: "Personal Notes",
-        content: `
-          <form>
-            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom:10px;">
-              <label for="heraldHud-personalNotesInput"><strong>Name for Journal</strong></label>
-              <textarea id="heraldHud-personalNotesInput" rows="3" style="width: 100%;" placeholder="Enter Name ..."></textarea>
-              <div>
-                <label for="heraldHud-personalNotesType"><strong>Type</strong></label>
-                <input id="heraldHud-personalNotesType" type="text" style="width: 100%;" placeholder="Enter Type ..."/>
-              </div>
-            
-            </div>
-          </form>
-        `,
-        buttons: {
-          save: {
-            label: "Save",
-            callback: async (html) => {
-              const personalNotesInput = html
-                .find("#heraldHud-personalNotesInput")
-                .val()
-                ?.trim();
+        new Dialog({
+          title: "Party Journal",
+          content: `
+        <form>
+          <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom:10px;">
+            <label for="heraldHud-partyJournalInput"><strong>Name for Journal</strong></label>
+            <textarea id="heraldHud-partyJournalInput" rows="3" style="width: 100%;" placeholder="Enter Name ..."></textarea>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            <div style=""><strong>Which Party</strong></div>
+            ${
+              listRadioButton ||
+              `<div style=" font-style:italic;">No journals found</div>`
+            }
+          </div>
+        </form>
+      `,
+          buttons: {
+            save: {
+              label: "Create",
+              callback: (html) => {
+                const partyJournalName = html
+                  .find("#heraldHud-partyJournalInput")
+                  .val();
+                const selectedJournalId = html
+                  .find("input[name='heraldHud-partyJournalType']:checked")
+                  .val();
+                console.log(
+                  "Name:",
+                  name,
+                  "Selected Journal ID:",
+                  selectedJournalId
+                );
 
-              const typeInput = html
-                .find("#heraldHud-personalNotesType")
-                .val()
-                ?.trim();
-              if (!personalNotesInput)
-                return ui.notifications.warn("Please enter a note name.");
-
-              heraldHud_menuDetailSocket.executeAsGM(
-                "heraldHudCreatePersonalNotes",
-                user,
-                personalNotesInput,
-                typeInput
-              );
-              setTimeout(async () => {
-                await heraldHud_renderListPersonalNotesMiddleContainer();
-              }, 500);
+                heraldHud_menuDetailSocket.executeAsGM(
+                  "heraldHudCreatePartyJournal",
+                  user,
+                  partyJournalName,
+                  selectedJournalId
+                );
+                setTimeout(async () => {
+                  await heraldHud_renderListPartyJournalMiddleContainer();
+                }, 500);
+              },
+            },
+            cancel: {
+              label: "Cancel",
+              callback: () => {},
             },
           },
-          cancel: {
-            label: "Cancel",
-            callback: () => {},
-          },
-        },
-        default: "save",
-      }).render(true);
-    });
+          default: "save",
+        }).render(true);
+      });
+    }
   }
+  await heraldHud_renderListPartyJournalMiddleContainer();
+}
+
+async function heraldHud_renderListPartyJournalMiddleContainer() {
+  const user = game.user;
+  let dialogMiddle = document.getElementById(
+    "heraldHud-listPartyJournalMiddleContainer"
+  );
+
+  let heraldHudFolder = game.folders.find(
+    (f) => f.name === "Herald Hud" && f.type === "JournalEntry"
+  );
+
+  let partyJournalFolder = game.folders.find(
+    (f) =>
+      f.name === "Party Journal" &&
+      f.type === "JournalEntry" &&
+      f.folder?.id === heraldHudFolder.id
+  );
+
+  let playerFolder = game.folders.find(
+    (f) =>
+      f.name === user.name &&
+      f.type === "JournalEntry" &&
+      f.folder?.id === partyJournalFolder.id
+  );
+  if (!playerFolder) {
+    return;
+  }
+  let partyJournalList = game.journal.filter(
+    (j) => j.folder?.id === playerFolder.id
+  );
 }
 
 export { heraldHud_renderListMenu };

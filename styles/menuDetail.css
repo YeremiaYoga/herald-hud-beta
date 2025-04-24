@@ -5,6 +5,8 @@
   cursor: pointer;
 }
 
+
+
 .heraldHud-menuDetailWrapper {
   position: relative;
   display: flex;
@@ -12,12 +14,26 @@
   justify-content: center;
   width: 30px;
   height: 30px;
-  background-color: green;
-  border-radius: 50%;
-  -webkit-border-radius: 50%;
-  -moz-border-radius: 50%;
-  -ms-border-radius: 50%;
-  -o-border-radius: 50%;
+
+}
+
+.heraldHud-menuDetailButton {
+  width: 23px;
+  height: 23px;
+  background: rgb(0, 0, 0);
+  transform: rotate(45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+
+}
+
+.heraldHud-menuDetailImage {
+  border: none;
+  width: 35px;
+  height: 35px;
+  position: absolute;
 }
 
 .heraldHud-menuDetailButton {}

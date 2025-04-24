@@ -2,7 +2,7 @@
   "name": "herald-hud-beta",
   "title": "Herald HUD Beta",
   "description": "Herald Beta Testing",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "author": ["Herald of Memory", "CandleNote"],
   "manifest": "https://raw.githubusercontent.com/YeremiaYoga/herald-hud-beta/main/module.json",
   "download": "https://github.com/YeremiaYoga/herald-hud-beta/archive/refs/heads/main.zip",

@@ -349,14 +349,30 @@ async function heraldHud_renderActorData() {
     "heraldHud-menuDetailContainer"
   );
 
+  // if (menuDetailContainerDiv) {
+  //   menuDetailContainerDiv.innerHTML = `
+  //   <div id="heraldHud-menuDetailWrapper" class="heraldHud-menuDetailWrapper">
+  //     <div id="heraldHud-menuDetailButton" class="heraldHud-menuDetailButton"></div>
+  //   </div>
+  //   `;
+  // }
+
   if (menuDetailContainerDiv) {
     menuDetailContainerDiv.innerHTML = `
-    <div id="heraldHud-menuDetailWrapper" class="heraldHud-menuDetailWrapper">
+    <div id="heraldHud-menuDetailDivContainer" class="heraldHud-menuDetailDivContainer">
+      <div id="heraldHud-menuDetailWrapper" class="heraldHud-menuDetailWrapper">
       <div id="heraldHud-menuDetailButton" class="heraldHud-menuDetailButton"></div>
+       <img
+          src="/modules/herald-hud-beta/assets/menudetail_icon.webp"
+          alt=""
+          class="heraldHud-menuDetailImage"
+        />
+      </div>
     </div>
+
+  
     `;
   }
-
   let menuDetailWrapper = document.getElementById(
     "heraldHud-menuDetailWrapper"
   );
