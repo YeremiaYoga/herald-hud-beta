@@ -181,11 +181,9 @@
 
 }
 
-.heraldHud-personalNotesContainer {
+.heraldHud-personalNotesWrapperContainer {
   color: white;
-  padding: 5px;
-  display: flex;
-  align-items: center;
+
   padding: 5px;
   margin-bottom: 5px;
   border: 2px solid gold;
@@ -194,6 +192,11 @@
   -moz-border-radius: 5px;
   -ms-border-radius: 5px;
   -o-border-radius: 5px;
+}
+
+.heraldHud-personalNotesContainer {
+  display: flex;
+  align-items: center;
   cursor: pointer;
 }
 
@@ -261,6 +264,13 @@
   cursor: pointer;
 }
 
+.heraldHud-personalNotesPage {
+  margin-left: 10px;
+  font-size: 14px;
+  padding: 3px;
+  cursor: pointer;
+}
+
 /* ---------------------------------------------
    DIALOG PARTY NOTES
 --------------------------------------------- */
@@ -279,6 +289,61 @@
 .heraldHud-listPartyJournalMiddleContainer {
   padding-bottom: 40px;
 
+}
+
+.heraldHud-partyJournalContainer {
+  color: white;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  padding: 5px;
+  margin-bottom: 5px;
+  border: 2px solid gold;
+  border-radius: 5px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+  cursor: pointer;
+}
+
+
+
+.heraldHud-partyJournalName {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.heraldHud-partyJournalRightContainer {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.heraldHud-buttonDeletePartyJournalContainer {
+  color: red;
+  cursor: pointer;
+}
+
+
+.heraldHud-searchPartyJournalContainer {
+  width: 100%;
+}
+
+.heraldHud-searchPartyJournal {
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 14px;
+  border: 2px solid gold !important;
+  border-radius: 4px;
+  color: white !important;
+  background-color: #222;
+}
+
+.heraldHud-searchPartyJournal::placeholder {
+  color: white !important;
+  opacity: 1;
 }
 
 .heraldHud-listPartyJournalBottomContainer {
