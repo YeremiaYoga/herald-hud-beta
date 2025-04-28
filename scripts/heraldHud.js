@@ -33,8 +33,7 @@ let heraldHud_listOverlayHudbarFrame = [
   "black_hole_frame",
   "blood_bone_frame",
   "raven_frame",
-  "dragon_frame"
- 
+  "dragon_frame",
 ];
 Hooks.once("ready", () => {
   heraldHud_spellsTrackerOff = game.settings.get(

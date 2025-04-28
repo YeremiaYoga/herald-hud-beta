@@ -1,26 +1,38 @@
 {
-  "name": "herald-hud-beta",
   "title": "Herald HUD Beta",
   "description": "Herald Beta Testing",
-  "version": "1.0.15",
-  "author": ["Herald of Memory", "CandleNote"],
+  "version": "1.0.16",
   "manifest": "https://raw.githubusercontent.com/YeremiaYoga/herald-hud-beta/main/module.json",
   "download": "https://github.com/YeremiaYoga/herald-hud-beta/archive/refs/heads/main.zip",
   "esmodules": ["scripts/main.js"],
   "styles": ["styles/style.css", "styles/menuDetail.css"],
   "persistentStorage": true,
   "socket": true,
-  "dependencies": [
+  "packs": [
     {
-      "name": "socketlib",
-      "type": "module",
-      "manifest": "https://raw.githubusercontent.com/manuelVo/foundryvtt-socketlib/main/module.json"
+      "name": "herald-hud-backup",
+      "label": "Herald Hud Backup",
+      "path": "packs/herald-hud-backup",
+      "type": "JournalEntry",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
     }
   ],
-  "languages": [],
-  "packs": [],
   "compatibility": {
     "minimum": "12",
     "verified": "12"
+  },
+  "id": "herald-hud-beta",
+  "relationships": {
+    "requires": [
+      {
+        "id": "socketlib",
+        "type": "module",
+        "manifest": "https://raw.githubusercontent.com/manuelVo/foundryvtt-socketlib/main/module.json",
+        "compatibility": {}
+      }
+    ]
   }
 }
