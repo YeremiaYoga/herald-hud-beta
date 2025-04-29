@@ -1,4 +1,4 @@
-async function heraldHud_createCompendiumFolder(user) {
+async function heraldHud_createCompendiumPersonalNotesFolder(user) {
   const pack = game.packs.get("herald-hud-beta.herald-hud-backup");
   if (!pack) {
     return ui.notifications.error(
@@ -10,12 +10,6 @@ async function heraldHud_createCompendiumFolder(user) {
 
   const personalNotesFolder = folders.find((f) => f.name === "Personal Notes");
 
-  if (personalNotesFolder) {
-    playerFolder = folders.find(
-      (f) => f.name === user.name && f.folder?.id === personalNotesFolder.id
-    );
-  }
-  console.log(personalNotesFolder);
   if (!personalNotesFolder) {
     const folderData = {
       name: "Personal Notes",
@@ -26,6 +20,11 @@ async function heraldHud_createCompendiumFolder(user) {
     personalNotesFolder = await Folder.create(folderData, {
       pack: "herald-hud-beta.herald-hud-backup",
     });
+  }
+  if (personalNotesFolder) {
+    playerFolder = folders.find(
+      (f) => f.name === user.name && f.folder?.id === personalNotesFolder.id
+    );
   }
 
   if (!playerFolder) {
@@ -139,7 +138,167 @@ async function heraldHud_backupJournalPersonalNotes(user, journalEntry) {
   });
 }
 
+async function heraldHud_createCompediumPartyJournalFolder() {
+  const pack = game.packs.get("herald-hud-beta.herald-hud-backup");
+  const journalFolders = game.folders.filter((f) => f.type === "JournalEntry");
+  if (!pack) {
+    return ui.notifications.error(
+      `Compendium "herald-hud.herald-hud-backup" not found.`
+    );
+  }
+  let heraldHudFolder = "";
+  let partyJournalFolder = "";
+  for (let folder of journalFolders) {
+    if (folder.name == "Herald Hud") {
+      heraldHudFolder = folder;
+    }
+    if (
+      folder.name == "Party Journal" &&
+      folder.folder.id == heraldHudFolder.id
+    ) {
+      partyJournalFolder = folder;
+    }
+  }
+  const compediumFolder = pack.folders;
+  let listPartyJournalFolder = compediumFolder.find(
+    (f) => f.name === "Party Journal"
+  );
+
+  if (!listPartyJournalFolder) {
+    const folderData = {
+      name: "Party Journal",
+      type: "JournalEntry",
+      compendium: "herald-hud-beta.herald-hud-backup",
+      sorting: "a",
+    };
+    listPartyJournalFolder = await Folder.create(folderData, {
+      pack: "herald-hud-beta.herald-hud-backup",
+    });
+  }
+  if (listPartyJournalFolder) {
+    const relevantJournalFolders = journalFolders.filter(
+      (f) => f.folder?.id === partyJournalFolder.id
+    );
+    const existingFolderNames = new Set(compediumFolder.map((f) => f.name));
+    for (let jFolder of relevantJournalFolders) {
+      if (!existingFolderNames.has(jFolder.name)) {
+        const partyFolderCompedium = {
+          name: jFolder.name,
+          type: "JournalEntry",
+          compendium: "herald-hud-beta.herald-hud-backup",
+          folder: listPartyJournalFolder.id,
+          sorting: "a",
+        };
+        await Folder.create(partyFolderCompedium, {
+          pack: "herald-hud-beta.herald-hud-backup",
+        });
+      }
+    }
+  }
+}
+
+async function heraldHud_backupJournalPartyJournal(journalEntry) {
+  const pack = game.packs.get("herald-hud-beta.herald-hud-backup");
+  const journalFolders = game.folders.filter((f) => f.type === "JournalEntry");
+  if (!pack) {
+    return ui.notifications.error(
+      `Compendium "herald-hud.herald-hud-backup" not found.`
+    );
+  }
+  let heraldHudFolder = "";
+  let partyJournalFolder = "";
+  let partyFolder = "";
+  let partyJournalCompendium = "";
+  let todayFolder = "";
+  const compendiumFolder = pack.folders;
+
+  const today = new Date();
+  const day = String(today.getDate()).padStart(2, "0");
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const year = today.getFullYear();
+  const todayDate = `${day}-${month}-${year}`;
+  for (let folder of journalFolders) {
+    if (folder.name === "Herald Hud") {
+      heraldHudFolder = folder;
+    }
+    if (
+      folder.name === "Party Journal" &&
+      folder.folder.id === heraldHudFolder.id
+    ) {
+      partyJournalFolder = folder;
+    }
+    if (
+      folder.name === journalEntry.flags.type &&
+      folder.folder.id === partyJournalFolder.id
+    ) {
+      partyFolder = folder;
+    }
+  }
+  console.log(partyFolder);
+
+  let listPartyJournalFolder = compendiumFolder.find(
+    (f) => f.name === "Party Journal"
+  );
+
+  if (listPartyJournalFolder) {
+    partyJournalCompendium = compendiumFolder.find(
+      (f) =>
+        f.folder?.id == listPartyJournalFolder.id &&
+        f.name == journalEntry.flags.type
+    );
+  }
+
+  if (partyJournalCompendium) {
+    todayFolder = compendiumFolder.find(
+      (f) => f.name === todayDate && f.folder?.id === partyJournalCompendium.id
+    );
+  }
+  if (!todayFolder) {
+    const todayFolderData = {
+      name: todayDate,
+      type: "JournalEntry",
+      compendium: "herald-hud-beta.herald-hud-backup",
+      folder: partyJournalCompendium.id,
+      sorting: "a",
+    };
+    todayFolder = await Folder.create(todayFolderData, {
+      pack: "herald-hud-beta.herald-hud-backup",
+    });
+
+    const journalEntries = game.journal.filter(
+      (entry) => entry.folder?.id === partyFolder.id
+    );
+    for (let journalEntry of journalEntries) {
+      const newJournalEntryData = {
+        name: journalEntry.name,
+        content: journalEntry.content,
+        folder: todayFolder.id,
+        flags: journalEntry.flags,
+        ownership: journalEntry.ownership,
+      };
+
+      await JournalEntry.create(newJournalEntryData, {
+        pack: "herald-hud-beta.herald-hud-backup",
+      });
+    }
+  }
+
+  const newJournalEntryData = {
+    name: journalEntry.name,
+    content: journalEntry.content,
+    folder: todayFolder.id,
+    flags: journalEntry.flags,
+    ownership: journalEntry.ownership,
+  };
+
+  await JournalEntry.create(newJournalEntryData, {
+    pack: "herald-hud-beta.herald-hud-backup",
+  });
+}
+
 export {
-  heraldHud_createCompendiumFolder,
+  heraldHud_createCompendiumPersonalNotesFolder,
   heraldHud_backupJournalPersonalNotes,
+  heraldHud_createCompediumPartyJournalFolder,
+  heraldHud_backupJournalPartyJournal,
 };

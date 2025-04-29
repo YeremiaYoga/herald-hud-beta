@@ -3006,22 +3006,25 @@ async function heraldHud_renderContainerStats() {
   if (heraldHud_dialogDiv) {
     heraldHud_dialogDiv.innerHTML = `
     <div id="heraldHud-dialogStatsContainer" class="heraldHud-dialogStatsContainer">
-      <div id="heraldHud-statsAbilitiesContainer" class="heraldHud-statsAbilitiesContainer">
-        <div id="heraldHud-statsAbilitiesTitle" class="heraldHud-statsAbilitiesTitle">Abilities</div>
-        <div id="heraldHud-statsListAbilities" class="heraldHud-statsListAbilities">
-      
-        </div>
-      </div>
-      <div id="heraldHud-statsSkillsContainer" class="heraldHud-statsSkillsContainer">
-        <div id="heraldHud-statsSkillsTitle" class="heraldHud-statsSkillsTitle">Skills</div>
-        <div id="heraldHud-statsListSkills" class="heraldHud-statsListSkills">
-      
-        </div>
-      </div>
-      <div id="heraldHud-statsSkillsSearchContainer" class="heraldHud-statsSkillsSearchContainer">
-          <div class="heraldHud-statsSkillsSearchView">
-              <input type="text" id="heraldHud-statsSkillsSearchValue" class="heraldHud-statsSkillsSearchValue" placeholder="Search Skills...">
+      <div style="padding-bottom:30px">
+        <div id="heraldHud-statsAbilitiesContainer" class="heraldHud-statsAbilitiesContainer">
+          <div id="heraldHud-statsAbilitiesTitle" class="heraldHud-statsAbilitiesTitle">Abilities</div>
+          <div id="heraldHud-statsListAbilities" class="heraldHud-statsListAbilities">
+        
           </div>
+        </div>
+        <div id="heraldHud-statsSkillsContainer" class="heraldHud-statsSkillsContainer">
+          <div id="heraldHud-statsSkillsTitle" class="heraldHud-statsSkillsTitle">Skills</div>
+          <div id="heraldHud-statsListSkills" class="heraldHud-statsListSkills">
+        
+          </div>
+        </div>
+      </div>
+      
+      <div id="heraldHud-statsSkillsSearchContainer" class="heraldHud-statsSkillsSearchContainer">
+        <div class="heraldHud-statsSkillsSearchView">
+          <input type="text" id="heraldHud-statsSkillsSearchValue" class="heraldHud-statsSkillsSearchValue" placeholder="Search Skills...">
+        </div>
       </div>
     </div>`;
 
@@ -3153,16 +3156,32 @@ async function heraldHud_renderDataStatsSkill() {
     let skillTotal =
       skillData.total >= 0 ? `+${skillData.total}` : skillData.total;
     let proficientData = ``;
+    console.log(skillData);
     if (skillData.proficient == 1) {
       proficientData = `
           <div class="heraldHud-skillProficientWrapper">
-            <i class="fa-solid fa-circle" style="color:#8f8f8f;"></i>
+            <div style="width: 10px; height: 10px;background-color: #8f8f8f;border-radius: 50%;display: inline-block;"></div>
             <span class="heraldHud-skillProficientTooltip">Proficient</span>
+          </div>`;
+    } else if (skillData.proficient == 0.5) {
+      proficientData = `
+          <div class="heraldHud-skillProficientWrapper">
+            <div style="width: 10px; height: 10px;border: 1px solid #8f8f8f;background: linear-gradient(to right, #8f8f8f 50%, transparent 50%);
+            border-radius: 50%;display: inline-block;"></div>
+            <span class="heraldHud-skillProficientTooltip">Half Proficient</span>
+          </div>`;
+    } else if (skillData.proficient == 2) {
+      proficientData = `
+          <div class="heraldHud-skillProficientWrapper">
+            <div style="width: 12px;height: 12px;border-radius: 50%;border: 1px solid #8f8f8f;display: flex;align-items: center;justify-content: center;">
+              <div style="width: 8px; height: 8px;border-radius: 50%;background-color: #8f8f8f;"></div>
+            </div>
+            <span class="heraldHud-skillProficientTooltip">Expertise</span>
           </div>`;
     } else {
       proficientData = `
           <div class="heraldHud-skillProficientWrapper">
-            <i class="fa-regular fa-circle" style="color:#8f8f8f;"></i>
+            <div style="width: 10px; height: 10px;border: 1px solid #8f8f8f;background-color: transparent;border-radius: 50%;display: inline-block;"></div>
             <span class="heraldHud-skillProficientTooltip">Not Proficient</span>
           </div>`;
     }
@@ -3680,7 +3699,7 @@ async function heraldHud_getDataInformation() {
   let dialogInformationDiv = document.getElementById(
     "heraldHud-dialogActorInformation"
   );
-
+  console.log(actor.system);
   let sensesDiv = ``;
   let resistancesDiv = ``;
   let damageImmunitiesDiv = ``;
@@ -3690,6 +3709,7 @@ async function heraldHud_getDataInformation() {
   let armorDiv = ``;
   let weaponsDiv = ``;
   let languagesDiv = ``;
+  let toolsDiv = "";
 
   let sensesValue = actor.system?.attributes?.senses || {};
   let sensesArray = Object.entries(sensesValue).filter(
@@ -4016,6 +4036,24 @@ async function heraldHud_getDataInformation() {
     `;
   }
 
+  let toolProficiencyValue = actor.system?.tools;
+  if (toolProficiencyValue) {
+    let toolsItems = ``;
+    for (let [key, value] of Object.entries(toolProficiencyValue)) {
+      const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
+      toolsItems += `<div class="heraldHud-infoBadge">${capitalizedKey}</div>`;
+    }
+    toolsDiv = `
+    <div id="heraldHud-informationContainer" class="heraldHud-informationContainer">
+      <div id="heraldHud-informationTitle" class="heraldHud-informationTitle">Tools</div>
+      <hr style=" border: 1px solid grey; margin-top: 5px;">
+      <div id="heraldHud-informationList" class="heraldHud-informationList">
+        ${toolsItems}
+      </div>
+    </div>
+    `;
+  }
+
   if (dialogInformationDiv) {
     dialogInformationDiv.innerHTML = `
     ${sensesDiv}
@@ -4027,6 +4065,7 @@ async function heraldHud_getDataInformation() {
     ${armorDiv}
     ${weaponsDiv}
     ${languagesDiv}
+    ${toolsDiv}
   `;
   }
 }

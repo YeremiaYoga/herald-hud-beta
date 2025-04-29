@@ -2356,8 +2356,7 @@
 
 /* Stats */
 .heraldHud-dialogStatsContainer {
-    display: flex;
-    flex-direction: column;
+
     height: 100%;
     width: 100%;
     color: white;
@@ -2493,6 +2492,8 @@
     position: relative;
     display: inline-block;
     cursor: pointer;
+    display: flex;
+    align-items: center;
 }
 
 .heraldHud-skillProficientWrapper .heraldHud-skillProficientTooltip {
@@ -2521,11 +2522,11 @@
 
 
 .heraldHud-statsSkillsSearchContainer {
-    padding-bottom: 60%;
+
 }
 
 .heraldHud-statsSkillsSearchView {
-    position: fixed;
+    position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
