@@ -205,9 +205,7 @@ async function heraldHud_backupJournalPartyJournal(journalEntry) {
       `Compendium "herald-hud.herald-hud-backup" not found.`
     );
   }
-  let heraldHudFolder = "";
-  let partyJournalFolder = "";
-  let partyFolder = "";
+
   let partyJournalCompendium = "";
   let todayFolder = "";
   const compendiumFolder = pack.folders;
@@ -217,24 +215,33 @@ async function heraldHud_backupJournalPartyJournal(journalEntry) {
   const month = String(today.getMonth() + 1).padStart(2, "0");
   const year = today.getFullYear();
   const todayDate = `${day}-${month}-${year}`;
-  for (let folder of journalFolders) {
-    if (folder.name === "Herald Hud") {
-      heraldHudFolder = folder;
-    }
-    if (
-      folder.name === "Party Journal" &&
-      folder.folder.id === heraldHudFolder.id
-    ) {
-      partyJournalFolder = folder;
-    }
-    if (
-      folder.name === journalEntry.flags.type &&
-      folder.folder.id === partyJournalFolder.id
-    ) {
-      partyFolder = folder;
-    }
+  const heraldHudFolder = journalFolders.find((f) => f.name === "Herald Hud");
+  if (!heraldHudFolder) {
+    return ui.notifications.error(`Folder "Herald Hud" not found.`);
   }
-  console.log(partyFolder);
+
+  const partyJournalFolder = journalFolders.find(
+    (f) => f.name === "Party Journal" && f.folder?.id === heraldHudFolder.id
+  );
+  if (!partyJournalFolder) {
+    return ui.notifications.error(
+      `Folder "Party Journal" not found under "Herald Hud".`
+    );
+  }
+
+  const typeName = journalEntry.flags?.type;
+  if (!typeName) {
+    return ui.notifications.warn(`Journal entry has no 'type' flag.`);
+  }
+
+  const partyFolder = journalFolders.find(
+    (f) => f.name === typeName && f.folder?.id === partyJournalFolder.id
+  );
+  if (!partyFolder) {
+    return ui.notifications.warn(
+      `Folder for party type "${typeName}" not found.`
+    );
+  }
 
   let listPartyJournalFolder = compendiumFolder.find(
     (f) => f.name === "Party Journal"
@@ -281,19 +288,19 @@ async function heraldHud_backupJournalPartyJournal(journalEntry) {
         pack: "herald-hud-beta.herald-hud-backup",
       });
     }
+  } else {
+    const newJournalEntryData = {
+      name: journalEntry.name,
+      content: journalEntry.content,
+      folder: todayFolder.id,
+      flags: journalEntry.flags,
+      ownership: journalEntry.ownership,
+    };
+
+    await JournalEntry.create(newJournalEntryData, {
+      pack: "herald-hud-beta.herald-hud-backup",
+    });
   }
-
-  const newJournalEntryData = {
-    name: journalEntry.name,
-    content: journalEntry.content,
-    folder: todayFolder.id,
-    flags: journalEntry.flags,
-    ownership: journalEntry.ownership,
-  };
-
-  await JournalEntry.create(newJournalEntryData, {
-    pack: "herald-hud-beta.herald-hud-backup",
-  });
 }
 
 export {

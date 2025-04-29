@@ -1065,7 +1065,6 @@ async function heraldHud_createPartyJournal(input, type) {
 }
 
 async function heraldHud_getViewPartyJournal() {
- 
   console.log(game.journal);
   const user = game.user;
   const selectedActor = user.character;
@@ -1448,10 +1447,11 @@ async function heraldHud_renderListPartyJournalMiddleContainer() {
                 journal.name = partyJournalName;
                 journal.flags = journal.flags || {};
                 journal.flags.type = newType;
-                await game.journal.get(journal.id).update({
+                let journalEntry = await game.journal.get(journal.id).update({
                   name: partyJournalName,
                   flags: { type: newType },
                 });
+                await bc.heraldHud_backupJournalPartyJournal(journalEntry);
                 setTimeout(async () => {
                   await heraldHud_renderListPartyJournalMiddleContainer();
                 }, 500);
