@@ -36,6 +36,19 @@ Hooks.once("socketlib.ready", () => {
   heraldHud_menuDetailSocket.register("updatePartyJournalAllUser", async () => {
     await heraldHud_renderListPartyJournalMiddleContainer();
   });
+  heraldHud_menuDetailSocket.register(
+    "backupHeralHudJournalByClose",
+    async (user, journalEntry) => {
+      if (journalEntry.flags.category == "Personal Notes") {
+        await bc.heraldHud_backupJournalPersonalNotes(user, journalEntry);
+      } else if (journalEntry.flags.category == "Party Journal") {
+        await bc.heraldHud_backupJournalPartyJournal(journalEntry);
+      }
+    }
+  );
+  heraldHud_menuDetailSocket.register("createNpcsFolder", async (user) => {
+    await heraldHud_gmCreateNpcsFolder(user);
+  });
 });
 async function heraldHud_renderListMenu() {
   let heraldHud_dialogDiv = document.getElementById("heraldHud-dialog");
@@ -48,15 +61,24 @@ async function heraldHud_renderListMenu() {
   ];
   let listMenu = ``;
   for (let menu of arrMenu) {
+    let iconMenu = "";
     let menuTitle = menu
       .split("_")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
+    if (menu == "npcs") {
+      iconMenu = `
+      <div id="heraldHud-menuIconContainer" class="heraldHud-menuIconContainer" data-name="${menu}">
+        <i class="fa-solid fa-crosshairs"></i>
+      </div>
+      `;
+    }
     listMenu += `
         <div id="heraldHud-menuDetailItem" class="heraldHud-menuDetailItem" data-name="${menu}">
             <div class="heraldHud-menuDetailName">
                 ${menuTitle}
             </div>
+            ${iconMenu}
         </div>
         `;
   }
@@ -69,9 +91,21 @@ async function heraldHud_renderListMenu() {
     document
       .querySelectorAll(".heraldHud-menuDetailItem")
       .forEach((menuDetail) => {
-        menuDetail.addEventListener("click", async function () {
+        menuDetail.addEventListener("click", async function (event) {
+          if (event.target.closest(".heraldHud-menuIconContainer")) return;
           let name = this.getAttribute("data-name");
           await heraldHud_showDialogSubMenuDetail(name);
+        });
+      });
+
+    document
+      .querySelectorAll(".heraldHud-menuIconContainer")
+      .forEach((menuDetail) => {
+        menuDetail.addEventListener("click", async function () {
+          let name = this.getAttribute("data-name");
+          if (name == "npcs") {
+            await heraldHud_showDialogSubMenuDetail("npcs_target");
+          }
         });
       });
   }
@@ -90,6 +124,9 @@ async function heraldHud_showDialogSubMenuDetail(kategori) {
   } else if (kategori == `party_journal`) {
     await heraldHud_getViewPartyJournal();
   } else if (kategori == `mission`) {
+  } else if (kategori == `npcs`) {
+  } else if (kategori == `npcs_target`) {
+    await heraldHud_getViewTargetingNpcs();
   }
 }
 
@@ -519,6 +556,7 @@ async function heraldHud_createPersonalNotes(user, input, type) {
     folder: playerFolder.id,
     flags: {
       type: type,
+      category: "Personal Notes",
     },
     ownership: { default: 3 },
   });
@@ -583,8 +621,13 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
 
     let pagesHTML = "";
     for (let page of journal.pages) {
+      const level = page.title.level || 0;
+      let marginLeft = 0;
+      if (level === 1) marginLeft = 10;
+      else if (level === 2) marginLeft = 20;
+      else if (level === 3) marginLeft = 30;
       pagesHTML += `
-        <div class="heraldHud-personalNotesPage" data-journal-id="${journal.id}" data-page-id="${page.id}">
+        <div class="heraldHud-personalNotesPage" data-journal-id="${journal.id}" data-page-id="${page.id}" style="margin-left: ${marginLeft}px">
           <div class="heraldHud-personalNotesPageName">- ${page.name}</div>
         </div>
       `;
@@ -603,6 +646,9 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
           <div id="heraldHud-personalNotesMiddleContainer" class="heraldHud-personalNotesMiddleContainer">
           </div>
           <div id="heraldHud-personalNotesRightContainer" class="heraldHud-personalNotesRightContainer">
+            <div id="heraldHud-buttonAddPagePersonalNotesContainer" class="heraldHud-buttonAddPagePersonalNotesContainer" data-id="${journal.id}">
+              <i class="fa-solid fa-file-circle-plus"></i>
+            </div>
             <div id="heraldHud-buttonEditPersonalNotesContainer" class="heraldHud-buttonEditPersonalNotesContainer" data-id="${journal.id}">
               <i class="fa-solid fa-pen-to-square"></i>
             </div>
@@ -627,6 +673,9 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
             <div id="heraldHud-personalNotesMiddleContainer" class="heraldHud-personalNotesMiddleContainer">
             </div>
             <div id="heraldHud-personalNotesRightContainer" class="heraldHud-personalNotesRightContainer">
+              <div id="heraldHud-buttonAddPagePersonalNotesContainer" class="heraldHud-buttonAddPagePersonalNotesContainer" data-id="${journal.id}">
+                <i class="fa-solid fa-file-circle-plus"></i>
+              </div>
               <div id="heraldHud-buttonEditPersonalNotesContainer" class="heraldHud-buttonEditPersonalNotesContainer" data-id="${journal.id}">
                 <i class="fa-solid fa-pen-to-square"></i>
               </div>
@@ -672,11 +721,11 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
   if (dialogMiddle) {
     dialogMiddle.innerHTML = listPersonalNotes;
 
-    const noteContainers = dialogMiddle.querySelectorAll(
-      ".heraldHud-personalNotesContainer"
+    const addPage = dialogMiddle.querySelectorAll(
+      ".heraldHud-buttonAddPagePersonalNotesContainer"
     );
 
-    noteContainers.forEach((container) => {
+    addPage.forEach((container) => {
       container.addEventListener("click", async (event) => {
         if (
           event.target.closest(
@@ -807,6 +856,7 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
                   user,
                   journalEntry
                 );
+                console.log(journalEntry);
                 await heraldHud_renderListPersonalNotesMiddleContainer();
               },
             },
@@ -954,19 +1004,16 @@ async function heraldHud_gmCreatePersonalNotesFolder(user) {
   }
 }
 
-/* ---------------------------------------------
+/* ------------------------------------------------------------------------------
    DIALOG PARTY NOTES
---------------------------------------------- */
+------------------------------------------------------------------------------- */
 
 async function heraldHud_gmCreatePartyJournalFolder(user) {
   const folders = game.folders.filter((f) => f.type === "JournalEntry");
-
   let heraldCoreFolder = "";
   let partyFolder = "";
-
   let heraldHudFolder = "";
   let partyJournalFolder = "";
-  let playerFolder = "";
   for (let folder of folders) {
     if (folder.name == "Herald Core") {
       heraldCoreFolder = folder;
@@ -985,9 +1032,6 @@ async function heraldHud_gmCreatePartyJournalFolder(user) {
       folder.folder.id == heraldHudFolder.id
     ) {
       partyJournalFolder = folder;
-    }
-    if (folder.name == user.name && folder.folder.id == partyJournalFolder.id) {
-      playerFolder = folder;
     }
   }
   if (!heraldHudFolder) {
@@ -1058,6 +1102,7 @@ async function heraldHud_createPartyJournal(input, type) {
     folder: matchingFolder.id,
     flags: {
       type: type,
+      category: "Party Journal",
     },
     ownership: { default: 3 },
   });
@@ -1065,7 +1110,6 @@ async function heraldHud_createPartyJournal(input, type) {
 }
 
 async function heraldHud_getViewPartyJournal() {
-  console.log(game.journal);
   const user = game.user;
   const selectedActor = user.character;
   heraldHud_menuDetailSocket.executeAsGM("createPartyJournalFolder", user);
@@ -1277,25 +1321,46 @@ async function heraldHud_renderListPartyJournalMiddleContainer() {
       let journalName = journal.name;
       let type = journal.flags?.type || "";
 
+      let pagesHTML = "";
+      for (let page of journal.pages) {
+        const level = page.title.level || 0;
+        let marginLeft = 0;
+        if (level === 1) marginLeft = 10;
+        else if (level === 2) marginLeft = 20;
+        else if (level === 3) marginLeft = 30;
+        pagesHTML += `
+          <div class="heraldHud-partyJournalPage" data-journal-id="${journal.id}" data-page-id="${page.id}" style="margin-left: ${marginLeft}px">
+            <div class="heraldHud-partyJournalPageName">- ${page.name}</div>
+          </div>
+        `;
+      }
       if (type) {
         if (!groupedPartyJournal[type]) {
           groupedPartyJournal[type] = "";
         }
 
         groupedPartyJournal[type] += `
-        <div id="heraldHud-partyJournalContainer" class="heraldHud-partyJournalContainer" data-id="${journal.id}">
-          <div id="heraldHud-partyJournalLeftContainer" class="heraldHud-partyJournalLeftContainer">
-            <div id="heraldHud-partyJournalName" class="heraldHud-partyJournalName">${journalName}</div>
-          </div>
-          <div id="heraldHud-partyJournalMiddleContainer" class="heraldHud-partyJournalMiddleContainer">
-          </div>
-          <div id="heraldHud-partyJournalRightContainer" class="heraldHud-partyJournalRightContainer">
-            <div id="heraldHud-buttonEditPartyJournalContainer" class="heraldHud-buttonEditPartyJournalContainer" data-id="${journal.id}">
-              <i class="fa-solid fa-pen-to-square"></i>
+        <div id="heraldHud-partyJournalWrapperContainer" class="heraldHud-partyJournalWrapperContainer">
+          <div id="heraldHud-partyJournalContainer" class="heraldHud-partyJournalContainer" data-id="${journal.id}">
+            <div id="heraldHud-partyJournalLeftContainer" class="heraldHud-partyJournalLeftContainer">
+              <div id="heraldHud-partyJournalName" class="heraldHud-partyJournalName">${journalName}</div>
             </div>
-            <div id="heraldHud-buttonDeletePartyJournalContainer" class="heraldHud-buttonDeletePartyJournalContainer" data-id="${journal.id}">
-              <i class="fa-solid fa-trash"></i>
+            <div id="heraldHud-partyJournalMiddleContainer" class="heraldHud-partyJournalMiddleContainer">
             </div>
+            <div id="heraldHud-partyJournalRightContainer" class="heraldHud-partyJournalRightContainer">
+              <div id="heraldHud-buttonAddPagePartyJournalContainer" class="heraldHud-buttonAddPagePartyJournalContainer" data-id="${journal.id}">
+                <i class="fa-solid fa-file-circle-plus"></i>
+              </div>
+              <div id="heraldHud-buttonEditPartyJournalContainer" class="heraldHud-buttonEditPartyJournalContainer" data-id="${journal.id}">
+                <i class="fa-solid fa-pen-to-square"></i>
+              </div>
+              <div id="heraldHud-buttonDeletePartyJournalContainer" class="heraldHud-buttonDeletePartyJournalContainer" data-id="${journal.id}">
+                <i class="fa-solid fa-trash"></i>
+              </div>
+            </div>
+          </div>
+          <div id="heraldHud-partyJournalPagesContainer" class="heraldHud-partyJournalPagesContainer">
+            ${pagesHTML}
           </div>
         </div>
       `;
@@ -1322,11 +1387,11 @@ async function heraldHud_renderListPartyJournalMiddleContainer() {
   if (dialogMiddle) {
     dialogMiddle.innerHTML = listPartyJournal;
 
-    const partyJournalContainer = dialogMiddle.querySelectorAll(
-      ".heraldHud-partyJournalContainer"
+    const addPage = dialogMiddle.querySelectorAll(
+      ".heraldHud-buttonAddPagePartyJournalContainer"
     );
 
-    partyJournalContainer.forEach((container) => {
+    addPage.forEach((container) => {
       container.addEventListener("click", async (event) => {
         if (
           event.target.closest(".heraldHud-buttonDeletePartyJournalContainer")
@@ -1497,6 +1562,112 @@ async function heraldHud_renderListPartyJournalMiddleContainer() {
         }).render(true);
       });
     });
+    const pages = document.querySelectorAll(".heraldHud-partyJournalPage");
+    pages.forEach((pageEl) => {
+      pageEl.addEventListener("click", async () => {
+        const journalId = pageEl.getAttribute("data-journal-id");
+        const pageId = pageEl.getAttribute("data-page-id");
+
+        const journal = game.journal.get(journalId);
+        if (!journal) return;
+
+        journal.sheet.render(true, {
+          pageId: pageId,
+        });
+      });
+    });
+  }
+}
+
+Hooks.on("closeJournalSheet", (app, html) => {
+  const user = game.user;
+  const journal = app.document;
+  const folder = journal.folder;
+  heraldHud_menuDetailSocket.executeAsGM(
+    "backupHeralHudJournalByClose",
+    user,
+    journal
+  );
+});
+
+/* ------------------------------------------------------------------------------
+   DIALOG NPCS
+------------------------------------------------------------------------------- */
+async function heraldHud_gmCreateNpcsFolder(user) {
+  const folders = game.folders.filter((f) => f.type === "JournalEntry");
+  let heraldCoreFolder = "";
+  let partyFolder = "";
+  let heraldHudFolder = "";
+  let npcsFolder = "";
+  for (let folder of folders) {
+    if (folder.name == "Herald Core") {
+      heraldCoreFolder = folder;
+    }
+
+    if (folder.name == "Party" && folder.folder.id == heraldCoreFolder.id) {
+      partyFolder = folder;
+    }
+
+    if (folder.name == "Herald Hud") {
+      heraldHudFolder = folder;
+    }
+
+    if (folder.name == "Npcs" && folder.folder.id == heraldHudFolder.id) {
+      npcsFolder = folder;
+    }
+  }
+  if (!heraldHudFolder) {
+    heraldHudFolder = await Folder.create({
+      name: "Herald Hud",
+      type: "JournalEntry",
+    });
+  }
+  if (!npcsFolder) {
+    npcsFolder = await Folder.create({
+      name: "Npcs",
+      type: "JournalEntry",
+      folder: heraldHudFolder.id,
+    });
+  }
+  const partyJournals = game.journal.filter(
+    (j) => j.folder?.id === partyFolder.id
+  );
+  for (let party of partyJournals) {
+    let alreadyParty = false;
+    for (let folder of folders) {
+      if (folder.name == party.name && folder.folder.id == npcsFolder.id) {
+        alreadyParty = true;
+        break;
+      }
+    }
+    if (!alreadyParty) {
+      await Folder.create({
+        name: party.name,
+        type: "JournalEntry",
+        folder: npcsFolder.id,
+      });
+    }
+  }
+}
+// 0 = Neutral
+// 1 = Friendly
+// -1 = Hostile
+// -2 = Secret
+
+let arrNpcdisposition = ["Friendly"];
+async function heraldHud_getViewTargetingNpcs() {
+  const user = game.user;
+  const controlledToken = canvas.tokens.controlled[0] || null;
+  if (!controlledToken) {
+    ui.notifications.warn("No NPC target selected.");
+    return;
+  }
+  const tokenDocument = controlledToken.document;
+  console.log(tokenDocument.disposition);
+
+  heraldHud_menuDetailSocket.executeAsGM("createNpcsFolder", user);
+  let heraldHud_dialog2Div = document.getElementById("heraldHud-dialog2");
+  if (heraldHud_dialog2Div) {
   }
 }
 

@@ -42,6 +42,7 @@ async function heraldHud_createCompendiumPersonalNotesFolder(user) {
 }
 
 async function heraldHud_backupJournalPersonalNotes(user, journalEntry) {
+  console.log(journalEntry);
   const pack = game.packs.get("herald-hud-beta.herald-hud-backup");
   if (!pack) {
     return ui.notifications.error(
@@ -198,6 +199,7 @@ async function heraldHud_createCompediumPartyJournalFolder() {
 }
 
 async function heraldHud_backupJournalPartyJournal(journalEntry) {
+  console.log(journalEntry);
   const pack = game.packs.get("herald-hud-beta.herald-hud-backup");
   const journalFolders = game.folders.filter((f) => f.type === "JournalEntry");
   if (!pack) {
