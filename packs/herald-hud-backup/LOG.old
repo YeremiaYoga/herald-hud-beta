@@ -1,3 +1,24 @@
-2025/04/29-17:01:08.046 2384 Recovering log #22
-2025/04/29-17:01:08.058 2384 Delete type=0 #22
-2025/04/29-17:01:08.060 2384 Delete type=3 #20
+2025/04/30-09:29:29.966 13c8 Recovering log #26
+2025/04/30-09:29:29.966 13c8 Level-0 table #28: started
+2025/04/30-09:29:29.976 13c8 Level-0 table #28: 691 bytes OK
+2025/04/30-09:29:29.976 13c8 Delete type=0 #26
+2025/04/30-09:29:29.976 13c8 Delete type=3 #25
+2025/04/30-16:56:25.209 58c4 Level-0 table #31: started
+2025/04/30-16:56:25.224 58c4 Level-0 table #31: 1556 bytes OK
+2025/04/30-16:56:25.228 58c4 Delete type=0 #29
+2025/04/30-16:56:25.230 58c4 Manual compaction at level-0 from '!folders!3NTTJO4vFjWWpVPE' @ 72057594037927935 : 1 .. '!journal.pages!Orvg74F2JmuwbirP.q92ZeYjepo5Y9DY5' @ 0 : 0; will stop at '!journal!mL8tJAZOo70YcEE9' @ 495 : 1
+2025/04/30-16:56:25.230 58c4 Compacting 2@0 + 0@1 files
+2025/04/30-16:56:25.244 58c4 Generated table #32@0: 14 keys, 1748 bytes
+2025/04/30-16:56:25.245 58c4 Compacted 2@0 + 0@1 files => 1748 bytes
+2025/04/30-16:56:25.249 58c4 compacted to: files[ 0 1 1 0 0 0 0 ]
+2025/04/30-16:56:25.249 58c4 Delete type=2 #28
+2025/04/30-16:56:25.250 58c4 Delete type=2 #31
+2025/04/30-16:56:25.256 58c4 Manual compaction at level-0 from '!journal!mL8tJAZOo70YcEE9' @ 495 : 1 .. '!journal.pages!Orvg74F2JmuwbirP.q92ZeYjepo5Y9DY5' @ 0 : 0; will stop at (end)
+2025/04/30-16:56:25.267 58c4 Manual compaction at level-1 from '!folders!3NTTJO4vFjWWpVPE' @ 72057594037927935 : 1 .. '!journal.pages!Orvg74F2JmuwbirP.q92ZeYjepo5Y9DY5' @ 0 : 0; will stop at '!journal!mL8tJAZOo70YcEE9' @ 495 : 1
+2025/04/30-16:56:25.267 58c4 Compacting 1@1 + 1@2 files
+2025/04/30-16:56:25.274 58c4 Generated table #33@1: 36 keys, 4384 bytes
+2025/04/30-16:56:25.274 58c4 Compacted 1@1 + 1@2 files => 4384 bytes
+2025/04/30-16:56:25.277 58c4 compacted to: files[ 0 0 1 0 0 0 0 ]
+2025/04/30-16:56:25.277 58c4 Delete type=2 #24
+2025/04/30-16:56:25.278 58c4 Delete type=2 #32
+2025/04/30-16:56:25.284 58c4 Manual compaction at level-1 from '!journal!mL8tJAZOo70YcEE9' @ 495 : 1 .. '!journal.pages!Orvg74F2JmuwbirP.q92ZeYjepo5Y9DY5' @ 0 : 0; will stop at (end)
