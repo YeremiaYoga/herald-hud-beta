@@ -125,14 +125,21 @@ async function heraldHud_backupJournalPersonalNotes(user, journalEntry) {
       });
     }
   }
-
-  const newJournalEntryData = {
-    name: journalEntry.name,
-    content: journalEntry.content,
-    folder: todayFolder.id,
-    flags: journalEntry.flags,
-    ownership: journalEntry.ownership,
-  };
+  const existingJournal = pack.index.find(
+    (entry) =>
+      entry.name === journalEntry.name && entry.folder === todayFolder.id
+  );
+  if (existingJournal) {
+    await pack.documentClass.deleteDocuments([existingJournal._id], {
+      pack: pack.collection,
+    });
+  }
+  const newJournalEntryData = duplicate(journalEntry.toObject());
+  newJournalEntryData.folder = todayFolder.id;
+  delete newJournalEntryData._id;
+  for (let page of newJournalEntryData.pages) {
+    delete page._id;
+  }
 
   await JournalEntry.create(newJournalEntryData, {
     pack: "herald-hud-beta.herald-hud-backup",
@@ -291,13 +298,21 @@ async function heraldHud_backupJournalPartyJournal(journalEntry) {
       });
     }
   } else {
-    const newJournalEntryData = {
-      name: journalEntry.name,
-      content: journalEntry.content,
-      folder: todayFolder.id,
-      flags: journalEntry.flags,
-      ownership: journalEntry.ownership,
-    };
+    const existingJournal = pack.index.find(
+      (entry) =>
+        entry.name === journalEntry.name && entry.folder === todayFolder.id
+    );
+    if (existingJournal) {
+      await pack.documentClass.deleteDocuments([existingJournal._id], {
+        pack: pack.collection,
+      });
+    }
+    const newJournalEntryData = duplicate(journalEntry.toObject());
+    newJournalEntryData.folder = todayFolder.id;
+    delete newJournalEntryData._id;
+    for (let page of newJournalEntryData.pages) {
+      delete page._id;
+    }
 
     await JournalEntry.create(newJournalEntryData, {
       pack: "herald-hud-beta.herald-hud-backup",

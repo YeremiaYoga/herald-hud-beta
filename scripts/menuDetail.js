@@ -1,4 +1,5 @@
 import * as bc from "./backup.js";
+import * as hl from "./helper.js";
 
 let heraldHud_menuDetailSocket;
 
@@ -37,7 +38,7 @@ Hooks.once("socketlib.ready", () => {
     await heraldHud_renderListPartyJournalMiddleContainer();
   });
   heraldHud_menuDetailSocket.register(
-    "backupHeralHudJournalByClose",
+    "backupHeralHudJournalByPage",
     async (user, journalEntry) => {
       if (journalEntry.flags.category == "Personal Notes") {
         await bc.heraldHud_backupJournalPersonalNotes(user, journalEntry);
@@ -48,6 +49,9 @@ Hooks.once("socketlib.ready", () => {
   );
   heraldHud_menuDetailSocket.register("createNpcsFolder", async (user) => {
     await heraldHud_gmCreateNpcsFolder(user);
+  });
+  heraldHud_menuDetailSocket.register("createPageNpcsData", async (data) => {
+    await heraldHud_confirmAddNpcsTarget(data);
   });
 });
 async function heraldHud_renderListMenu() {
@@ -104,7 +108,7 @@ async function heraldHud_renderListMenu() {
         menuDetail.addEventListener("click", async function () {
           let name = this.getAttribute("data-name");
           if (name == "npcs") {
-            await heraldHud_showDialogSubMenuDetail("npcs_target");
+            await heraldHud_showDialogNpcsTarget();
           }
         });
       });
@@ -727,19 +731,8 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
 
     addPage.forEach((container) => {
       container.addEventListener("click", async (event) => {
-        if (
-          event.target.closest(
-            ".heraldHud-buttonDeletePersonalNotesContainer"
-          ) ||
-          event.target.closest(".heraldHud-buttonEditPersonalNotesContainer")
-        )
-          return;
-
         const journalId = container.getAttribute("data-id");
-        const journal = game.journal.get(journalId);
-        if (journal) {
-          journal.sheet.render(true);
-        }
+        await heraldHud_addPagePersonalNotes(journalId);
       });
     });
 
@@ -946,12 +939,54 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
         const journal = game.journal.get(journalId);
         if (!journal) return;
 
-        journal.sheet.render(true, {
-          pageId: pageId,
-        });
+        const page = journal.pages.get(pageId);
+        if (!page) return;
+
+        await page.sheet.render(true);
       });
     });
   }
+}
+
+async function heraldHud_addPagePersonalNotes(journalId) {
+  const journal = game.journal.get(journalId);
+  if (!journal) return;
+
+  new Dialog({
+    title: "Add New Page",
+    content: `
+      <form>
+        <div class="form-group">
+          <label for="page-name">Page Name</label>
+          <input type="text" name="page-name" id="page-name" placeholder="Enter page name"/>
+        </div>
+      </form>
+    `,
+    buttons: {
+      create: {
+        label: "Save",
+        callback: async (html) => {
+          const pageName = html.find('[name="page-name"]').val();
+          if (!pageName) return ui.notifications.warn("Page name is required.");
+
+          await journal.createEmbeddedDocuments("JournalEntryPage", [
+            {
+              name: pageName,
+              type: "text",
+              text: { content: "" },
+            },
+          ]);
+
+          await heraldHud_renderListPersonalNotesMiddleContainer();
+        },
+      },
+      cancel: {
+        icon: '<i class="fas fa-times"></i>',
+        label: "Cancel",
+      },
+    },
+    default: "create",
+  }).render(true);
 }
 
 async function heraldHud_gmCreatePersonalNotesFolder(user) {
@@ -1393,23 +1428,8 @@ async function heraldHud_renderListPartyJournalMiddleContainer() {
 
     addPage.forEach((container) => {
       container.addEventListener("click", async (event) => {
-        if (
-          event.target.closest(".heraldHud-buttonDeletePartyJournalContainer")
-        ) {
-          return;
-        }
-
-        if (
-          event.target.closest(".heraldHud-buttonEditPartyJournalContainer")
-        ) {
-          return;
-        }
-
         const journalId = container.getAttribute("data-id");
-        const journal = game.journal.get(journalId);
-        if (journal) {
-          journal.sheet.render(true);
-        }
+        await heraldHud_addPagePartyJournal(journalId);
       });
     });
 
@@ -1571,20 +1591,72 @@ async function heraldHud_renderListPartyJournalMiddleContainer() {
         const journal = game.journal.get(journalId);
         if (!journal) return;
 
-        journal.sheet.render(true, {
-          pageId: pageId,
-        });
+        const page = journal.pages.get(pageId);
+        if (!page) return;
+
+        await page.sheet.render(true);
       });
     });
   }
 }
 
-Hooks.on("closeJournalSheet", (app, html) => {
-  const user = game.user;
-  const journal = app.document;
-  const folder = journal.folder;
+async function heraldHud_addPagePartyJournal(journalId) {
+  const journal = game.journal.get(journalId);
+  if (!journal) return;
+
+  new Dialog({
+    title: "Add New Page",
+    content: `
+      <form>
+        <div class="form-group">
+          <label for="page-name">Page Name</label>
+          <input type="text" name="page-name" id="page-name" placeholder="Enter page name"/>
+        </div>
+      </form>
+    `,
+    buttons: {
+      create: {
+        label: "Save",
+        callback: async (html) => {
+          const pageName = html.find('[name="page-name"]').val();
+          if (!pageName) return ui.notifications.warn("Page name is required.");
+
+          await journal.createEmbeddedDocuments("JournalEntryPage", [
+            {
+              name: pageName,
+              type: "text",
+              text: { content: "" },
+            },
+          ]);
+
+          await heraldHud_renderListPartyJournalMiddleContainer();
+        },
+      },
+      cancel: {
+        icon: '<i class="fas fa-times"></i>',
+        label: "Cancel",
+      },
+    },
+    default: "create",
+  }).render(true);
+}
+
+Hooks.on("createJournalEntryPage", (page, options, userId) => {
+  const user = game.users.get(userId);
+  const journal = page.parent;
+
   heraldHud_menuDetailSocket.executeAsGM(
-    "backupHeralHudJournalByClose",
+    "backupHeralHudJournalByPage",
+    user,
+    journal
+  );
+});
+Hooks.on("updateJournalEntryPage", (page, changes, options, userId) => {
+  const user = game.users.get(userId);
+  const journal = page.parent;
+
+  heraldHud_menuDetailSocket.executeAsGM(
+    "backupHeralHudJournalByPage",
     user,
     journal
   );
@@ -1641,34 +1713,321 @@ async function heraldHud_gmCreateNpcsFolder(user) {
       }
     }
     if (!alreadyParty) {
-      await Folder.create({
+      const createdFolder = await Folder.create({
         name: party.name,
         type: "JournalEntry",
         folder: npcsFolder.id,
       });
+
+      await JournalEntry.create({
+        name: `${party.name} NPCs`,
+        folder: createdFolder.id,
+        pages: [],
+        content: "",
+        ownership: { default: 3 },
+      });
     }
   }
 }
+
 // 0 = Neutral
 // 1 = Friendly
 // -1 = Hostile
 // -2 = Secret
-
-let arrNpcdisposition = ["Friendly"];
-async function heraldHud_getViewTargetingNpcs() {
+let arrNpcdisposition = [1, 0];
+async function heraldHud_showDialogNpcsTarget() {
   const user = game.user;
+  const selectedActor = user.character;
   const controlledToken = canvas.tokens.controlled[0] || null;
+  const targetedToken = game.user.targets.first() || null;
   if (!controlledToken) {
     ui.notifications.warn("No NPC target selected.");
     return;
   }
-  const tokenDocument = controlledToken.document;
-  console.log(tokenDocument.disposition);
+  if (!targetedToken) {
+    ui.notifications.warn("No NPC target selected.");
+    return;
+  }
+  console.log(targetedToken);
+  const tokenDocument = targetedToken.document;
+  console.log(tokenDocument);
+  if (!arrNpcdisposition.includes(tokenDocument.disposition)) {
+    ui.notifications.warn("Npc Not Friendly");
+    return;
+  }
 
   heraldHud_menuDetailSocket.executeAsGM("createNpcsFolder", user);
-  let heraldHud_dialog2Div = document.getElementById("heraldHud-dialog2");
-  if (heraldHud_dialog2Div) {
+
+  const actor = tokenDocument.actor;
+  const image = tokenDocument.texture?.src || actor.img;
+  const name = tokenDocument.name || actor.name;
+
+  const folders = game.folders.filter((f) => f.type === "JournalEntry");
+
+  let heraldCoreFolder = "";
+  let heraldCorePartyFolder = "";
+
+  for (let folder of folders) {
+    if (folder.name == "Herald Core") {
+      heraldCoreFolder = folder;
+    }
+
+    if (folder.name == "Party" && folder.folder.id == heraldCoreFolder.id) {
+      heraldCorePartyFolder = folder;
+    }
   }
+
+  const partyJournals = game.journal.filter(
+    (j) => j.folder?.id === heraldCorePartyFolder.id
+  );
+  let userUuid = user.uuid;
+  let actorUuid = selectedActor.uuid;
+  let listRadioButton = ``;
+  console.log(partyJournals);
+  for (let pj of partyJournals) {
+    for (let page of pj.pages) {
+      if (page.name === `${userUuid} | ${actorUuid}`) {
+        listRadioButton += `
+    <div style="margin-bottom:4px;">
+      <input
+        type="radio"
+        id="heraldHud-npcsPartyInput-${pj.id}"
+        name="heraldHud-npcsPartyInput" 
+        value="${pj.name}"
+      />
+      <label
+        for="heraldHud-npcsPartyInput-${pj.id}"
+        style=""
+      >${pj.name}</label>
+    </div>
+  `;
+      }
+    }
+  }
+
+  let dialogContent = `
+  <div id="heraldHud-dialogNpcsTargetContainer" class="heraldHud-dialogNpcsTargetContainer" style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="width: 70px; height: 70px; border-radius: 50%; overflow: hidden; display: flex; justify-content: center; align-items: center; border:1px solid black">
+        <img src="${image}" alt="Token Image" style="width: 100%; height: 100%; object-fit: cover; border:none">
+      </div>
+      <div>
+          <div style="font-weight: bold; font-size: 20px;">Name :</div>
+          <div style=" font-size: 14px;">${name}</div>
+      </div>
+    
+    </div>
+
+    <div>
+      <label>Gender:</label>
+      <div class="heraldHud-npcsGenderSelector" style="display: flex; gap: 5px;">
+        ${["Male", "Female", "Other", "They"]
+          .map(
+            (gender) => `
+          <div class="heraldHud-npcsGenderOption" data-gender="${gender}" style="
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid rgba(100, 100, 100, 0.8);
+          ">${gender}</div>
+        `
+          )
+          .join("")}
+      </div>
+    </div>
+
+    <div>
+      <label>Faction:</label>
+      <div style="display: flex; gap: 5px; align-items: center;">
+        <input type="text" id="heraldHud-npcsFactionInput" style="flex: 1;" />
+        <div class="heraldHud-npcsFactionUnknownBtn" style="padding:4px 9px;border-radius: 4px;cursor: pointer;border: 1px solid rgba(100, 100, 100, 0.8);">?</div>
+      </div>
+    </div>
+
+    <div>
+      <label>Race:</label>
+      <div style="display: flex; gap: 5px; align-items: center;">
+        <input type="text" id="heraldHud-npcsRaceInput" style="flex: 1;" />
+        <div class="heraldHud-npcsRaceUnknownBtn" style="padding:4px 9px;border-radius: 4px;cursor: pointer;border: 1px solid rgba(100, 100, 100, 0.8);">?</div>
+      </div>
+    </div>
+
+    <div>
+      <label>Party:</label>
+      <div>
+        ${listRadioButton}
+      </div>
+    </div>
+  </div>
+`;
+  new Dialog({
+    title: `NPC Target Info - ${name}`,
+    content: dialogContent,
+    buttons: {
+      save: {
+        label: "Confirm",
+        callback: async (html) => {
+          const selectedGender = html
+            .find(".heraldHud-npcsGenderOption.selected")
+            .data("gender");
+          const faction = html
+            .find("#heraldHud-npcsFactionUnknown")
+            .prop("checked")
+            ? "Unknown"
+            : html.find("#heraldHud-npcsFactionInput").val();
+          const race = html.find("#heraldHud-npcsRaceUnknown").prop("checked")
+            ? "Unknown"
+            : html.find("#heraldHud-npcsRaceInput").val();
+          const party = html
+            .find('input[name="heraldHud-npcsPartyInput"]:checked')
+            .val();
+
+          console.log({ selectedGender, faction, race, party });
+          let data = {
+            actor: actor,
+            gender: selectedGender,
+            faction: faction,
+            race: race,
+            party: party,
+          };
+          await heraldHud_confirmAddNpcsTarget(data);
+          // heraldHud_menuDetailSocket.executeAsGM("createPageNpcsData", data);
+        },
+      },
+      cancel: {
+        label: "Cancel",
+      },
+    },
+    render: (html) => {
+      html.find(".heraldHud-npcsGenderOption").on("click", function () {
+        html.find(".heraldHud-npcsGenderOption").removeClass("selected").css({
+          backgroundColor: "",
+          color: "",
+        });
+        $(this)
+          .addClass("selected")
+          .css("background-color", "rgba(100, 100, 100, 0.8)")
+          .css("color", "#fff");
+      });
+
+      html.find(".heraldHud-npcsFactionUnknownBtn").on("click", function () {
+        const input = html.find("#heraldHud-npcsFactionInput");
+        const isActive = $(this).hasClass("selected");
+
+        if (isActive) {
+          $(this).removeClass("selected").css({
+            backgroundColor: "",
+            color: "",
+          });
+          input.prop("disabled", false).val("");
+        } else {
+          $(this).addClass("selected").css({
+            backgroundColor: "rgba(100, 100, 100, 0.8)",
+            color: "#fff",
+          });
+          input.prop("disabled", true).val("Unknown");
+        }
+      });
+
+      html.find(".heraldHud-npcsRaceUnknownBtn").on("click", function () {
+        const input = html.find("#heraldHud-npcsRaceInput");
+        const isActive = $(this).hasClass("selected");
+
+        if (isActive) {
+          $(this).removeClass("selected").css({
+            backgroundColor: "",
+            color: "",
+          });
+          input.prop("disabled", false).val("");
+        } else {
+          $(this).addClass("selected").css({
+            backgroundColor: "rgba(100, 100, 100, 0.8)",
+            color: "#fff",
+          });
+          input.prop("disabled", true).val("Unknown");
+        }
+      });
+    },
+    default: "save",
+  }).render(true);
+}
+
+async function heraldHud_confirmAddNpcsTarget(data) {
+  const folders = game.folders.filter((f) => f.type === "JournalEntry");
+  let heraldHudFolder = "";
+  let npcsFolder = "";
+  let partyFolder = "";
+  for (let folder of folders) {
+    if (folder.name == "Herald Hud") {
+      heraldHudFolder = folder;
+    }
+
+    if (folder.name == "Npcs" && folder.folder.id == heraldHudFolder.id) {
+      npcsFolder = folder;
+    }
+    if (folder.name == data.party && folder.folder.id == npcsFolder.id) {
+      partyFolder = folder;
+    }
+  }
+  let partyJournal = game.journal.find(
+    (j) => j.folder?.id === partyFolder.id && j.name === `${data.party} NPCs`
+  );
+  const pageData = {
+    name: data.actor.name || "Unnamed NPC",
+    type: "text",
+    text: {
+      content: `
+        <img src="${data.actor.img}" width="100" height="100">
+        <p><strong>Name :</strong> ${data.actor.name}</p>
+        <p><strong>Gender :</strong> ${data.gender}</p>
+        <p><strong>Faction :</strong> ${data.faction}</p>
+        <p><strong>Race : </strong>${data.race}</p>
+        <p><strong>Public Notes :</strong></p>
+        ${data.actor.system.details.biography.public}
+        <p><strong>Extra Notes :</strong> </p>
+      `,
+      format: 1,
+    },
+  };
+
+  if (partyJournal) {
+    // const existingPage = partyJournal.pages.find(
+    //   (p) => p.name === pageData.name
+    // );
+    // if (existingPage) {
+    //   new Dialog({
+    //     title: "Yes ",
+    //     content: `<p>The Character Might Already Exist, do you wish to Continue?</p>`,
+    //     buttons: {
+    //       yes: {
+    //         icon: '<i class="fas fa-check"></i>',
+    //         label: "Yes, Replace",
+    //         callback: async () => {
+    //           await existingPage.delete();
+    //           await partyJournal.createEmbeddedDocuments("JournalEntryPage", [
+    //             pageData,
+    //           ]);
+    //         },
+    //       },
+    //       no: {
+    //         label: "No",
+    //         callback: () => {
+    //           ui.notifications.info(`Page "${pageData.name}" tidak diganti.`);
+    //         },
+    //       },
+    //     },
+    //     default: "no",
+    //   }).render(true);
+    // } else {
+    //   await partyJournal.createEmbeddedDocuments("JournalEntryPage", [
+    //     pageData,
+    //   ]);
+    // }
+    await partyJournal.createEmbeddedDocuments("JournalEntryPage", [pageData]);
+  }
+}
+async function heraldHud_saveNpcsTargetParty() {
+
 }
 
 export { heraldHud_renderListMenu };
