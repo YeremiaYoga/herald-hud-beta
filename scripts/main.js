@@ -5,6 +5,17 @@ Hooks.on("ready", () => {
     await herald_hud.heraldHud_renderHtml();
     await herald_hud.heraldHud_renderHeraldHud();
   }, 1000);
+  // Mengganti sheet default untuk JournalEntry
+  JournalEntry.sheet = core.JournalTextTinyMCESheet;
+
+  // Mengganti sheet untuk setiap Journal Entry yang sudah ada
+  for (let entry of game.journal.entries) {
+    // Memastikan entry sudah menggunakan sheet TinyMCE
+    if (!(entry.sheet instanceof core.JournalTextTinyMCESheet)) {
+      entry.sheet = new core.JournalTextTinyMCESheet(entry);
+      entry.render(true); // Render ulang entry setelah mengganti sheet
+    }
+  }
 });
 
 Hooks.once("init", () => {
@@ -67,5 +78,26 @@ Hooks.once("init", () => {
     type: String,
     default: "basic_frame",
   });
+});
+Hooks.on("renderDocumentSheetConfig", (app, html, data) => {
+  console.log("Sheet config dibuka untuk JournalEntryPage:", app.document);
 
+  // Temukan elemen form-group untuk "This Sheet"
+  const thisSheetGroup = html
+    .find("label:contains('This Sheet')")
+    .closest(".form-group");
+
+  // Buat opsi tambahan
+  const customMenu = $(`
+    <div class="form-group">
+      <label>Test</label>
+      <input type="checkbox" name="flags.heraldHud.secretMode" ${
+        getProperty(app.document, "flags.heraldHud.secretMode") ? "checked" : ""
+      } />
+      <p class="notes">Testing</p>
+    </div>
+  `);
+
+  // Sisipkan setelah grup "This Sheet"
+  thisSheetGroup.after(customMenu);
 });

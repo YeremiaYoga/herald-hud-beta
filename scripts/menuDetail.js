@@ -623,16 +623,30 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
     let journalName = journal.name;
     let type = journal.flags?.type || "";
 
+    const sortedPages = journal.pages.contents.sort((a, b) => a.sort - b.sort);
+
     let pagesHTML = "";
-    for (let page of journal.pages) {
+    let pageNumber = 0;
+    for (let page of sortedPages) {
       const level = page.title.level || 0;
       let marginLeft = 0;
       if (level === 1) marginLeft = 10;
       else if (level === 2) marginLeft = 20;
       else if (level === 3) marginLeft = 30;
+      pageNumber++;
       pagesHTML += `
-        <div class="heraldHud-personalNotesPage" data-journal-id="${journal.id}" data-page-id="${page.id}" style="margin-left: ${marginLeft}px">
-          <div class="heraldHud-personalNotesPageName">- ${page.name}</div>
+        <div class="heraldHud-personalNotesPageContainer" data-journal-id="${journal.id}" data-pageNumber="${pageNumber}" data-page-id="${page.id}" style="margin-left: ${marginLeft}px">
+          <div class="heraldHud-personalNotesPage">
+            <div class="heraldHud-personalNotesPageName">- ${page.name}</div>
+          </div>  
+          <div class="heraldHud-arrowPersonalNotesContainer">
+            <div class="heraldHud-arrowPagePersonalNotes" data-id="${page.id}" data-pageNumber="${pageNumber}" data-journal-id="${journal.id}" data-type="up">
+              <i class="fa fa-arrow-up" ></i>
+            </div>
+            <div class="heraldHud-arrowPagePersonalNotes" data-id="${page.id}" data-pageNumber="${pageNumber}" data-journal-id="${journal.id}" data-type="down">
+                <i class="fa fa-arrow-down"></i>
+            </div>
+          </div>
         </div>
       `;
     }
@@ -650,14 +664,17 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
           <div id="heraldHud-personalNotesMiddleContainer" class="heraldHud-personalNotesMiddleContainer">
           </div>
           <div id="heraldHud-personalNotesRightContainer" class="heraldHud-personalNotesRightContainer">
-            <div id="heraldHud-buttonAddPagePersonalNotesContainer" class="heraldHud-buttonAddPagePersonalNotesContainer" data-id="${journal.id}">
+            <div class="heraldHud-buttonAddPagePersonalNotesContainer heraldHud-btnPersonalNotesTooltipParent" data-id="${journal.id}">
               <i class="fa-solid fa-file-circle-plus"></i>
+              <span class="heraldHud-btnPersonalNotesTooltip">Add Page</span>
             </div>
-            <div id="heraldHud-buttonEditPersonalNotesContainer" class="heraldHud-buttonEditPersonalNotesContainer" data-id="${journal.id}">
+            <div class="heraldHud-buttonEditPersonalNotesContainer heraldHud-btnPersonalNotesTooltipParent" data-id="${journal.id}">
               <i class="fa-solid fa-pen-to-square"></i>
+              <span class="heraldHud-btnPersonalNotesTooltip">Edit Journal</span>
             </div>
-            <div id="heraldHud-buttonDeletePersonalNotesContainer" class="heraldHud-buttonDeletePersonalNotesContainer" data-id="${journal.id}">
+            <div class="heraldHud-buttonDeletePersonalNotesContainer heraldHud-btnPersonalNotesTooltipParent" data-id="${journal.id}">
               <i class="fa-solid fa-trash"></i>
+              <span class="heraldHud-btnPersonalNotesTooltip">Delete Journal</span>
             </div>
           </div>
         </div>
@@ -677,14 +694,17 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
             <div id="heraldHud-personalNotesMiddleContainer" class="heraldHud-personalNotesMiddleContainer">
             </div>
             <div id="heraldHud-personalNotesRightContainer" class="heraldHud-personalNotesRightContainer">
-              <div id="heraldHud-buttonAddPagePersonalNotesContainer" class="heraldHud-buttonAddPagePersonalNotesContainer" data-id="${journal.id}">
+              <div class="heraldHud-buttonAddPagePersonalNotesContainer heraldHud-btnPersonalNotesTooltipParent" data-id="${journal.id}">
                 <i class="fa-solid fa-file-circle-plus"></i>
+                <span class="heraldHud-btnPersonalNotesTooltip">Add Page</span>
               </div>
-              <div id="heraldHud-buttonEditPersonalNotesContainer" class="heraldHud-buttonEditPersonalNotesContainer" data-id="${journal.id}">
+              <div class="heraldHud-buttonEditPersonalNotesContainer heraldHud-btnPersonalNotesTooltipParent" data-id="${journal.id}">
                 <i class="fa-solid fa-pen-to-square"></i>
+                <span class="heraldHud-btnPersonalNotesTooltip">Edit Journal</span>
               </div>
-              <div id="heraldHud-buttonDeletePersonalNotesContainer" class="heraldHud-buttonDeletePersonalNotesContainer" data-id="${journal.id}">
+              <div class="heraldHud-buttonDeletePersonalNotesContainer heraldHud-btnPersonalNotesTooltipParent" data-id="${journal.id}">
                 <i class="fa-solid fa-trash"></i>
+                <span class="heraldHud-btnPersonalNotesTooltip">Delete Journal</span>
               </div>
             </div>
           </div>
@@ -930,9 +950,13 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
       });
     });
 
-    const pages = document.querySelectorAll(".heraldHud-personalNotesPage");
+    const pages = document.querySelectorAll(
+      ".heraldHud-personalNotesPageContainer"
+    );
     pages.forEach((pageEl) => {
-      pageEl.addEventListener("click", async () => {
+      pageEl.addEventListener("click", async (event) => {
+        if (event.target.closest(".heraldHud-arrowPersonalNotesContainer"))
+          return;
         const journalId = pageEl.getAttribute("data-journal-id");
         const pageId = pageEl.getAttribute("data-page-id");
 
@@ -945,7 +969,72 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
         await page.sheet.render(true);
       });
     });
+
+    const arrowUp = document.querySelectorAll(
+      ".heraldHud-arrowPagePersonalNotes"
+    );
+    arrowUp.forEach((arrow) => {
+      arrow.addEventListener("click", async () => {
+        const type = arrow.getAttribute("data-type");
+        const pageId = arrow.getAttribute("data-id");
+        let pageNumber = parseInt(arrow.getAttribute("data-pageNumber"));
+        const journalId = arrow.getAttribute("data-journal-id");
+
+        if (type == "up") {
+          await heraldHud_pageNumberChange("up", pageId, pageNumber, journalId);
+        } else {
+          await heraldHud_pageNumberChange(
+            "down",
+            pageId,
+            pageNumber,
+            journalId
+          );
+        }
+      });
+    });
   }
+}
+
+async function heraldHud_pageNumberChange(type, pageId, pageNumber, journalId) {
+  const journal = game.journal.get(journalId);
+  if (!journal) {
+    console.log("Journal tidak ditemukan");
+    return;
+  }
+  const pages = journal.pages;
+  const pageCount = pages.length;
+  console.log(pageCount);
+
+  let pageChange = pageNumber;
+  if (type == "up") {
+    pageChange = pageNumber - 1;
+  } else {
+    pageChange = pageNumber + 1;
+  }
+  const before = document.querySelector(
+    `.heraldHud-personalNotesPageContainer[data-pageNumber="${pageChange}"]`
+  );
+  if (!before) {
+    return;
+  }
+  let previvousId = before.getAttribute("data-page-id");
+
+  let previousPage = pages.find((page) => page.id === previvousId);
+
+  let currentPage = pages.find((page) => page.id === pageId);
+
+  let tempSort = currentPage.sort;
+  currentPage.sort = previousPage.sort;
+  previousPage.sort = tempSort;
+
+  await journal.update({
+    pages: [
+      { _id: currentPage.id, sort: currentPage.sort },
+      { _id: previousPage.id, sort: previousPage.sort },
+    ],
+  });
+
+  await heraldHud_renderListPersonalNotesMiddleContainer();
 }
 
 async function heraldHud_addPagePersonalNotes(journalId) {
@@ -969,11 +1058,17 @@ async function heraldHud_addPagePersonalNotes(journalId) {
           const pageName = html.find('[name="page-name"]').val();
           if (!pageName) return ui.notifications.warn("Page name is required.");
 
+          const pages = journal.pages;
+          const pageArray = [...pages.values()];
+          const lastPage = pageArray[pageArray.length - 1];
+          const lastPageSort = lastPage ? lastPage.sort : 0;
+
           await journal.createEmbeddedDocuments("JournalEntryPage", [
             {
               name: pageName,
               type: "text",
               text: { content: "" },
+              sort: lastPageSort + 1,
             },
           ]);
 
@@ -1356,16 +1451,31 @@ async function heraldHud_renderListPartyJournalMiddleContainer() {
       let journalName = journal.name;
       let type = journal.flags?.type || "";
 
+      const sortedPages = journal.pages.contents.sort(
+        (a, b) => a.sort - b.sort
+      );
       let pagesHTML = "";
-      for (let page of journal.pages) {
+      let pageNumber = 0;
+      for (let page of sortedPages) {
         const level = page.title.level || 0;
         let marginLeft = 0;
         if (level === 1) marginLeft = 10;
         else if (level === 2) marginLeft = 20;
         else if (level === 3) marginLeft = 30;
+        pageNumber++;
         pagesHTML += `
-          <div class="heraldHud-partyJournalPage" data-journal-id="${journal.id}" data-page-id="${page.id}" style="margin-left: ${marginLeft}px">
-            <div class="heraldHud-partyJournalPageName">- ${page.name}</div>
+          <div class="heraldHud-partyJournalPageContainer" data-journal-id="${journal.id}" data-pageNumber="${pageNumber}" data-page-id="${page.id}" style="margin-left: ${marginLeft}px" >
+            <div class="heraldHud-partyJournalPage">
+              <div class="heraldHud-partyJournalPageName">- ${page.name}</div>
+            </div>
+            <div class="heraldHud-arrowPartyJournalContainer">
+              <div class="heraldHud-arrowPagePartyJournal" data-id="${page.id}" data-pageNumber="${pageNumber}" data-journal-id="${journal.id}" data-type="up">
+                <i class="fa fa-arrow-up" ></i>
+              </div>
+              <div class="heraldHud-arrowPagePartyJournal" data-id="${page.id}" data-pageNumber="${pageNumber}" data-journal-id="${journal.id}" data-type="down">
+                  <i class="fa fa-arrow-down"></i>
+              </div>
+            </div>
           </div>
         `;
       }
@@ -1383,14 +1493,17 @@ async function heraldHud_renderListPartyJournalMiddleContainer() {
             <div id="heraldHud-partyJournalMiddleContainer" class="heraldHud-partyJournalMiddleContainer">
             </div>
             <div id="heraldHud-partyJournalRightContainer" class="heraldHud-partyJournalRightContainer">
-              <div id="heraldHud-buttonAddPagePartyJournalContainer" class="heraldHud-buttonAddPagePartyJournalContainer" data-id="${journal.id}">
+              <div id="heraldHud-buttonAddPagePartyJournalContainer" class="heraldHud-buttonAddPagePartyJournalContainer heraldHud-btnPartyJournalTooltipParent" data-id="${journal.id}">
                 <i class="fa-solid fa-file-circle-plus"></i>
+                <span class="heraldHud-btnPartyJournalTooltip">Add Page</span>
               </div>
-              <div id="heraldHud-buttonEditPartyJournalContainer" class="heraldHud-buttonEditPartyJournalContainer" data-id="${journal.id}">
+              <div id="heraldHud-buttonEditPartyJournalContainer" class="heraldHud-buttonEditPartyJournalContainer heraldHud-btnPartyJournalTooltipParent" data-id="${journal.id}">
                 <i class="fa-solid fa-pen-to-square"></i>
+                <span class="heraldHud-btnPartyJournalTooltip">Edit Journal</span>
               </div>
-              <div id="heraldHud-buttonDeletePartyJournalContainer" class="heraldHud-buttonDeletePartyJournalContainer" data-id="${journal.id}">
+              <div id="heraldHud-buttonDeletePartyJournalContainer" class="heraldHud-buttonDeletePartyJournalContainer heraldHud-btnPartyJournalTooltipParent" data-id="${journal.id}">
                 <i class="fa-solid fa-trash"></i>
+                <span class="heraldHud-btnPartyJournalTooltip">Delete Journal</span>
               </div>
             </div>
           </div>
@@ -1582,9 +1695,13 @@ async function heraldHud_renderListPartyJournalMiddleContainer() {
         }).render(true);
       });
     });
-    const pages = document.querySelectorAll(".heraldHud-partyJournalPage");
+    const pages = document.querySelectorAll(
+      ".heraldHud-partyJournalPageContainer"
+    );
     pages.forEach((pageEl) => {
-      pageEl.addEventListener("click", async () => {
+      pageEl.addEventListener("click", async (event) => {
+        if (event.target.closest(".heraldHud-arrowPartyJournalContainer"))
+          return;
         const journalId = pageEl.getAttribute("data-journal-id");
         const pageId = pageEl.getAttribute("data-page-id");
 
@@ -1597,7 +1714,82 @@ async function heraldHud_renderListPartyJournalMiddleContainer() {
         await page.sheet.render(true);
       });
     });
+
+    const arrowDiv = document.querySelectorAll(
+      ".heraldHud-arrowPagePartyJournal"
+    );
+    arrowDiv.forEach((arrow) => {
+      arrow.addEventListener("click", async () => {
+        const type = arrow.getAttribute("data-type");
+        const pageId = arrow.getAttribute("data-id");
+        let pageNumber = parseInt(arrow.getAttribute("data-pageNumber"));
+        const journalId = arrow.getAttribute("data-journal-id");
+
+        if (type == "up") {
+          await heraldHud_partyJournalPageNumberChange(
+            "up",
+            pageId,
+            pageNumber,
+            journalId
+          );
+        } else {
+          await heraldHud_partyJournalPageNumberChange(
+            "down",
+            pageId,
+            pageNumber,
+            journalId
+          );
+        }
+      });
+    });
   }
+}
+
+async function heraldHud_partyJournalPageNumberChange(
+  type,
+  pageId,
+  pageNumber,
+  journalId
+) {
+  const journal = game.journal.get(journalId);
+  if (!journal) {
+    console.log("Journal tidak ditemukan");
+    return;
+  }
+  const pages = journal.pages;
+  const pageCount = pages.length;
+  console.log(pageCount);
+
+  let pageChange = pageNumber;
+  if (type == "up") {
+    pageChange = pageNumber - 1;
+  } else {
+    pageChange = pageNumber + 1;
+  }
+  const before = document.querySelector(
+    `.heraldHud-partyJournalPageContainer[data-pageNumber="${pageChange}"]`
+  );
+  if (!before) {
+    return;
+  }
+  let previvousId = before.getAttribute("data-page-id");
+
+  let previousPage = pages.find((page) => page.id === previvousId);
+
+  let currentPage = pages.find((page) => page.id === pageId);
+
+  let tempSort = currentPage.sort;
+  currentPage.sort = previousPage.sort;
+  previousPage.sort = tempSort;
+
+  await journal.update({
+    pages: [
+      { _id: currentPage.id, sort: currentPage.sort },
+      { _id: previousPage.id, sort: previousPage.sort },
+    ],
+  });
+
+  await heraldHud_renderListPartyJournalMiddleContainer();
 }
 
 async function heraldHud_addPagePartyJournal(journalId) {
@@ -1620,12 +1812,16 @@ async function heraldHud_addPagePartyJournal(journalId) {
         callback: async (html) => {
           const pageName = html.find('[name="page-name"]').val();
           if (!pageName) return ui.notifications.warn("Page name is required.");
-
+          const pages = journal.pages;
+          const pageArray = [...pages.values()];
+          const lastPage = pageArray[pageArray.length - 1];
+          const lastPageSort = lastPage ? lastPage.sort : 0;
           await journal.createEmbeddedDocuments("JournalEntryPage", [
             {
               name: pageName,
               type: "text",
               text: { content: "" },
+              sort: lastPageSort + 1,
             },
           ]);
 
@@ -1821,19 +2017,43 @@ async function heraldHud_showDialogNpcsTarget() {
     <div>
       <label>Gender:</label>
       <div class="heraldHud-npcsGenderSelector" style="display: flex; gap: 5px;">
-        ${["Male", "Female", "Other", "They"]
-          .map(
-            (gender) => `
+  ${["Male", "Female", "Other", "They"]
+    .map((gender) => {
+      let icon = "";
+      let color = "";
+
+      if (gender === "Male") {
+        icon = '<i class="fa-solid fa-mars" style="color:rgb(32, 0, 212)"></i>';
+        color = "rgb(32, 0, 212)";
+      } else if (gender === "Female") {
+        icon =
+          '<i class="fa-solid fa-venus" style="color:rgb(216, 0, 198)"></i>';
+        color = "rgb(216, 0, 198)";
+      } else if (gender === "Other") {
+        icon =
+          '<i class="fa-solid fa-question" style="color:rgb(0, 0, 0)"></i>';
+        color = "rgb(0, 0, 0)";
+      } else if (gender === "They") {
+        icon =
+          '<i class="fa-solid fa-mars-and-venus" style="color:rgb(121, 0, 235)"></i>';
+        color = "rgb(121, 0, 235)";
+      }
+      return `
           <div class="heraldHud-npcsGenderOption" data-gender="${gender}" style="
             padding: 5px 10px;
             border-radius: 4px;
             cursor: pointer;
             border: 1px solid rgba(100, 100, 100, 0.8);
-          ">${gender}</div>
-        `
-          )
-          .join("")}
-      </div>
+            font-size:20px;
+       
+          ">
+            ${icon}
+          </div>
+        `;
+    })
+    .join("")}
+</div>
+
     </div>
 
     <div>
@@ -1891,7 +2111,6 @@ async function heraldHud_showDialogNpcsTarget() {
             party: party,
           };
           await heraldHud_confirmAddNpcsTarget(data);
-          // heraldHud_menuDetailSocket.executeAsGM("createPageNpcsData", data);
         },
       },
       cancel: {
@@ -1904,6 +2123,7 @@ async function heraldHud_showDialogNpcsTarget() {
           backgroundColor: "",
           color: "",
         });
+
         $(this)
           .addClass("selected")
           .css("background-color", "rgba(100, 100, 100, 0.8)")
@@ -1991,43 +2211,38 @@ async function heraldHud_confirmAddNpcsTarget(data) {
   };
 
   if (partyJournal) {
-    // const existingPage = partyJournal.pages.find(
-    //   (p) => p.name === pageData.name
-    // );
-    // if (existingPage) {
-    //   new Dialog({
-    //     title: "Yes ",
-    //     content: `<p>The Character Might Already Exist, do you wish to Continue?</p>`,
-    //     buttons: {
-    //       yes: {
-    //         icon: '<i class="fas fa-check"></i>',
-    //         label: "Yes, Replace",
-    //         callback: async () => {
-    //           await existingPage.delete();
-    //           await partyJournal.createEmbeddedDocuments("JournalEntryPage", [
-    //             pageData,
-    //           ]);
-    //         },
-    //       },
-    //       no: {
-    //         label: "No",
-    //         callback: () => {
-    //           ui.notifications.info(`Page "${pageData.name}" tidak diganti.`);
-    //         },
-    //       },
-    //     },
-    //     default: "no",
-    //   }).render(true);
-    // } else {
-    //   await partyJournal.createEmbeddedDocuments("JournalEntryPage", [
-    //     pageData,
-    //   ]);
-    // }
-    await partyJournal.createEmbeddedDocuments("JournalEntryPage", [pageData]);
+    const existingPage = partyJournal.pages.find(
+      (p) => p.name === pageData.name
+    );
+    if (existingPage) {
+      new Dialog({
+        title: "Yes ",
+        content: `<p>The Character Might Already Exist, do you wish to Continue?</p>`,
+        buttons: {
+          yes: {
+            label: "Yes",
+            callback: async () => {
+              await existingPage.delete();
+              await partyJournal.createEmbeddedDocuments("JournalEntryPage", [
+                pageData,
+              ]);
+            },
+          },
+          no: {
+            label: "No",
+            callback: () => {},
+          },
+        },
+        default: "no",
+      }).render(true);
+    } else {
+      await partyJournal.createEmbeddedDocuments("JournalEntryPage", [
+        pageData,
+      ]);
+    }
+    // await partyJournal.createEmbeddedDocuments("JournalEntryPage", [pageData]);
   }
 }
-async function heraldHud_saveNpcsTargetParty() {
-
-}
+async function heraldHud_saveNpcsTargetParty() {}
 
 export { heraldHud_renderListMenu };

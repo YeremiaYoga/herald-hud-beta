@@ -232,10 +232,12 @@
   align-items: center;
   gap: 10px;
 }
-.heraldHud-buttonAddPagePersonalNotesContainer{
+
+.heraldHud-buttonAddPagePersonalNotesContainer {
   cursor: pointer;
 }
-.heraldHud-buttonEditPersonalNotesContainer{
+
+.heraldHud-buttonEditPersonalNotesContainer {
   cursor: pointer;
 }
 
@@ -289,14 +291,55 @@
   cursor: pointer;
 }
 
-.heraldHud-personalNotesPage {
-  font-size: 14px;
-  padding: 3px;
-  cursor: pointer;
+.heraldHud-btnPersonalNotesTooltipParent {
+  position: relative;
+  display: inline-block;
 }
 
-.heraldHud-personalNotesPage:hover {
+.heraldHud-btnPersonalNotesTooltip {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  bottom: 140%;
+  left: -100%;
+  transform: translateX(-50%);
+  background-color: rgb(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 3px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  font-size: 10px;
+  z-index: 100;
+  transition: opacity 0.2s;
+  z-index: 20;
+}
+
+.heraldHud-btnPersonalNotesTooltipParent:hover .heraldHud-btnPersonalNotesTooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+
+.heraldHud-personalNotesPageContainer {
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.heraldHud-personalNotesPage {
+  font-size: 14px;
+  padding: 4px;
+
+}
+
+.heraldHud-personalNotesPageContainer:hover {
   background-color: rgb(194, 194, 194, 0.3);
+}
+
+.heraldHud-arrowPersonalNotesContainer {
+  display: flex;
+  gap: 5px;
 }
 
 /* --------------------------------------------------------------------------------------
@@ -352,10 +395,12 @@
   align-items: center;
   gap: 10px;
 }
-.heraldHud-buttonAddPagePartyJournalContainer{
+
+.heraldHud-buttonAddPagePartyJournalContainer {
   cursor: pointer;
 }
-.heraldHud-buttonEditPartyJournalContainer{
+
+.heraldHud-buttonEditPartyJournalContainer {
   cursor: pointer;
 }
 
@@ -411,14 +456,60 @@
   cursor: pointer;
 }
 
-.heraldHud-partyJournalPage {
-  font-size: 14px;
-  padding: 3px;
-  cursor: pointer;
+.heraldHud-btnPartyJournalTooltipParent {
+  position: relative;
+  display: inline-block;
 }
 
-.heraldHud-partyJournalPage:hover {
+.heraldHud-btnPartyJournalTooltip {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  bottom: 140%;
+  left: -100%;
+  transform: translateX(-50%);
+  background-color: rgb(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 3px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  font-size: 10px;
+  z-index: 100;
+  transition: opacity 0.2s;
+  z-index: 20;
+  -webkit-transform: translateX(-50%);
+  -moz-transform: translateX(-50%);
+  -ms-transform: translateX(-50%);
+  -o-transform: translateX(-50%);
+}
+
+.heraldHud-btnPartyJournalTooltipParent:hover .heraldHud-btnPartyJournalTooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.heraldHud-partyJournalPageContainer {
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.heraldHud-partyJournalPage {
+  font-size: 14px;
+  padding: 4px;
+
+}
+
+
+
+.heraldHud-partyJournalPageContainer:hover {
   background-color: rgb(194, 194, 194, 0.3);
+}
+
+.heraldHud-arrowPartyJournalContainer {
+  display: flex;
+  gap: 5px;
 }
 
 /* --------------------------------------------------------------------------------------
@@ -429,5 +520,5 @@
   left: 48%;
   width: 300px;
   height: 350px;
+  background-color: rgb(216, 0, 198);
 }
-
