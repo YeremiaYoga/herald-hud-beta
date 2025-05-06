@@ -76,6 +76,7 @@ async function heraldHud_renderListMenu() {
         <i class="fa-solid fa-crosshairs"></i>
       </div>
       `;
+      menuTitle = "NPCs";
     }
     listMenu += `
         <div id="heraldHud-menuDetailItem" class="heraldHud-menuDetailItem" data-name="${menu}">
@@ -119,7 +120,6 @@ async function heraldHud_showDialogSubMenuDetail(kategori) {
   const user = game.user;
   await heraldHud_showDialog2MenuDetail(kategori);
   const pack = game.packs.get("herald-hud-beta.herald-hud-backup");
-  console.log(pack);
 
   if (kategori == "biography") {
     await heraldHud_getViewBiography();
@@ -129,6 +129,7 @@ async function heraldHud_showDialogSubMenuDetail(kategori) {
     await heraldHud_getViewPartyJournal();
   } else if (kategori == `mission`) {
   } else if (kategori == `npcs`) {
+    await heraldHud_getViewNpcs();
   } else if (kategori == `npcs_target`) {
     await heraldHud_getViewTargetingNpcs();
   }
@@ -317,10 +318,10 @@ async function heraldHud_getDataBiographyMiddle() {
 async function heraldHud_getDataBiographyBottom() {
   const user = game.user;
   let selectedActor = user.character;
-  console.log(selectedActor);
+
 
   let biographyValue = selectedActor.system?.details?.biography.value || "";
-  console.log(biographyValue);
+
   let bottomTimeoutInput = {};
   let inputBottom = document.getElementById(
     `heraldHud-bottomInputBiographyField-biography`
@@ -565,7 +566,7 @@ async function heraldHud_createPersonalNotes(user, input, type) {
     ownership: { default: 3 },
   });
 
-  console.log(journalEntry);
+
   await bc.heraldHud_backupJournalPersonalNotes(user, journalEntry);
 }
 
@@ -611,7 +612,18 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
 
   for (let data of personalNotesJournal) {
     let journalName = data.name.toLowerCase();
-    if (journalName.indexOf(valueSearch) !== -1) {
+    let match = journalName.includes(valueSearch);
+
+    if (!match && data.pages) {
+      for (let page of data.pages.contents) {
+        if (page.name.toLowerCase().includes(valueSearch)) {
+          match = true;
+          break;
+        }
+      }
+    }
+
+    if (match) {
       filteredPersonalNotes.push(data);
     }
   }
@@ -619,7 +631,7 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
   let notesWithoutType = [];
 
   for (let journal of filteredPersonalNotes) {
-    console.log(journal.flags);
+
     let journalName = journal.name;
     let type = journal.flags?.type || "";
 
@@ -869,7 +881,7 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
                   user,
                   journalEntry
                 );
-                console.log(journalEntry);
+             
                 await heraldHud_renderListPersonalNotesMiddleContainer();
               },
             },
@@ -1003,7 +1015,6 @@ async function heraldHud_pageNumberChange(type, pageId, pageNumber, journalId) {
   }
   const pages = journal.pages;
   const pageCount = pages.length;
-  console.log(pageCount);
 
   let pageChange = pageNumber;
   if (type == "up") {
@@ -1373,56 +1384,11 @@ async function heraldHud_renderListPartyJournalMiddleContainer() {
     "heraldHud-listPartyJournalMiddleContainer"
   );
 
-  const folders = game.folders.filter((f) => f.type === "JournalEntry");
-
-  let heraldCoreFolder = "";
-  let heraldCorePartyFolder = "";
-  let heraldHudFolder = "";
-  let partyJournalFolder = "";
-
-  for (let folder of folders) {
-    if (folder.name == "Herald Core") {
-      heraldCoreFolder = folder;
-    }
-
-    if (folder.name == "Party" && folder.folder.id == heraldCoreFolder.id) {
-      heraldCorePartyFolder = folder;
-    }
-
-    if (folder.name == "Herald Hud") {
-      heraldHudFolder = folder;
-    }
-
-    if (
-      folder.name == "Party Journal" &&
-      folder.folder.id == heraldHudFolder.id
-    ) {
-      partyJournalFolder = folder;
-    }
-  }
-
-  let userUuid = user.uuid;
-  let actorUuid = selectedActor.uuid;
-  let arrUserPartyFolder = [];
-  const partyList = game.journal.filter(
-    (j) => j.folder?.id === heraldCorePartyFolder.id
+  let arrUserPartyFolder = await hl.heraldHud_getPlayerPartyList(
+    user,
+    selectedActor,
+    "folder"
   );
-  partyList.forEach((pj) => {
-    const page = pj.pages.find(
-      (page) => page.name === `${userUuid} | ${actorUuid}`
-    );
-
-    if (page) {
-      const matchingFolder = folders.find(
-        (folder) =>
-          folder.name === pj.name && folder.folder.id === partyJournalFolder.id
-      );
-
-      if (matchingFolder) {
-        arrUserPartyFolder.push(matchingFolder);
-      }
-    }
-  });
 
   let groupedPartyJournal = {};
   for (let partyFolder of arrUserPartyFolder) {
@@ -1442,7 +1408,18 @@ async function heraldHud_renderListPartyJournalMiddleContainer() {
 
     for (let data of partyJournalList) {
       let journalName = data.name.toLowerCase();
-      if (journalName.indexOf(valueSearch) !== -1) {
+      let match = journalName.includes(valueSearch);
+
+      if (!match && data.pages) {
+        for (let page of data.pages.contents) {
+          if (page.name.toLowerCase().includes(valueSearch)) {
+            match = true;
+            break;
+          }
+        }
+      }
+
+      if (match) {
         filteredPartyJournal.push(data);
       }
     }
@@ -1859,8 +1836,9 @@ Hooks.on("updateJournalEntryPage", (page, changes, options, userId) => {
 });
 
 /* ------------------------------------------------------------------------------
-   DIALOG NPCS
+   DIALOG NPCS TARGET
 ------------------------------------------------------------------------------- */
+
 async function heraldHud_gmCreateNpcsFolder(user) {
   const folders = game.folders.filter((f) => f.type === "JournalEntry");
   let heraldCoreFolder = "";
@@ -1946,7 +1924,7 @@ async function heraldHud_showDialogNpcsTarget() {
   }
   console.log(targetedToken);
   const tokenDocument = targetedToken.document;
-  console.log(tokenDocument);
+
   if (!arrNpcdisposition.includes(tokenDocument.disposition)) {
     ui.notifications.warn("Npc Not Friendly");
     return;
@@ -1979,7 +1957,7 @@ async function heraldHud_showDialogNpcsTarget() {
   let userUuid = user.uuid;
   let actorUuid = selectedActor.uuid;
   let listRadioButton = ``;
-  console.log(partyJournals);
+
   for (let pj of partyJournals) {
     for (let page of pj.pages) {
       if (page.name === `${userUuid} | ${actorUuid}`) {
@@ -2102,7 +2080,6 @@ async function heraldHud_showDialogNpcsTarget() {
             .find('input[name="heraldHud-npcsPartyInput"]:checked')
             .val();
 
-          console.log({ selectedGender, faction, race, party });
           let data = {
             actor: actor,
             gender: selectedGender,
@@ -2174,23 +2151,16 @@ async function heraldHud_showDialogNpcsTarget() {
 
 async function heraldHud_confirmAddNpcsTarget(data) {
   const folders = game.folders.filter((f) => f.type === "JournalEntry");
-  let heraldHudFolder = "";
-  let npcsFolder = "";
-  let partyFolder = "";
-  for (let folder of folders) {
-    if (folder.name == "Herald Hud") {
-      heraldHudFolder = folder;
-    }
+  const heraldHudFolder = folders.find((f) => f.name === "Herald Hud");
+  const npcsFolder = folders.find(
+    (f) => f.name === "Npcs" && f.folder?.id === heraldHudFolder?.id
+  );
+  const partyFolder = folders.find(
+    (f) => f.name === data.party && f.folder?.id === npcsFolder?.id
+  );
 
-    if (folder.name == "Npcs" && folder.folder.id == heraldHudFolder.id) {
-      npcsFolder = folder;
-    }
-    if (folder.name == data.party && folder.folder.id == npcsFolder.id) {
-      partyFolder = folder;
-    }
-  }
-  let partyJournal = game.journal.find(
-    (j) => j.folder?.id === partyFolder.id && j.name === `${data.party} NPCs`
+  const partyJournal = game.journal.find(
+    (j) => j.folder?.id === partyFolder?.id && j.name === `${data.party} NPCs`
   );
   const pageData = {
     name: data.actor.name || "Unnamed NPC",
@@ -2243,6 +2213,236 @@ async function heraldHud_confirmAddNpcsTarget(data) {
     // await partyJournal.createEmbeddedDocuments("JournalEntryPage", [pageData]);
   }
 }
-async function heraldHud_saveNpcsTargetParty() {}
+
+/* ------------------------------------------------------------------------------
+   DIALOG NPCS TARGET
+------------------------------------------------------------------------------- */
+
+async function heraldHud_getViewNpcs() {
+  const user = game.user;
+  const selectedActor = user.character;
+  let heraldHud_dialog2Div = document.getElementById("heraldHud-dialog2");
+
+  if (heraldHud_dialog2Div) {
+    heraldHud_dialog2Div.innerHTML = `
+      <div id="heraldHud-dialogNpcsContainer" class="heraldHud-dialogNpcsContainer">
+        <div id="heraldHud-npcsTopContiner" class="heraldHud-npcsTopContiner"></div>
+        <div id="heraldHud-npcsMiddleContainer" class="heraldHud-npcsMiddleContainer"></div>
+        <div id="heraldHud-npcsBottomContainer" class="heraldHud-npcsBottomContainer">
+          <div class="heraldHud-searchNpcsContainer" >
+            <input type="text" id="heraldHud-searchNpcs" class="heraldHud-searchNpcs" placeholder="Search notes..." />
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  let searchNpcs = document.getElementById("heraldHud-searchNpcs");
+  let inputSearchTimeOut;
+  searchNpcs.addEventListener("input", () => {
+    clearTimeout(inputSearchTimeOut);
+
+    inputSearchTimeOut = setTimeout(async () => {
+      await heraldHud_renderNpcsMiddleContainer();
+    }, 500);
+  });
+  await heraldHud_renderNpcsMiddleContainer();
+}
+
+async function heraldHud_renderNpcsMiddleContainer() {
+  const user = game.user;
+  const selectedActor = user.character;
+  let dialogMiddle = document.getElementById("heraldHud-npcsMiddleContainer");
+
+  let arrPlayerPartyList = await hl.heraldHud_getPlayerPartyList(
+    user,
+    selectedActor,
+    "name"
+  );
+  let arrAllNpcs = await hl.heraldHud_getAllNpcsByParty(arrPlayerPartyList);
+  let listNpcs = ``;
+
+  let searchNpcs = document.getElementById("heraldHud-searchNpcs");
+  let valueSearch = "";
+  if (searchNpcs) {
+    valueSearch = searchNpcs.value.toLowerCase();
+  }
+
+  let filteredNpcs = [];
+
+  for (let data of arrAllNpcs) {
+    let pageName = data.name.toLowerCase();
+    if (pageName.indexOf(valueSearch) !== -1) {
+      filteredNpcs.push(data);
+    }
+  }
+
+  let favoriteNpcs = [];
+  let otherNpcs = [];
+
+  for (let npc of filteredNpcs) {
+    const foundJournal = game.journal.contents.find(
+      (j) => j.id === npc.journalId && j.folder?.id === npc.folderId
+    );
+    const foundPage = foundJournal?.pages.get(npc.pageId);
+    const favArray = foundPage?.flags?.heraldHud?.favorite || [];
+
+    const isFavorite = favArray.includes(user.id);
+    if (isFavorite) favoriteNpcs.push(npc);
+    else otherNpcs.push(npc);
+  }
+
+  if (favoriteNpcs.length > 0) {
+    for (let npc of favoriteNpcs) {
+      let icon = "";
+      if (npc.gender === "Male") {
+        icon = '<i class="fa-solid fa-mars" style="color:rgb(32, 0, 212)"></i>';
+      } else if (npc.gender === "Female") {
+        icon =
+          '<i class="fa-solid fa-venus" style="color:rgb(216, 0, 198)"></i>';
+      } else if (npc.gender === "Other") {
+        icon = '<i class="fa-solid fa-question" style="color:white"></i>';
+      } else if (npc.gender === "They") {
+        icon =
+          '<i class="fa-solid fa-mars-and-venus" style="color:rgb(121, 0, 235)"></i>';
+      }
+      listNpcs += `
+        <div id="heraldHud-npcsPartyContainer" class="heraldHud-npcsPartyContainer">
+            <div id="heraldHud-npcsPartyLeft" class="heraldHud-npcsPartyLeft">
+                <div class="heraldHud-npcsPartyImageContainer">
+                  <img src="${npc.img}" alt="" class="heraldHud-npcsPartyImageView" />
+                  <div class="heraldHud-npcsPartyFavoriteButton" data-journalId="${npc.journalId}" data-pageId="${npc.pageId}" data-folderId="${npc.folderId}">
+                    <i class="fa-solid fa-star"></i>
+                  </div>
+                </div>
+              
+            </div>
+            <div id="heraldHud-npcsPartyMiddle" class="heraldHud-npcsPartyMiddle">
+              <div id="heraldHud-npcsPartyName" class="heraldHud-npcsPartyName">${npc.name}</div>
+              <div id="heraldHud-npcsPartyGender" class="heraldHud-npcsPartyGender">${icon}</div>
+              <div id="heraldHud-npcsPartyFaction" class="heraldHud-npcsPartyFaction">${npc.faction}</div>
+              <div id="heraldHud-npcsPartyPartyname" class="heraldHud-npcsPartyPartyname">${npc.party}</div>
+            </div>
+            <div id="heraldHud-npcsPartyRight" class="heraldHud-npcsPartyRight">
+              <div class="heraldHud-npcsPartyDelete heraldHud-npcsPartyDeleteParent" data-journalId="${npc.journalId}" data-pageId="${npc.pageId}">
+                <i class="fa-solid fa-trash"></i>
+                <span class="heraldHud-npcsPartyDeleteTooltip">Delete Npc</span>
+              </div>
+            </div>
+        </div>
+      `;
+    }
+    listNpcs += `<hr style="border: none; border-top: 2px solid #aaa; margin: 16px 0;">`;
+  }
+
+  for (let npc of otherNpcs) {
+    let icon = "";
+    if (npc.gender === "Male") {
+      icon = '<i class="fa-solid fa-mars" style="color:rgb(32, 0, 212)"></i>';
+    } else if (npc.gender === "Female") {
+      icon = '<i class="fa-solid fa-venus" style="color:rgb(216, 0, 198)"></i>';
+    } else if (npc.gender === "Other") {
+      icon = '<i class="fa-solid fa-question" style="color:white"></i>';
+    } else if (npc.gender === "They") {
+      icon =
+        '<i class="fa-solid fa-mars-and-venus" style="color:rgb(121, 0, 235)"></i>';
+    }
+    listNpcs += `
+      <div id="heraldHud-npcsPartyContainer" class="heraldHud-npcsPartyContainer">
+          <div id="heraldHud-npcsPartyLeft" class="heraldHud-npcsPartyLeft">
+              <div class="heraldHud-npcsPartyImageContainer">
+                <img src="${npc.img}" alt="" class="heraldHud-npcsPartyImageView" />
+                <div class="heraldHud-npcsPartyFavoriteButton" data-journalId="${npc.journalId}" data-pageId="${npc.pageId}" data-folderId="${npc.folderId}">
+                  <i class="fa-solid fa-star"></i>
+                </div>
+              </div>
+            
+          </div>
+          <div id="heraldHud-npcsPartyMiddle" class="heraldHud-npcsPartyMiddle">
+            <div id="heraldHud-npcsPartyName" class="heraldHud-npcsPartyName">${npc.name}</div>
+            <div id="heraldHud-npcsPartyGender" class="heraldHud-npcsPartyGender">${icon}</div>
+            <div id="heraldHud-npcsPartyFaction" class="heraldHud-npcsPartyFaction">${npc.faction}</div>
+            <div id="heraldHud-npcsPartyPartyname" class="heraldHud-npcsPartyPartyname">${npc.party}</div>
+          </div>
+          <div id="heraldHud-npcsPartyRight" class="heraldHud-npcsPartyRight">
+            <div class="heraldHud-npcsPartyDelete heraldHud-npcsPartyDeleteParent" data-journalId="${npc.journalId}" data-pageId="${npc.pageId}">
+              <i class="fa-solid fa-trash"></i>
+              <span class="heraldHud-npcsPartyDeleteTooltip">Delete Npc</span>
+            </div>
+          </div>
+      </div>
+    `;
+  }
+
+  if (dialogMiddle) {
+    dialogMiddle.innerHTML = listNpcs;
+
+    const favoriteButtons = dialogMiddle.querySelectorAll(
+      ".heraldHud-npcsPartyFavoriteButton"
+    );
+
+    favoriteButtons.forEach((favoriteButton) => {
+      favoriteButton.addEventListener("click", async function (event) {
+        const journalId = event.currentTarget.getAttribute("data-journalId");
+        const pageId = event.currentTarget.getAttribute("data-pageId");
+        const folderId = event.currentTarget.getAttribute("data-folderId");
+      });
+    });
+
+    const deleteButtons = dialogMiddle.querySelectorAll(
+      ".heraldHud-npcsPartyDelete"
+    );
+
+    deleteButtons.forEach((deleteButton) => {
+      deleteButton.addEventListener("click", async function (event) {
+        const journalId = event.currentTarget.getAttribute("data-journalId");
+        const pageId = event.currentTarget.getAttribute("data-pageId");
+
+        await heraldHud_deleteNpcWithConfirmation(journalId, pageId);
+      });
+    });
+  }
+}
+
+async function heraldHud_deleteNpcWithConfirmation(journalId, pageId) {
+  const confirmationDialog = new Dialog({
+    title: "Confirm NPC Deletion",
+    content: "<p>Are you sure you want to delete this NPC?</p>",
+    buttons: {
+      confirm: {
+        label: "Delete",
+        callback: async () => {
+          try {
+            const journal = game.journal.get(journalId);
+            if (journal) {
+              const page = journal.pages.get(pageId);
+              if (page) {
+                await page.delete();
+                ui.notifications.info("NPC successfully deleted.");
+                await heraldHud_renderNpcsMiddleContainer();
+              } else {
+                ui.notifications.error("Page not found.");
+              }
+            } else {
+              ui.notifications.error("Journal not found.");
+            }
+          } catch (error) {
+            console.error("Error deleting NPC page:", error);
+            ui.notifications.error("An error occurred while deleting the NPC.");
+          }
+        },
+      },
+      cancel: {
+        label: "Cancel",
+        callback: () => {
+          console.log("NPC deletion cancelled.");
+        },
+      },
+    },
+    defaultButton: "cancel",
+  });
+
+  confirmationDialog.render(true);
+}
 
 export { heraldHud_renderListMenu };
