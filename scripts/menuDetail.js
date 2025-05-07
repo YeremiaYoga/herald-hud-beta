@@ -319,7 +319,6 @@ async function heraldHud_getDataBiographyBottom() {
   const user = game.user;
   let selectedActor = user.character;
 
-
   let biographyValue = selectedActor.system?.details?.biography.value || "";
 
   let bottomTimeoutInput = {};
@@ -566,7 +565,6 @@ async function heraldHud_createPersonalNotes(user, input, type) {
     ownership: { default: 3 },
   });
 
-
   await bc.heraldHud_backupJournalPersonalNotes(user, journalEntry);
 }
 
@@ -631,7 +629,6 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
   let notesWithoutType = [];
 
   for (let journal of filteredPersonalNotes) {
-
     let journalName = journal.name;
     let type = journal.flags?.type || "";
 
@@ -881,7 +878,7 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
                   user,
                   journalEntry
                 );
-             
+
                 await heraldHud_renderListPersonalNotesMiddleContainer();
               },
             },
@@ -1735,7 +1732,6 @@ async function heraldHud_partyJournalPageNumberChange(
   }
   const pages = journal.pages;
   const pageCount = pages.length;
-  console.log(pageCount);
 
   let pageChange = pageNumber;
   if (type == "up") {
@@ -2285,13 +2281,18 @@ async function heraldHud_renderNpcsMiddleContainer() {
       (j) => j.id === npc.journalId && j.folder?.id === npc.folderId
     );
     const foundPage = foundJournal?.pages.get(npc.pageId);
-    const favArray = foundPage?.flags?.heraldHud?.favorite || [];
+    const favArray = foundPage?.flags?.favorites || [];
 
     const isFavorite = favArray.includes(user.id);
     if (isFavorite) favoriteNpcs.push(npc);
     else otherNpcs.push(npc);
   }
-
+  favoriteNpcs.sort((a, b) =>
+    a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+  );
+  otherNpcs.sort((a, b) =>
+    a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+  );
   if (favoriteNpcs.length > 0) {
     for (let npc of favoriteNpcs) {
       let icon = "";
@@ -2311,7 +2312,7 @@ async function heraldHud_renderNpcsMiddleContainer() {
             <div id="heraldHud-npcsPartyLeft" class="heraldHud-npcsPartyLeft">
                 <div class="heraldHud-npcsPartyImageContainer">
                   <img src="${npc.img}" alt="" class="heraldHud-npcsPartyImageView" />
-                  <div class="heraldHud-npcsPartyFavoriteButton" data-journalId="${npc.journalId}" data-pageId="${npc.pageId}" data-folderId="${npc.folderId}">
+                  <div class="heraldHud-npcsPartyFavoriteButton" data-id="${npc.folderId}|${npc.journalId}|${npc.pageId}" data-type="isFavorited" style="color:gold;">
                     <i class="fa-solid fa-star"></i>
                   </div>
                 </div>
@@ -2324,7 +2325,7 @@ async function heraldHud_renderNpcsMiddleContainer() {
               <div id="heraldHud-npcsPartyPartyname" class="heraldHud-npcsPartyPartyname">${npc.party}</div>
             </div>
             <div id="heraldHud-npcsPartyRight" class="heraldHud-npcsPartyRight">
-              <div class="heraldHud-npcsPartyDelete heraldHud-npcsPartyDeleteParent" data-journalId="${npc.journalId}" data-pageId="${npc.pageId}">
+              <div class="heraldHud-npcsPartyDelete heraldHud-npcsPartyDeleteParent"  data-journalId="${npc.journalId}" data-pageId="${npc.pageId}" data-folderId="${npc.folderId}">
                 <i class="fa-solid fa-trash"></i>
                 <span class="heraldHud-npcsPartyDeleteTooltip">Delete Npc</span>
               </div>
@@ -2352,7 +2353,7 @@ async function heraldHud_renderNpcsMiddleContainer() {
           <div id="heraldHud-npcsPartyLeft" class="heraldHud-npcsPartyLeft">
               <div class="heraldHud-npcsPartyImageContainer">
                 <img src="${npc.img}" alt="" class="heraldHud-npcsPartyImageView" />
-                <div class="heraldHud-npcsPartyFavoriteButton" data-journalId="${npc.journalId}" data-pageId="${npc.pageId}" data-folderId="${npc.folderId}">
+                <div class="heraldHud-npcsPartyFavoriteButton" data-id="${npc.folderId}|${npc.journalId}|${npc.pageId}" data-type="notFavorited" style="color:rgb(175, 175, 175);">
                   <i class="fa-solid fa-star"></i>
                 </div>
               </div>
@@ -2364,8 +2365,8 @@ async function heraldHud_renderNpcsMiddleContainer() {
             <div id="heraldHud-npcsPartyFaction" class="heraldHud-npcsPartyFaction">${npc.faction}</div>
             <div id="heraldHud-npcsPartyPartyname" class="heraldHud-npcsPartyPartyname">${npc.party}</div>
           </div>
-          <div id="heraldHud-npcsPartyRight" class="heraldHud-npcsPartyRight">
-            <div class="heraldHud-npcsPartyDelete heraldHud-npcsPartyDeleteParent" data-journalId="${npc.journalId}" data-pageId="${npc.pageId}">
+          <div id="heraldHud-npcsPartyRight" class="heraldHud-npcsPartyRight" >
+            <div class="heraldHud-npcsPartyDelete heraldHud-npcsPartyDeleteParent" data-journalId="${npc.journalId}" data-pageId="${npc.pageId}" data-folderId="${npc.folderId}">
               <i class="fa-solid fa-trash"></i>
               <span class="heraldHud-npcsPartyDeleteTooltip">Delete Npc</span>
             </div>
@@ -2383,9 +2384,14 @@ async function heraldHud_renderNpcsMiddleContainer() {
 
     favoriteButtons.forEach((favoriteButton) => {
       favoriteButton.addEventListener("click", async function (event) {
-        const journalId = event.currentTarget.getAttribute("data-journalId");
-        const pageId = event.currentTarget.getAttribute("data-pageId");
-        const folderId = event.currentTarget.getAttribute("data-folderId");
+        const dataId = event.currentTarget.getAttribute("data-id");
+
+        const [folderId, journalId, pageId] = dataId.split("|");
+
+        const data = { folderId, journalId, pageId };
+        const type = event.currentTarget.getAttribute("data-type");
+
+        await heraldHud_changeNpcsFavorite(data, type);
       });
     });
 
@@ -2402,6 +2408,39 @@ async function heraldHud_renderNpcsMiddleContainer() {
       });
     });
   }
+}
+
+async function heraldHud_changeNpcsFavorite(data, type) {
+  let user = game.user;
+  let foundJournal = game.journal.contents.find(
+    (j) => j.id === data.journalId && j.folder?.id === data.folderId
+  );
+  let foundPage = foundJournal?.pages.get(data.pageId);
+  let favorites = foundPage.flags?.favorites;
+  if (type == "notFavorited") {
+    if (!favorites) {
+      await foundPage.update({
+        "flags.favorites": [user.id],
+      });
+    } else {
+      if (!favorites.includes(user.id)) {
+        favorites.push(user.id);
+        await foundPage.update({
+          "flags.favorites": favorites,
+        });
+      }
+    }
+  } else if (type == "isFavorited") {
+    if (Array.isArray(favorites)) {
+      let updatedFavorites = favorites.filter((id) => id !== user.id);
+
+      await foundPage.update({
+        "flags.favorites": updatedFavorites,
+      });
+    }
+  }
+  foundPage = foundJournal?.pages.get(data.pageId);
+  await heraldHud_renderNpcsMiddleContainer();
 }
 
 async function heraldHud_deleteNpcWithConfirmation(journalId, pageId) {
