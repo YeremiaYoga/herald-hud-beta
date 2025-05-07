@@ -6169,11 +6169,11 @@ function heraldHud_getSpellsSchoolIcon(schoolCode) {
   `;
 }
 
-Hooks.on("updateItem", async (item, changes, options, userId) => {
-  if (heraldHud_displayChargeTracker == true) {
-    await heraldHud_getActorData();
-    await heraldHud_renderChargeTracker();
-  }
-});
+// Hooks.on("updateItem", async (item, changes, options, userId) => {
+//   if (heraldHud_displayChargeTracker == true) {
+//     await heraldHud_getActorData();
+//     await heraldHud_renderChargeTracker();
+//   }
+// });
 
 export { heraldHud_renderHtml, heraldHud_renderHeraldHud };
