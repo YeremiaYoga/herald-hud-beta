@@ -159,4 +159,88 @@ async function heraldHud_parsePageHTMLContent(htmlContent) {
   return data;
 }
 
-export { heraldHud_getPlayerPartyList, heraldHud_getAllNpcsByParty };
+function heraldHud_getSpellsPrepSchoolIcon(schoolCode) {
+  const spellSchoolMap = {
+    abj: {
+      name: "Abjuration",
+      icon: "abjuration",
+      color: "#00AEEF",
+      filter:
+        "invert(57%) sepia(88%) saturate(3986%) hue-rotate(170deg) brightness(97%) contrast(101%)",
+    },
+    con: {
+      name: "Conjuration",
+      icon: "conjuration",
+      color: "#F68D2E",
+      filter:
+        "invert(67%) sepia(91%) saturate(1096%) hue-rotate(359deg) brightness(102%) contrast(100%)",
+    },
+    div: {
+      name: "Divination",
+      icon: "divination",
+      color: "#A65EFF",
+      filter:
+        "invert(58%) sepia(47%) saturate(2539%) hue-rotate(244deg) brightness(103%) contrast(98%)",
+    },
+    enc: {
+      name: "Enchantment",
+      icon: "enchantment",
+      color: "#FF4ECC",
+      filter:
+        "invert(53%) sepia(78%) saturate(2177%) hue-rotate(295deg) brightness(102%) contrast(98%)",
+    },
+    evo: {
+      name: "Evocation",
+      icon: "evocation",
+      color: "#ED1C24",
+      filter:
+        "invert(20%) sepia(92%) saturate(4372%) hue-rotate(355deg) brightness(98%) contrast(107%)",
+    },
+    ill: {
+      name: "Illusion",
+      icon: "illusion",
+      color: "#FFDD00",
+      filter:
+        "invert(84%) sepia(49%) saturate(576%) hue-rotate(357deg) brightness(108%) contrast(103%)",
+    },
+    nec: {
+      name: "Necromancy",
+      icon: "necromancy",
+      color: "#008A5E",
+      filter:
+        "invert(22%) sepia(92%) saturate(738%) hue-rotate(138deg) brightness(99%) contrast(102%)",
+    },
+    trs: {
+      name: "Transmutation",
+      icon: "transmutation",
+      color: "#00B3B3",
+      filter:
+        "invert(42%) sepia(94%) saturate(1418%) hue-rotate(148deg) brightness(100%) contrast(99%)",
+    },
+  };
+
+  let spellSchool = spellSchoolMap[schoolCode] || {
+    name: "Unknown",
+    icon: "unknown",
+    color: "#888888",
+    filter:
+      "invert(50%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%)",
+  };
+
+  let iconPath = `/systems/dnd5e/icons/svg/schools/${spellSchool.icon}.svg`;
+
+  return `
+    <div class="heraldHud-spellPrepSchoolContainer" style="border-color: ${spellSchool.color};">
+      <img src="${iconPath}" class="heraldHud-spellPrepSchoolIcon" alt="${spellSchool.name}" style="filter: ${spellSchool.filter};">
+      <div class="heraldHud-spellsPrepSchoolTooltip" style="">
+        ${spellSchool.name}
+      </div>
+    </div>
+  `;
+}
+
+export {
+  heraldHud_getPlayerPartyList,
+  heraldHud_getAllNpcsByParty,
+  heraldHud_getSpellsPrepSchoolIcon,
+};

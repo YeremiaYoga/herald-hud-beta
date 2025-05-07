@@ -1,4 +1,5 @@
 import * as md from "./menuDetail.js";
+import * as hl from "./helper.js";
 
 let heraldHud_actorSelected = null;
 let heraldHud_npcPlayerOwned = [];
@@ -10,6 +11,9 @@ let heraldHud_statsAbbreviations = false;
 let heraldHud_displayChargeTracker = false;
 let heraldHud_displayInformationButton = false;
 let heraldHud_speedHudbarOff = false;
+let heraldHud_heraldHudScale = ``;
+let heraldHud_dialogBorderColor = ``;
+let heraldHud_dialogBoxShadowColor = ``;
 let heraldHud_overlayHudbarNameImage = "";
 let heraldHud_listOverlayHudbarFrame = [
   "basic_frame",
@@ -60,6 +64,15 @@ Hooks.once("ready", () => {
   heraldHud_overlayHudbarNameImage = game.settings.get(
     "herald-hud",
     "hudbarImageFrame"
+  );
+  heraldHud_heraldHudScale = game.settings.get("herald-hud", "heraldHudScale");
+  heraldHud_dialogBorderColor = game.settings.get(
+    "herald-hud",
+    "dialogBorderColor"
+  );
+  heraldHud_dialogBoxShadowColor = game.settings.get(
+    "herald-hud",
+    "dialogBoxShadowColor"
   );
 });
 
@@ -652,23 +665,23 @@ async function heraldHud_updateDataActor() {
       if (hpPercent < 0) {
         hpGradientColor.innerHTML = `
         <stop offset="75%" stop-color="${hp0}" />
-        <stop offset="100%" stop-color="${darkenHex(hp0, 40)}"/>`;
+        <stop offset="100%" stop-color="${heraldHud_darkHex(hp0, 40)}"/>`;
       } else if (hpPercent <= 25) {
         hpGradientColor.innerHTML = `
         <stop offset="75%" stop-color="${hp25}" />
-        <stop offset="100%" stop-color="${darkenHex(hp25, 40)}"/>`;
+        <stop offset="100%" stop-color="${heraldHud_darkHex(hp25, 40)}"/>`;
       } else if (hpPercent <= 50) {
         hpGradientColor.innerHTML = `
         <stop offset="75%" stop-color="${hp50}" />
-        <stop offset="100%" stop-color="${darkenHex(hp50, 40)}"/>`;
+        <stop offset="100%" stop-color="${heraldHud_darkHex(hp50, 40)}"/>`;
       } else if (hpPercent <= 75) {
         hpGradientColor.innerHTML = `
         <stop offset="75%" stop-color="${hp75}" />
-        <stop offset="100%" stop-color="${darkenHex(hp75, 40)}"/>`;
+        <stop offset="100%" stop-color="${heraldHud_darkHex(hp75, 40)}"/>`;
       } else {
         hpGradientColor.innerHTML = `
         <stop offset="75%" stop-color="${hp100}" />
-        <stop offset="100%" stop-color="${darkenHex(hp100, 40)}"/>`;
+        <stop offset="100%" stop-color="${heraldHud_darkHex(hp100, 40)}"/>`;
       }
       if (hpValueInput) {
         hpValueInput.value = hp;
@@ -1508,6 +1521,8 @@ async function heraldHud_renderDialog(kategori) {
   let heraldHud_dialogDiv = document.getElementById("heraldHud-dialog");
   if (heraldHud_dialogDiv) {
     heraldHud_dialogDiv.style.display = "block";
+    heraldHud_dialogDiv.style.border = `3px solid ${heraldHud_dialogBorderColor}`;
+    heraldHud_dialogDiv.style.boxShadow = `0 0 10px ${heraldHud_dialogBoxShadowColor}`;
     heraldHud_dialogDiv.className = "heraldHud-dialog";
     heraldHud_dialogDiv.classList.add(`${kategori}`);
   }
@@ -1517,6 +1532,8 @@ async function heraldHud_renderDialog(kategori) {
     heraldHud_dialog2Div.className = "heraldHud-dialog2";
     if (kategori == "spells") {
       heraldHud_dialog2Div.style.display = "block";
+      heraldHud_dialog2Div.style.border = `3px solid ${heraldHud_dialogBorderColor}`;
+      heraldHud_dialog2Div.style.boxShadow = `0 0 10px ${heraldHud_dialogBoxShadowColor}`;
       heraldHud_dialog2Div.classList.add(`${kategori}`);
     }
   }
@@ -3386,7 +3403,7 @@ async function heraldHud_getDataSpellsPrep() {
         if (item.system.uses?.max) {
           spellsUses = `| ${item.system.uses.value}/${item.system.uses.max}`;
         }
-        let spellsSchool = heraldHud_getSpellsPrepSchoolIcon(
+        let spellsSchool = hl.heraldHud_getSpellsPrepSchoolIcon(
           item.system.school
         );
 
@@ -3491,10 +3508,8 @@ async function heraldHud_openSettingHudDialog() {
       }>${label}</option>`;
     })
     .join("");
-
   let dialogContent = `
     <div style="display: flex; flex-direction: column; gap: 10px; padding-top:10px;padding-bottom:10px;">
-
       <div style="display: flex; align-items: center; gap: 10px;">
         <input type="checkbox" id="heraldHud-statsAbbreviationsToggle" ${
           game.settings.get("herald-hud", "statsAbbreviations") ? "checked" : ""
@@ -3651,6 +3666,18 @@ async function heraldHud_openSettingHudDialog() {
     },
     default: "save",
   }).render(true);
+  Hooks.once("renderDialog", async (app) => {
+    // const dialogElement = app.element[0];
+    // const contentElement = dialogElement.querySelector(".window-content");
+    // if (contentElement) {
+    //   contentElement.style.backgroundColor = "black";
+    //   contentElement.style.color = "white";
+    //   contentElement.style.backgroundImage = "none";
+    //   contentElement.style.backgroundSize = "cover";
+    //   contentElement.style.backgroundRepeat = "no-repeat";
+    //   contentElement.style.backgroundPosition = "center";
+    // }
+  });
 }
 
 async function heraldHud_viewHudbarWithoutSpeed() {
@@ -5949,7 +5976,7 @@ Hooks.on("updateActor", async (actor, data) => {
   await heraldHud_getDataListNpc();
 });
 
-function darkenHex(hex, percent) {
+function heraldHud_darkHex(hex, percent) {
   let r = parseInt(hex.substring(1, 3), 16);
   let g = parseInt(hex.substring(3, 5), 16);
   let b = parseInt(hex.substring(5, 7), 16);
@@ -6141,83 +6168,12 @@ function heraldHud_getSpellsSchoolIcon(schoolCode) {
     </div>
   `;
 }
-function heraldHud_getSpellsPrepSchoolIcon(schoolCode) {
-  const spellSchoolMap = {
-    abj: {
-      name: "Abjuration",
-      icon: "abjuration",
-      color: "#00AEEF",
-      filter:
-        "invert(57%) sepia(88%) saturate(3986%) hue-rotate(170deg) brightness(97%) contrast(101%)",
-    },
-    con: {
-      name: "Conjuration",
-      icon: "conjuration",
-      color: "#F68D2E",
-      filter:
-        "invert(67%) sepia(91%) saturate(1096%) hue-rotate(359deg) brightness(102%) contrast(100%)",
-    },
-    div: {
-      name: "Divination",
-      icon: "divination",
-      color: "#A65EFF",
-      filter:
-        "invert(58%) sepia(47%) saturate(2539%) hue-rotate(244deg) brightness(103%) contrast(98%)",
-    },
-    enc: {
-      name: "Enchantment",
-      icon: "enchantment",
-      color: "#FF4ECC",
-      filter:
-        "invert(53%) sepia(78%) saturate(2177%) hue-rotate(295deg) brightness(102%) contrast(98%)",
-    },
-    evo: {
-      name: "Evocation",
-      icon: "evocation",
-      color: "#ED1C24",
-      filter:
-        "invert(20%) sepia(92%) saturate(4372%) hue-rotate(355deg) brightness(98%) contrast(107%)",
-    },
-    ill: {
-      name: "Illusion",
-      icon: "illusion",
-      color: "#FFDD00",
-      filter:
-        "invert(84%) sepia(49%) saturate(576%) hue-rotate(357deg) brightness(108%) contrast(103%)",
-    },
-    nec: {
-      name: "Necromancy",
-      icon: "necromancy",
-      color: "#008A5E",
-      filter:
-        "invert(22%) sepia(92%) saturate(738%) hue-rotate(138deg) brightness(99%) contrast(102%)",
-    },
-    trs: {
-      name: "Transmutation",
-      icon: "transmutation",
-      color: "#00B3B3",
-      filter:
-        "invert(42%) sepia(94%) saturate(1418%) hue-rotate(148deg) brightness(100%) contrast(99%)",
-    },
-  };
 
-  let spellSchool = spellSchoolMap[schoolCode] || {
-    name: "Unknown",
-    icon: "unknown",
-    color: "#888888",
-    filter:
-      "invert(50%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%)",
-  };
+Hooks.on("updateItem", async (item, changes, options, userId) => {
+  if (heraldHud_displayChargeTracker == true) {
+    await heraldHud_getActorData();
+    await heraldHud_renderChargeTracker();
+  }
+});
 
-  let iconPath = `/systems/dnd5e/icons/svg/schools/${spellSchool.icon}.svg`;
-
-  return `
-    <div class="heraldHud-spellPrepSchoolContainer" style="border-color: ${spellSchool.color};">
-      <img src="${iconPath}" class="heraldHud-spellPrepSchoolIcon" alt="${spellSchool.name}" style="filter: ${spellSchool.filter};">
-      <div class="heraldHud-spellsPrepSchoolTooltip" style="">
-        ${spellSchool.name}
-      </div>
-    </div>
-  `;
-}
 export { heraldHud_renderHtml, heraldHud_renderHeraldHud };

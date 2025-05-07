@@ -78,26 +78,28 @@ Hooks.once("init", () => {
     type: String,
     default: "basic_frame",
   });
-});
-Hooks.on("renderDocumentSheetConfig", (app, html, data) => {
-  console.log("Sheet config dibuka untuk JournalEntryPage:", app.document);
-
-  // Temukan elemen form-group untuk "This Sheet"
-  const thisSheetGroup = html
-    .find("label:contains('This Sheet')")
-    .closest(".form-group");
-
-  // Buat opsi tambahan
-  const customMenu = $(`
-    <div class="form-group">
-      <label>Test</label>
-      <input type="checkbox" name="flags.heraldHud.secretMode" ${
-        getProperty(app.document, "flags.heraldHud.secretMode") ? "checked" : ""
-      } />
-      <p class="notes">Testing</p>
-    </div>
-  `);
-
-  // Sisipkan setelah grup "This Sheet"
-  thisSheetGroup.after(customMenu);
+  game.settings.register("herald-hud", "heraldHudScale", {
+    name: "Herald Hud Size",
+    hint: "Herald Hud Size",
+    scope: "client",
+    config: true,
+    type: String,
+    default: "100",
+  });
+  game.settings.register("herald-hud", "dialogBorderColor", {
+    name: "Dialog Border Color",
+    hint: "Dialog Border Color",
+    scope: "client",
+    config: true,
+    type: String,
+    default: "gold",
+  });
+  game.settings.register("herald-hud", "dialogBoxShadowColor", {
+    name: "Dialog BoxShadow Color",
+    hint: "Dialog BoxShadow Color",
+    scope: "client",
+    config: true,
+    type: String,
+    default: "rgba(255, 215, 0, 0.5)",
+  });
 });

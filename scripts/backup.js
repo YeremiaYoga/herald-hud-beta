@@ -146,6 +146,10 @@ async function heraldHud_backupJournalPersonalNotes(user, journalEntry) {
   });
 }
 
+/* ------------------------------------------------------------------------------
+   DIALOG PARTY JOURNAL BACKUP
+------------------------------------------------------------------------------- */
+
 async function heraldHud_createCompediumPartyJournalFolder() {
   const pack = game.packs.get("herald-hud-beta.herald-hud-backup");
   const journalFolders = game.folders.filter((f) => f.type === "JournalEntry");
@@ -206,7 +210,6 @@ async function heraldHud_createCompediumPartyJournalFolder() {
 }
 
 async function heraldHud_backupJournalPartyJournal(journalEntry) {
-  console.log(journalEntry);
   const pack = game.packs.get("herald-hud-beta.herald-hud-backup");
   const journalFolders = game.folders.filter((f) => f.type === "JournalEntry");
   if (!pack) {
@@ -320,9 +323,191 @@ async function heraldHud_backupJournalPartyJournal(journalEntry) {
   }
 }
 
+/* ------------------------------------------------------------------------------
+   DIALOG NPCS BACKUP
+------------------------------------------------------------------------------- */
+
+async function heraldHud_createCompediumNpcsFolder() {
+  const pack = game.packs.get("herald-hud-beta.herald-hud-backup");
+  const journalFolders = game.folders.filter((f) => f.type === "JournalEntry");
+  if (!pack) {
+    return ui.notifications.error(
+      `Compendium "herald-hud.herald-hud-backup" not found.`
+    );
+  }
+  let heraldHudFolder = "";
+  let npcsFolder = "";
+  for (let folder of journalFolders) {
+    if (folder.name == "Herald Hud") {
+      heraldHudFolder = folder;
+    }
+    if (folder.name == "Npcs" && folder.folder.id == heraldHudFolder.id) {
+      npcsFolder = folder;
+    }
+  }
+  const compediumFolder = pack.folders;
+  let listNpcsFolder = compediumFolder.find((f) => f.name === "Npcs");
+
+  if (!listNpcsFolder) {
+    const folderData = {
+      name: "Npcs",
+      type: "JournalEntry",
+      compendium: "herald-hud-beta.herald-hud-backup",
+      sorting: "a",
+    };
+    listNpcsFolder = await Folder.create(folderData, {
+      pack: "herald-hud-beta.herald-hud-backup",
+    });
+  }
+  if (listNpcsFolder) {
+    const relevantJournalFolders = journalFolders.filter(
+      (f) => f.folder?.id === npcsFolder.id
+    );
+
+    const existingFolderNames = new Set(
+      compediumFolder
+        .filter((f) => f.folder?.id === listNpcsFolder.id)
+        .map((f) => f.name)
+    );
+    console.log(existingFolderNames);
+    for (let jFolder of relevantJournalFolders) {
+      if (!existingFolderNames.has(jFolder.name)) {
+        const partyFolderCompedium = {
+          name: jFolder.name,
+          type: "JournalEntry",
+          compendium: "herald-hud-beta.herald-hud-backup",
+          folder: listNpcsFolder.id,
+          sorting: "a",
+        };
+        await Folder.create(partyFolderCompedium, {
+          pack: "herald-hud-beta.herald-hud-backup",
+        });
+      }
+    }
+  }
+}
+
+async function heraldHud_backupJournalNpcs(uuid) {
+  const journalEntry = await fromUuid(uuid);
+
+  const pack = await game.packs.get("herald-hud-beta.herald-hud-backup");
+  const journalFolders = game.folders.filter((f) => f.type === "JournalEntry");
+  if (!pack) {
+    return ui.notifications.error(
+      `Compendium "herald-hud.herald-hud-backup" not found.`
+    );
+  }
+  let npcsCompendium = "";
+  let todayFolder = "";
+  const compendiumFolder = pack.folders;
+
+  const today = new Date();
+  const day = String(today.getDate()).padStart(2, "0");
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const year = today.getFullYear();
+  const todayDate = `${day}-${month}-${year}`;
+  const heraldHudFolder = journalFolders.find((f) => f.name === "Herald Hud");
+  if (!heraldHudFolder) {
+    return ui.notifications.error(`Folder "Herald Hud" not found.`);
+  }
+
+  const npcsFolder = journalFolders.find(
+    (f) => f.name === "Npcs" && f.folder?.id === heraldHudFolder.id
+  );
+  if (!npcsFolder) {
+    return ui.notifications.error(
+      `Folder "Npcs" not found under "Herald Hud".`
+    );
+  }
+
+  const cleanName = journalEntry.name.trim().split(" ").slice(0, -1).join(" ");
+
+  const partyFolder = journalFolders.find(
+    (f) => f.name === cleanName && f.folder?.id === npcsFolder.id
+  );
+  if (!partyFolder) {
+    return ui.notifications.error(
+      `Folder "Party" not found under "Herald Hud".`
+    );
+  }
+
+  let listNpcsFolder = compendiumFolder.find((f) => f.name === "Npcs");
+
+  if (listNpcsFolder) {
+    npcsCompendium = compendiumFolder.find(
+      (f) => f.folder?.id == listNpcsFolder.id && f.name == cleanName
+    );
+  }
+  if (npcsCompendium) {
+    todayFolder = compendiumFolder.find(
+      (f) => f.name === todayDate && f.folder?.id === npcsCompendium.id
+    );
+  }
+
+  if (!todayFolder) {
+    const todayFolderData = {
+      name: todayDate,
+      type: "JournalEntry",
+      compendium: "herald-hud-beta.herald-hud-backup",
+      folder: npcsCompendium.id,
+      sorting: "a",
+    };
+    todayFolder = await Folder.create(todayFolderData, {
+      pack: "herald-hud-beta.herald-hud-backup",
+    });
+
+    const newJournalEntryData = {
+      name: journalEntry.name,
+      folder: todayFolder.id,
+      pages: journalEntry.pages.map((page) => {
+        const pageData = duplicate(page);
+        delete pageData._id;
+        return pageData;
+      }),
+
+      flags: journalEntry.flags,
+      content: journalEntry.content,
+      img: journalEntry.img,
+    };
+
+    await JournalEntry.create(newJournalEntryData, {
+      pack: "herald-hud-beta.herald-hud-backup",
+    });
+  } else {
+    const docs = await pack.getDocuments();
+
+    const existingJournal = docs.find(
+      (doc) =>
+        doc.name === journalEntry.name && doc.folder?.id === todayFolder.id
+    );
+
+    if (existingJournal) {
+      await existingJournal.delete({ pack: pack.collection });
+    }
+    const newJournalEntryData = {
+      name: journalEntry.name,
+      folder: todayFolder.id,
+      pages: journalEntry.pages.map((page) => {
+        const pageData = duplicate(page);
+        delete pageData._id;
+        return pageData;
+      }),
+      flags: journalEntry.flags,
+      content: journalEntry.content,
+      img: journalEntry.img,
+    };
+
+    await JournalEntry.create(newJournalEntryData, {
+      pack: "herald-hud-beta.herald-hud-backup",
+    });
+  }
+}
+
 export {
   heraldHud_createCompendiumPersonalNotesFolder,
   heraldHud_backupJournalPersonalNotes,
   heraldHud_createCompediumPartyJournalFolder,
   heraldHud_backupJournalPartyJournal,
+  heraldHud_createCompediumNpcsFolder,
+  heraldHud_backupJournalNpcs,
 };

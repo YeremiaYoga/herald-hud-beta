@@ -40,18 +40,23 @@ Hooks.once("socketlib.ready", () => {
   heraldHud_menuDetailSocket.register(
     "backupHeralHudJournalByPage",
     async (user, journalEntry) => {
+      const uuid = journalEntry.uuid;
       if (journalEntry.flags.category == "Personal Notes") {
         await bc.heraldHud_backupJournalPersonalNotes(user, journalEntry);
       } else if (journalEntry.flags.category == "Party Journal") {
         await bc.heraldHud_backupJournalPartyJournal(journalEntry);
+      } else if (journalEntry.flags.category == "Npcs") {
+        await bc.heraldHud_backupJournalNpcs(uuid);
       }
     }
   );
   heraldHud_menuDetailSocket.register("createNpcsFolder", async (user) => {
     await heraldHud_gmCreateNpcsFolder(user);
+    await bc.heraldHud_createCompediumNpcsFolder();
   });
-  heraldHud_menuDetailSocket.register("createPageNpcsData", async (data) => {
-    await heraldHud_confirmAddNpcsTarget(data);
+
+  heraldHud_menuDetailSocket.register("backupHeraldHudNpcs", async (uuid) => {
+    await bc.heraldHud_backupJournalNpcs(uuid);
   });
 });
 async function heraldHud_renderListMenu() {
@@ -1269,6 +1274,17 @@ async function heraldHud_getViewPartyJournal() {
       </div>
     `;
 
+    let searchPartyJournal = document.getElementById(
+      "heraldHud-searchPartyJournal"
+    );
+    let inputSearchTimeOut;
+    searchPartyJournal.addEventListener("input", () => {
+      clearTimeout(inputSearchTimeOut);
+
+      inputSearchTimeOut = setTimeout(async () => {
+        await heraldHud_renderListPartyJournalMiddleContainer();
+      }, 500);
+    });
     let addPartyJournal = document.getElementById(
       "heraldHud-buttonAddPartyJournalContainer"
     );
@@ -1810,27 +1826,6 @@ async function heraldHud_addPagePartyJournal(journalId) {
   }).render(true);
 }
 
-Hooks.on("createJournalEntryPage", (page, options, userId) => {
-  const user = game.users.get(userId);
-  const journal = page.parent;
-
-  heraldHud_menuDetailSocket.executeAsGM(
-    "backupHeralHudJournalByPage",
-    user,
-    journal
-  );
-});
-Hooks.on("updateJournalEntryPage", (page, changes, options, userId) => {
-  const user = game.users.get(userId);
-  const journal = page.parent;
-
-  heraldHud_menuDetailSocket.executeAsGM(
-    "backupHeralHudJournalByPage",
-    user,
-    journal
-  );
-});
-
 /* ------------------------------------------------------------------------------
    DIALOG NPCS TARGET
 ------------------------------------------------------------------------------- */
@@ -1894,6 +1889,9 @@ async function heraldHud_gmCreateNpcsFolder(user) {
         folder: createdFolder.id,
         pages: [],
         content: "",
+        flags: {
+          category: "Npcs",
+        },
         ownership: { default: 3 },
       });
     }
@@ -1918,7 +1916,7 @@ async function heraldHud_showDialogNpcsTarget() {
     ui.notifications.warn("No NPC target selected.");
     return;
   }
-  console.log(targetedToken);
+
   const tokenDocument = targetedToken.document;
 
   if (!arrNpcdisposition.includes(tokenDocument.disposition)) {
@@ -2189,9 +2187,10 @@ async function heraldHud_confirmAddNpcsTarget(data) {
             label: "Yes",
             callback: async () => {
               await existingPage.delete();
-              await partyJournal.createEmbeddedDocuments("JournalEntryPage", [
-                pageData,
-              ]);
+              const createdPages = await partyJournal.createEmbeddedDocuments(
+                "JournalEntryPage",
+                [pageData]
+              );
             },
           },
           no: {
@@ -2206,7 +2205,9 @@ async function heraldHud_confirmAddNpcsTarget(data) {
         pageData,
       ]);
     }
-    // await partyJournal.createEmbeddedDocuments("JournalEntryPage", [pageData]);
+
+    const uuid = journalEntry.uuid;
+    await heraldHud_menuDetailSocket.executeAsGM("backupHeraldHudNpcs", uuid);
   }
 }
 
@@ -2308,7 +2309,7 @@ async function heraldHud_renderNpcsMiddleContainer() {
           '<i class="fa-solid fa-mars-and-venus" style="color:rgb(121, 0, 235)"></i>';
       }
       listNpcs += `
-        <div id="heraldHud-npcsPartyContainer" class="heraldHud-npcsPartyContainer">
+        <div id="heraldHud-npcsPartyContainer" class="heraldHud-npcsPartyContainer" data-journalId="${npc.journalId}" data-pageId="${npc.pageId}">
             <div id="heraldHud-npcsPartyLeft" class="heraldHud-npcsPartyLeft">
                 <div class="heraldHud-npcsPartyImageContainer">
                   <img src="${npc.img}" alt="" class="heraldHud-npcsPartyImageView" />
@@ -2349,7 +2350,7 @@ async function heraldHud_renderNpcsMiddleContainer() {
         '<i class="fa-solid fa-mars-and-venus" style="color:rgb(121, 0, 235)"></i>';
     }
     listNpcs += `
-      <div id="heraldHud-npcsPartyContainer" class="heraldHud-npcsPartyContainer">
+      <div id="heraldHud-npcsPartyContainer" class="heraldHud-npcsPartyContainer" data-journalId="${npc.journalId}" data-pageId="${npc.pageId}">
           <div id="heraldHud-npcsPartyLeft" class="heraldHud-npcsPartyLeft">
               <div class="heraldHud-npcsPartyImageContainer">
                 <img src="${npc.img}" alt="" class="heraldHud-npcsPartyImageView" />
@@ -2377,6 +2378,30 @@ async function heraldHud_renderNpcsMiddleContainer() {
 
   if (dialogMiddle) {
     dialogMiddle.innerHTML = listNpcs;
+
+    const npcDiv = document.querySelectorAll(".heraldHud-npcsPartyContainer");
+
+    npcDiv.forEach((pageEl) => {
+      pageEl.addEventListener("click", async (event) => {
+        if (
+          event.target.closest(".heraldHud-npcsPartyFavoriteButton") ||
+          event.target.closest(".heraldHud-npcsPartyDelete")
+        ) {
+          return;
+        }
+
+        const journalId = pageEl.getAttribute("data-journalId");
+        const pageId = pageEl.getAttribute("data-pageId");
+
+        const journal = game.journal.get(journalId);
+        if (!journal) return;
+
+        const page = journal.pages.get(pageId);
+        if (!page) return;
+
+        await page.sheet.render(true);
+      });
+    });
 
     const favoriteButtons = dialogMiddle.querySelectorAll(
       ".heraldHud-npcsPartyFavoriteButton"
@@ -2483,5 +2508,29 @@ async function heraldHud_deleteNpcWithConfirmation(journalId, pageId) {
 
   confirmationDialog.render(true);
 }
+
+Hooks.on("createJournalEntryPage", (page, options, userId) => {
+  const user = game.users.get(userId);
+  const journal = page.parent;
+
+  heraldHud_menuDetailSocket.executeAsGM(
+    "backupHeralHudJournalByPage",
+    user,
+    journal
+  );
+});
+Hooks.on("updateJournalEntryPage", async (page, changes, options, userId) => {
+  const user = game.users.get(userId);
+  const journal = page.parent;
+
+  heraldHud_menuDetailSocket.executeAsGM(
+    "backupHeralHudJournalByPage",
+    user,
+    journal
+  );
+  await heraldHud_renderListPartyJournalMiddleContainer();
+  await heraldHud_renderListPersonalNotesMiddleContainer();
+  await heraldHud_renderNpcsMiddleContainer();
+});
 
 export { heraldHud_renderListMenu };
