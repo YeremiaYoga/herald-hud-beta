@@ -6,7 +6,6 @@
     z-index: 10;
     display: flex;
     flex-direction: column;
-    /* scale: 0.7; */
 }
 
 .heraldHud-container {
@@ -1423,12 +1422,10 @@
     position: fixed;
     bottom: 14%;
     transform: translateX(-50%);
-    border: 3px solid gold;
     border-radius: 10px;
     background-color: rgba(0, 0, 0, 0.8);
     z-index: 16;
     padding: 10px;
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
 }
 
 .heraldHud-dialog2 {
@@ -1436,12 +1433,11 @@
     position: fixed;
     bottom: 14%;
     transform: translateX(-50%);
-    border: 3px solid gold;
+
     border-radius: 10px;
     background-color: rgba(0, 0, 0, 0.8);
     z-index: 16;
     padding: 5px;
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
 }
 
 .heraldHud-dialog.inventory {

@@ -146,6 +146,8 @@ async function heraldHud_showDialog2MenuDetail(kategori) {
   if (heraldHud_dialog2Div) {
     if (heraldHud_dialog2Div.style.display == "none") {
       heraldHud_dialog2Div.style.display = "block";
+      heraldHud_dialog2Div.style.border = `3px solid ${game.settings.get("herald-hud", "dialogBorderColor") || "#FFD700"}`;
+      heraldHud_dialog2Div.style.boxShadow = `0 0 10px ${game.settings.get("herald-hud", "dialogBoxShadowColor") ||"#CCAC00"}`;
       heraldHud_dialog2Div.classList.add(`${kategori}`);
     } else {
       heraldHud_dialog2Div.className = "heraldHud-dialog2";
@@ -2206,7 +2208,7 @@ async function heraldHud_confirmAddNpcsTarget(data) {
       ]);
     }
 
-    const uuid = journalEntry.uuid;
+    const uuid = partyJournal.uuid;
     await heraldHud_menuDetailSocket.executeAsGM("backupHeraldHudNpcs", uuid);
   }
 }

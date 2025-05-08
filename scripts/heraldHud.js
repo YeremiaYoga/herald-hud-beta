@@ -12,8 +12,9 @@ let heraldHud_displayChargeTracker = false;
 let heraldHud_displayInformationButton = false;
 let heraldHud_speedHudbarOff = false;
 let heraldHud_heraldHudScale = ``;
-let heraldHud_dialogBorderColor = ``;
-let heraldHud_dialogBoxShadowColor = ``;
+let heraldHud_dialogBorderColor = `#FFD700`;
+let heraldHud_dialogBoxShadowColor = `#CCAC00`;
+
 let heraldHud_overlayHudbarNameImage = "";
 let heraldHud_listOverlayHudbarFrame = [
   "basic_frame",
@@ -66,14 +67,14 @@ Hooks.once("ready", () => {
     "hudbarImageFrame"
   );
   heraldHud_heraldHudScale = game.settings.get("herald-hud", "heraldHudScale");
-  heraldHud_dialogBorderColor = game.settings.get(
-    "herald-hud",
-    "dialogBorderColor"
-  );
-  heraldHud_dialogBoxShadowColor = game.settings.get(
-    "herald-hud",
-    "dialogBoxShadowColor"
-  );
+  // heraldHud_dialogBorderColor = game.settings.get(
+  //   "herald-hud",
+  //   "dialogBorderColor"
+  // );
+  // heraldHud_dialogBoxShadowColor = game.settings.get(
+  //   "herald-hud",
+  //   "dialogBoxShadowColor"
+  // );
 });
 
 let heraldHud_gameVersion = ``;
@@ -3495,6 +3496,18 @@ async function heraldHud_getDataSpellsPrep() {
 async function heraldHud_openSettingHudDialog() {
   const user = game.user;
   let selectedActor = user.character;
+  const playerCharacters = game.actors.filter(
+    (actor) =>
+      actor.hasPlayerOwner && actor.isOwner && actor.type === "character"
+  );
+  let playerCharacterOptions = playerCharacters
+    .map((actor) => {
+      const isSelected = selectedActor?.id === actor.id ? "selected" : "";
+      return `<option value="${actor.id}" ${isSelected} style="background-color: #121212; color: white;">
+              ${actor.name}
+            </option>`;
+    })
+    .join("");
   let currentHudFrame =
     game.settings.get("herald-hud", "hudbarImageFrame") ?? "basic_frame";
   let hudFrameOptions = heraldHud_listOverlayHudbarFrame
@@ -3503,61 +3516,215 @@ async function heraldHud_openSettingHudDialog() {
         .split("_")
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
         .join(" ");
-      return `<option value="${frame}" ${
+      return `<option value="${frame}" style="background-color: #121212; color: white;" ${
         currentHudFrame === frame ? "selected" : ""
       }>${label}</option>`;
     })
     .join("");
+  // let dialogContent = `
+  //   <div style="display: flex; flex-direction: column; gap: 10px; padding-top:10px;padding-bottom:10px;">
+  //     <fieldset style="border-radius:5px; padding:10px;">
+  //       <legend>Player Configuration</legend>
+  //       <div style="display: flex; flex-direction: column; gap: 10px;">
+  //          <div style="display: flex;align-items: center;color:white;  justify-content: space-between; width: 100%;">
+  //           <label for="heraldHud-playerCharacterSelect" style="flex: 1; text-align: left;">Player Character:</label>
+  //           <select id="heraldHud-playerCharacterSelect" style="flex: 1;color: white !important;">
+  //             ${playerCharacterOptions}
+  //           </select>
+  //         </div>
+  //         <div style="display: flex;align-items: center; justify-content: space-between; width: 100%;">
+  //           <label for="heraldHud-playerColor" style="flex: 1; text-align: left;">Player Color:</label>
+  //           <input type="text" id="heraldHud-playerColor" value="${
+  //             game.user.color
+  //           }" style="flex: 1;color: white !important;">
+  //         </div>
+  //       </div>
+
+  //     </fieldset>
+
+  //     <fieldset style="border-radius:5px; padding:10px;">
+  //       <legend>Disable Features</legend>
+  //       <div style="display: flex; flex-direction: column; gap: 10px;">
+  //         <div style="display: flex; align-items: center; gap: 10px;">
+  //         <input type="checkbox" id="heraldHud-informationButtonToggle" ${
+  //           game.settings.get("herald-hud", "displayInformationButton")
+  //             ? "checked"
+  //             : ""
+  //         }>
+  //         <label for="heraldHud-informationButtonToggle">Disable Information Button</label>
+  //         </div>
+  //         <div style="display: flex; align-items: center; gap: 10px;">
+  //           <input type="checkbox" id="heraldHud-spellsTrackerToggle" ${
+  //             game.settings.get("herald-hud", "spellsTrackerOff")
+  //               ? "checked"
+  //               : ""
+  //           }>
+  //           <label for="heraldHud-spellsTrackerToggle">Disable Spell Slot Tracker Box</label>
+  //         </div>
+  //         <div style="display: flex; align-items: center; gap: 10px;">
+  //           <input type="checkbox" id="heraldHud-displayChargeTrackerToggle" ${
+  //             game.settings.get("herald-hud", "displayChargeTracker")
+  //               ? "checked"
+  //               : ""
+  //           }>
+  //           <label for="heraldHud-displayChargeTrackerToggle">Disable Charge Tracker</label>
+  //         </div>
+
+  //         <div style="display: flex; align-items: center; gap: 10px;">
+  //           <input type="checkbox" id="heraldHud-speedHudbarToggle" ${
+  //             game.settings.get("herald-hud", "speedHudbarOff") ? "checked" : ""
+  //           }>
+  //           <label for="heraldHud-speedHudbarToggle">Disable Speed HUD Bar</label>
+  //         </div>
+  //       </div>
+
+  //     </fieldset>
+  //     <fieldset style="border-radius:5px; padding:10px;">
+  //       <legend>Change Herald Hud</legend>
+  //       <div style="display: flex; flex-direction: column; gap: 10px;">
+  //         <div style="display: flex; align-items: center; gap: 10px;">
+  //         <input type="checkbox" id="heraldHud-statsAbbreviationsToggle" ${
+  //           game.settings.get("herald-hud", "statsAbbreviations")
+  //             ? "checked"
+  //             : ""
+  //         }>
+  //         <label for="heraldHud-statsAbbreviationsToggle">Abbreviations Skill</label>
+  //         </div>
+  //         <div style="display: flex; align-items: center; gap: 10px;">
+  //           <input type="checkbox" id="heraldHud-dockHudToggle" ${
+  //             game.settings.get("herald-hud", "dockHudToBottom")
+  //               ? "checked"
+  //               : ""
+  //           }>
+  //           <label for="heraldHud-dockHudToggle">Dock Herald's HUD to Bottom</label>
+  //         </div>
+  //         <div style="display: flex;align-items: center;color:white;  justify-content: space-between; width: 100%;">
+  //           <label for="heraldHud-hudFrameSelect"style="flex: 1; text-align: left;">HUD Bar Frame Style:</label>
+  //           <select id="heraldHud-hudFrameSelect" style="flex: 1;color: white !important;">
+  //             ${hudFrameOptions}
+  //           </select>
+  //         </div>
+  //         <div style="display: flex;align-items: center; justify-content: space-between; width: 100%;">
+  //           <label for="heraldHud-hudScaleInput" style="flex: 1; text-align: left;">HUD Scale (%):</label>
+  //           <input type="number" id="heraldHud-hudScaleInput" min="50" max="200" value="${
+  //             game.settings.get("herald-hud", "heraldHudScale") || "100"
+  //           }" style="flex: 1;color: white !important;">
+  //         </div>
+  //         <div style="display: flex;align-items: center; justify-content: space-between; width: 100%;">
+  //           <label for="heraldHud-borderColorInput" style="flex: 1; text-align: left;">Border Color:</label>
+  //           <input type="text" id="heraldHud-borderColorInput" value="${
+  //             game.settings.get("herald-hud", "dialogBorderColor") || "#FFD700"
+  //           }" style="flex: 1;color: white !important;">
+  //         </div>
+  //         <div style="display: flex;align-items: center; justify-content: space-between; width: 100%;">
+  //           <label for="heraldHud-shadowColorInput" style="flex: 1; text-align: left;">Border Glow:</label>
+  //           <input type="text" id="heraldHud-shadowColorInput" value="${
+  //             game.settings.get("herald-hud", "dialogBoxShadowColor") ||
+  //             "#CCAC00"
+  //           }" style="flex: 1;color: white !important;">
+  //         </div>
+  //       </div>
+  //     </fieldset>
+  //   </div>
+  // `;
+
   let dialogContent = `
-    <div style="display: flex; flex-direction: column; gap: 10px; padding-top:10px;padding-bottom:10px;">
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <input type="checkbox" id="heraldHud-statsAbbreviationsToggle" ${
-          game.settings.get("herald-hud", "statsAbbreviations") ? "checked" : ""
-        }>
-        <label for="heraldHud-statsAbbreviationsToggle">Abbreviations Skill</label>
+  <div style="display: flex; flex-direction: column; gap: 10px; padding-top:10px;padding-bottom:10px;">
+    <fieldset style=" padding:10px;">
+      <legend>Player Configuration</legend>
+      <div style="">
+         <div style="display: flex;align-items: center;color:white;  justify-content: space-between; width: 100%;">
+          <label for="heraldHud-playerCharacterSelect" >Player Character:</label>
+          <select id="heraldHud-playerCharacterSelect" style="color: white !important;">
+            
+          </select>
+        </div>
+        <div style="align-items: center; justify-content: space-between; width: 100%;">
+          <label for="heraldHud-playerColor" >Player Color:</label>
+          <input type="text" id="heraldHud-playerColor" value="" style="color: white !important;">
+        </div>
       </div>
-       <div style="display: flex; align-items: center; gap: 10px;">
+     
+    </fieldset>
+  
+    <fieldset style=" padding:10px;">
+      <legend>Disable Features</legend>
+      <div style="">
+        <div style="display: flex; align-items: center; gap: 10px;">
         <input type="checkbox" id="heraldHud-informationButtonToggle" ${
           game.settings.get("herald-hud", "displayInformationButton")
             ? "checked"
             : ""
         }>
         <label for="heraldHud-informationButtonToggle">Disable Information Button</label>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <input type="checkbox" id="heraldHud-spellsTrackerToggle" ${
+            game.settings.get("herald-hud", "spellsTrackerOff") ? "checked" : ""
+          }>
+          <label for="heraldHud-spellsTrackerToggle">Disable Spell Slot Tracker Box</label>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <input type="checkbox" id="heraldHud-displayChargeTrackerToggle" ${
+            game.settings.get("herald-hud", "displayChargeTracker")
+              ? "checked"
+              : ""
+          }>
+          <label for="heraldHud-displayChargeTrackerToggle">Disable Charge Tracker</label>
+        </div>
+      
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <input type="checkbox" id="heraldHud-speedHudbarToggle" ${
+            game.settings.get("herald-hud", "speedHudbarOff") ? "checked" : ""
+          }>
+          <label for="heraldHud-speedHudbarToggle">Disable Speed HUD Bar</label>
+        </div>
       </div>
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <input type="checkbox" id="heraldHud-spellsTrackerToggle" ${
-          game.settings.get("herald-hud", "spellsTrackerOff") ? "checked" : ""
+     
+    </fieldset>
+    <fieldset style=" padding:10px;">
+      <legend>Change Herald Hud</legend>
+      <div style="">
+        <div style="display: flex; align-items: center; gap: 10px;">
+        <input type="checkbox" id="heraldHud-statsAbbreviationsToggle" ${
+          game.settings.get("herald-hud", "statsAbbreviations") ? "checked" : ""
         }>
-        <label for="heraldHud-spellsTrackerToggle">Disable Spell Slot Tracker Box</label>
+        <label for="heraldHud-statsAbbreviationsToggle">Abbreviations Skill</label>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <input type="checkbox" id="heraldHud-dockHudToggle" ${
+            game.settings.get("herald-hud", "dockHudToBottom") ? "checked" : ""
+          }>
+          <label for="heraldHud-dockHudToggle">Dock Herald's HUD to Bottom</label>
+        </div>
+        <div style="display: flex;align-items: center;color:white;  justify-content: space-between; width: 100%;">
+          <label for="heraldHud-hudFrameSelect">HUD Bar Frame Style:</label>
+          <select id="heraldHud-hudFrameSelect" style="color: white !important;">
+            ${hudFrameOptions}
+          </select>
+        </div>
+        <div style="align-items: center; justify-content: space-between; width: 100%;">
+          <label for="heraldHud-hudScaleInput" >HUD Scale (%):</label>
+          <input type="number" id="heraldHud-hudScaleInput" min="50" max="200" value="${
+            game.settings.get("herald-hud", "heraldHudScale") || "100"
+          }" style="color: white !important;">
+        </div>
+        <div style="align-items: center; justify-content: space-between; width: 100%;">
+          <label for="heraldHud-borderColorInput" >Border Color:</label>
+          <input type="text" id="heraldHud-borderColorInput" value="${
+            game.settings.get("herald-hud", "dialogBorderColor") || "#FFD700"
+          }" style="color: white !important;">
+        </div>
+        <div style="align-items: center; justify-content: space-between; width: 100%;">
+          <label for="heraldHud-shadowColorInput" >Border Glow:</label>
+          <input type="text" id="heraldHud-shadowColorInput" value="${
+            game.settings.get("herald-hud", "dialogBoxShadowColor") || "#CCAC00"
+          }" style="color: white !important;">
+        </div>
       </div>
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <input type="checkbox" id="heraldHud-displayChargeTrackerToggle" ${
-          game.settings.get("herald-hud", "displayChargeTracker")
-            ? "checked"
-            : ""
-        }>
-        <label for="heraldHud-displayChargeTrackerToggle">Disable Charge Tracker</label>
-      </div>
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <input type="checkbox" id="heraldHud-dockHudToggle" ${
-          game.settings.get("herald-hud", "dockHudToBottom") ? "checked" : ""
-        }>
-        <label for="heraldHud-dockHudToggle">Dock Herald's HUD to Bottom</label>
-      </div>
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <input type="checkbox" id="heraldHud-speedHudbarToggle" ${
-          game.settings.get("herald-hud", "speedHudbarOff") ? "checked" : ""
-        }>
-        <label for="heraldHud-speedHudbarToggle">Disable Speed HUD Bar</label>
-      </div>
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <label for="heraldHud-hudFrameSelect">HUD Bar Frame Style:</label>
-        <select id="heraldHud-hudFrameSelect">
-           ${hudFrameOptions}
-        </select>
-      </div>
-    </div>
-  `;
+    </fieldset>
+  </div>
+`;
 
   new Dialog({
     title: "Herald HUD Settings",
@@ -3565,6 +3732,7 @@ async function heraldHud_openSettingHudDialog() {
     buttons: {
       save: {
         label: "Save",
+        style: "color: white;",
         callback: async (html) => {
           let spellTrackerCheckbox = html.find(
             "#heraldHud-spellsTrackerToggle"
@@ -3583,6 +3751,14 @@ async function heraldHud_openSettingHudDialog() {
             "#heraldHud-speedHudbarToggle"
           )[0];
           let hudFrameSelect = html.find("#heraldHud-hudFrameSelect")[0];
+          let borderColorInput = html.find("#heraldHud-borderColorInput")[0];
+          let boxShadowColorInput = html.find("#heraldHud-shadowColorInput")[0];
+          let hudScaleInput = html.find("#heraldHud-hudScaleInput")[0];
+
+          let playerCharacterSelect = html.find(
+            "#heraldHud-playerCharacterSelect"
+          )[0];
+          let playerColorInput = html.find("#heraldHud-playerColor")[0];
 
           heraldHud_spellsTrackerOff = spellTrackerCheckbox.checked;
           heraldHud_dockHudToBottom = dockHudCheckbox.checked;
@@ -3592,6 +3768,24 @@ async function heraldHud_openSettingHudDialog() {
             informationButtonCheckbox.checked;
           heraldHud_speedHudbarOff = speedHudbarCheckbox.checked;
           heraldHud_overlayHudbarNameImage = hudFrameSelect.value;
+
+          // heraldHud_dialogBorderColor = borderColorInput.value;
+          // heraldHud_dialogBoxShadowColor = boxShadowColorInput.value;
+          heraldHud_heraldHudScale = hudScaleInput.value;
+
+          const selectedPlayerCharacter = playerCharacterSelect.value;
+          const selectedPlayerColor = playerColorInput.value;
+
+          if (
+            selectedPlayerCharacter !== selectedActor.id ||
+            selectedPlayerColor !== user.color
+          ) {
+            await heraldHud_changeUserConfiguration(
+              selectedPlayerCharacter,
+              selectedPlayerColor
+            );
+          }
+
           await game.settings.set(
             "herald-hud",
             "statsAbbreviations",
@@ -3628,11 +3822,28 @@ async function heraldHud_openSettingHudDialog() {
             heraldHud_overlayHudbarNameImage
           );
 
+          // await game.settings.set(
+          //   "herald-hud",
+          //   "dialogBorderColor",
+          //   heraldHud_dialogBorderColor
+          // );
+          // await game.settings.set(
+          //   "herald-hud",
+          //   "dialogBoxShadowColor",
+          //   heraldHud_dialogBoxShadowColor
+          // );
+          await game.settings.set(
+            "herald-hud",
+            "heraldHudScale",
+            heraldHud_heraldHudScale
+          );
+
           heraldHud_settingHudToBottom();
           heraldHud_renderChargeTracker();
           heraldHud_renderActorInfo();
           heraldHud_renderOverlayHudbarFrame();
           heraldHud_viewHudbarWithoutSpeed();
+          await heraldHud_changeScaleHud();
         },
       },
       clearFavorites: {
@@ -3667,17 +3878,43 @@ async function heraldHud_openSettingHudDialog() {
     default: "save",
   }).render(true);
   Hooks.once("renderDialog", async (app) => {
-    // const dialogElement = app.element[0];
-    // const contentElement = dialogElement.querySelector(".window-content");
-    // if (contentElement) {
-    //   contentElement.style.backgroundColor = "black";
-    //   contentElement.style.color = "white";
-    //   contentElement.style.backgroundImage = "none";
-    //   contentElement.style.backgroundSize = "cover";
-    //   contentElement.style.backgroundRepeat = "no-repeat";
-    //   contentElement.style.backgroundPosition = "center";
-    // }
+    const dialogElement = app.element[0];
+
+    const contentElement = dialogElement.querySelector(".window-content");
+    if (contentElement) {
+      contentElement.style.backgroundColor = "rgba(0, 0, 0, 0.3)";
+      contentElement.style.color = "white";
+      contentElement.style.backgroundImage = "none";
+      contentElement.style.backgroundSize = "cover";
+      contentElement.style.backgroundRepeat = "no-repeat";
+      contentElement.style.backgroundPosition = "center";
+    }
+    const buttons = dialogElement.querySelectorAll(
+      ".dialog-buttons .dialog-button"
+    );
+
+    buttons.forEach((button) => {
+      button.style.color = "white";
+      button.style.border = "1px solid white";
+    });
   });
+}
+
+async function heraldHud_changeUserConfiguration(characterId, color) {
+  // const user = game.user;
+  // const actor = game.actors.get(characterId);
+  // if (actor) {
+  //   await user.update({ character: actor });
+  // }
+  // await user.update({ color: color });
+  // await heraldHud_renderHeraldHud();
+}
+
+async function heraldHud_changeScaleHud() {
+  // let heraldHud = document.getElementById("heraldHud");
+  // if (heraldHud) {
+  //   heraldHud.style.scale = heraldHud_heraldHudScale / 100;
+  // }
 }
 
 async function heraldHud_viewHudbarWithoutSpeed() {
@@ -6170,7 +6407,7 @@ function heraldHud_getSpellsSchoolIcon(schoolCode) {
 }
 
 // Hooks.on("updateItem", async (item, changes, options, userId) => {
-//   if (heraldHud_displayChargeTracker == true) {
+//   if (heraldHud_displayChargeTracker == false) {
 //     await heraldHud_getActorData();
 //     await heraldHud_renderChargeTracker();
 //   }

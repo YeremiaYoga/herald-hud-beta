@@ -92,7 +92,7 @@ Hooks.once("init", () => {
     scope: "client",
     config: true,
     type: String,
-    default: "gold",
+    default: "#FFD700",
   });
   game.settings.register("herald-hud", "dialogBoxShadowColor", {
     name: "Dialog BoxShadow Color",
@@ -100,6 +100,8 @@ Hooks.once("init", () => {
     scope: "client",
     config: true,
     type: String,
-    default: "rgba(255, 215, 0, 0.5)",
+    default: "#CCAC00",
   });
+
+
 });
