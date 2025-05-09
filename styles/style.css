@@ -1025,7 +1025,6 @@
 }
 
 .heraldHud-settingButton {
-    color: rgb(61, 61, 61);
     font-size: 22px;
 }
 
@@ -3592,4 +3591,18 @@
     opacity: 1;
     visibility: visible;
     transform: translateX(-50%) translateY(-2px);
+}
+
+
+
+
+
+/* SETTING */
+
+#heraldHud-playerColorPicker input[type="text"],
+#heraldHud-borderColorPicker input[type="text"],
+#heraldHud-shadowColorPicker input[type="text"],
+#heraldHud-settingButtonColorPicker input[type="text"],
+#heraldHud-informationButtonColorPicker input[type="text"] {
+    color: white;
 }

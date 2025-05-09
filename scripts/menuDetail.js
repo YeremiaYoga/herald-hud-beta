@@ -50,6 +50,10 @@ Hooks.once("socketlib.ready", () => {
       }
     }
   );
+  heraldHud_menuDetailSocket.register("createQuestFolder", async () => {
+    await gmCreateQuestFolder();
+  });
+
   heraldHud_menuDetailSocket.register("createNpcsFolder", async (user) => {
     await heraldHud_gmCreateNpcsFolder(user);
     await bc.heraldHud_createCompediumNpcsFolder();
@@ -65,7 +69,7 @@ async function heraldHud_renderListMenu() {
     `biography`,
     `personal_notes`,
     `party_journal`,
-    `mission`,
+    `quest`,
     `npcs`,
   ];
   let listMenu = ``;
@@ -132,7 +136,8 @@ async function heraldHud_showDialogSubMenuDetail(kategori) {
     await heraldHud_getViewPersonalNotes();
   } else if (kategori == `party_journal`) {
     await heraldHud_getViewPartyJournal();
-  } else if (kategori == `mission`) {
+  } else if (kategori == `quest`) {
+    await heraldHud_getViewQuest();
   } else if (kategori == `npcs`) {
     await heraldHud_getViewNpcs();
   } else if (kategori == `npcs_target`) {
@@ -146,8 +151,12 @@ async function heraldHud_showDialog2MenuDetail(kategori) {
   if (heraldHud_dialog2Div) {
     if (heraldHud_dialog2Div.style.display == "none") {
       heraldHud_dialog2Div.style.display = "block";
-      heraldHud_dialog2Div.style.border = `3px solid ${game.settings.get("herald-hud", "dialogBorderColor") || "#FFD700"}`;
-      heraldHud_dialog2Div.style.boxShadow = `0 0 10px ${game.settings.get("herald-hud", "dialogBoxShadowColor") ||"#CCAC00"}`;
+      heraldHud_dialog2Div.style.border = `3px solid ${
+        game.settings.get("herald-hud", "dialogBorderColor") || "#FFD700"
+      }`;
+      heraldHud_dialog2Div.style.boxShadow = `0 0 10px ${
+        game.settings.get("herald-hud", "dialogBoxShadowColor") || "#CCAC00"
+      }`;
       heraldHud_dialog2Div.classList.add(`${kategori}`);
     } else {
       heraldHud_dialog2Div.className = "heraldHud-dialog2";
@@ -656,11 +665,15 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
             <div class="heraldHud-personalNotesPageName">- ${page.name}</div>
           </div>  
           <div class="heraldHud-arrowPersonalNotesContainer">
+           
             <div class="heraldHud-arrowPagePersonalNotes" data-id="${page.id}" data-pageNumber="${pageNumber}" data-journal-id="${journal.id}" data-type="up">
               <i class="fa fa-arrow-up" ></i>
             </div>
             <div class="heraldHud-arrowPagePersonalNotes" data-id="${page.id}" data-pageNumber="${pageNumber}" data-journal-id="${journal.id}" data-type="down">
                 <i class="fa fa-arrow-down"></i>
+            </div>
+            <div class="heraldHud-deletePagePersonalNotes" data-pageId="${page.id}"  data-journalId="${journal.id}" style="color:red;">
+              <i class="fa-solid fa-trash"></i>
             </div>
           </div>
         </div>
@@ -1008,6 +1021,19 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
         }
       });
     });
+
+    let deletePage = document.querySelectorAll(
+      ".heraldHud-deletePagePersonalNotes"
+    );
+    deletePage.forEach((page) => {
+      page.addEventListener("click", async function (event) {
+        const journalId = event.currentTarget.getAttribute("data-journalId");
+        const pageId = event.currentTarget.getAttribute("data-pageId");
+
+        await heraldHud_deletePages("personal notes", journalId, pageId);
+
+      });
+    });
   }
 }
 
@@ -1150,7 +1176,7 @@ async function heraldHud_gmCreatePersonalNotesFolder(user) {
 }
 
 /* ------------------------------------------------------------------------------
-   DIALOG PARTY NOTES
+   DIALOG PARTY JOURNAL
 ------------------------------------------------------------------------------- */
 
 async function heraldHud_gmCreatePartyJournalFolder(user) {
@@ -1467,6 +1493,9 @@ async function heraldHud_renderListPartyJournalMiddleContainer() {
               <div class="heraldHud-arrowPagePartyJournal" data-id="${page.id}" data-pageNumber="${pageNumber}" data-journal-id="${journal.id}" data-type="down">
                   <i class="fa fa-arrow-down"></i>
               </div>
+              <div class="heraldHud-deletePagePartyJournal" data-pageId="${page.id}"  data-journalId="${journal.id}" style="color:red;">
+                <i class="fa-solid fa-trash"></i>
+              </div>
             </div>
           </div>
         `;
@@ -1734,6 +1763,19 @@ async function heraldHud_renderListPartyJournalMiddleContainer() {
         }
       });
     });
+
+    let deletePage = document.querySelectorAll(
+      ".heraldHud-deletePagePartyJournal"
+    );
+    deletePage.forEach((page) => {
+      page.addEventListener("click", async function (event) {
+        const journalId = event.currentTarget.getAttribute("data-journalId");
+        const pageId = event.currentTarget.getAttribute("data-pageId");
+
+        await heraldHud_deletePages("party journal", journalId, pageId);
+
+      });
+    });
   }
 }
 
@@ -1829,6 +1871,162 @@ async function heraldHud_addPagePartyJournal(journalId) {
 }
 
 /* ------------------------------------------------------------------------------
+   DIALOG MISSION
+------------------------------------------------------------------------------- */
+
+async function gmCreateQuestFolder() {
+  const folders = game.folders.filter((f) => f.type === "JournalEntry");
+  let heraldCoreFolder = "";
+  let partyFolder = "";
+  let heraldHudFolder = "";
+  let questFolder = "";
+  for (let folder of folders) {
+    if (folder.name == "Herald Core") {
+      heraldCoreFolder = folder;
+    }
+
+    if (folder.name == "Party" && folder.folder.id == heraldCoreFolder.id) {
+      partyFolder = folder;
+    }
+
+    if (folder.name == "Herald Hud") {
+      heraldHudFolder = folder;
+    }
+
+    if (folder.name == "Quest" && folder.folder.id == heraldHudFolder.id) {
+      questFolder = folder;
+    }
+  }
+  if (!heraldHudFolder) {
+    heraldHudFolder = await Folder.create({
+      name: "Herald Hud",
+      type: "JournalEntry",
+    });
+  }
+  if (!questFolder) {
+    questFolder = await Folder.create({
+      name: "Quest",
+      type: "JournalEntry",
+      folder: heraldHudFolder.id,
+    });
+  }
+  const partyJournals = game.journal.filter(
+    (j) => j.folder?.id === partyFolder.id
+  );
+  for (let party of partyJournals) {
+    let alreadyParty = false;
+    for (let folder of folders) {
+      if (folder.name == party.name && folder.folder?.id == questFolder.id) {
+        alreadyParty = true;
+        break;
+      }
+    }
+
+    let createdFolder;
+    if (!alreadyParty) {
+      createdFolder = await Folder.create({
+        name: party.name,
+        type: "JournalEntry",
+        folder: questFolder.id,
+      });
+    } else {
+      createdFolder = folders.find(
+        (f) => f.name === party.name && f.folder?.id === questFolder.id
+      );
+    }
+    const subfolderNames = [
+      "Main Quest",
+      "Side Quest",
+      "Players Quest",
+      "Characters Quest",
+    ];
+    for (let name of subfolderNames) {
+      const exists = game.folders.find(
+        (f) =>
+          f.name === name &&
+          f.folder?.id === createdFolder.id &&
+          f.type === "JournalEntry"
+      );
+      if (!exists) {
+        await Folder.create({
+          name,
+          type: "JournalEntry",
+          folder: createdFolder.id,
+        });
+      }
+    }
+  }
+}
+
+async function heraldHud_getViewQuest() {
+  let heraldHud_dialog2Div = document.getElementById("heraldHud-dialog2");
+  heraldHud_menuDetailSocket.executeAsGM("createQuestFolder");
+
+
+  const typeQuest = [
+    { name: "Main Quest", color: "red" },
+    { name: "Side Quest", color: "orange" },
+    { name: "Players Quest", color: "green" },
+    { name: "Characters Quest", color: "blue" },
+  ];
+  let listTypeQuest = "";
+  for(let quest of typeQuest){
+    listTypeQuest+=`
+    <div class="heraldHud-typeQuestContainer">
+      <div class="heraldHud-typeQuest" style="background-color: ${quest.color};"></div>
+    </div>
+    `;
+  }
+  if (heraldHud_dialog2Div) {
+    heraldHud_dialog2Div.innerHTML = `
+    <div id="heraldHud-dialogQuestContainer" class="heraldHud-dialogQuestContainer">
+      <div id="heraldHud-questTopContiner" class="heraldHud-questTopContiner">
+       
+        ${listTypeQuest}
+      </div>
+      <div id="heraldHud-questMiddleContainer" class="heraldHud-questMiddleContainer">
+        <div id="heraldHud-questMiddleLeftContainer" class="heraldHud-questMiddleLeftContainer"></div>
+        <div id="heraldHud-questMiddleRightContainer" class="heraldHud-questMiddleRightContainer"></div>
+      </div>
+      <div id="heraldHud-questBottomContainer" class="heraldHud-questBottomContainer"></div>
+    </div>
+  `;
+  }
+  await heraldHud_renderQuestMiddleLeftContainer();
+  await heraldHud_renderQuestMiddleRightContainer();
+}
+
+async function heraldHud_renderQuestMiddleLeftContainer() {
+  const user = game.user;
+  const selectedActor = user.character;
+  let dialogMiddleLeft = document.getElementById(
+    "heraldHud-questMiddleLeftContainer"
+  );
+
+  if (dialogMiddleLeft) {
+    dialogMiddleLeft.innerHTML = `
+       <div id="heraldHud-questListContainer" class="heraldHud-questListContainer"></div>
+    
+    `;
+  }
+}
+
+async function heraldHud_renderQuestMiddleRightContainer() {
+  const user = game.user;
+  const selectedActor = user.character;
+  let dialogMiddleRight = document.getElementById(
+    "heraldHud-questMiddleRightContainer"
+  );
+
+  if (dialogMiddleRight) {
+    dialogMiddleRight.innerHTML = `
+    <div id="heraldHud-questDetailContainer" class="heraldHud-questDetailContainer"></div>
+ 
+ `;
+  }
+}
+
+/* ------------------------------------------------------------------------------
    DIALOG NPCS TARGET
 ------------------------------------------------------------------------------- */
 
@@ -1904,7 +2102,7 @@ async function heraldHud_gmCreateNpcsFolder(user) {
 // 1 = Friendly
 // -1 = Hostile
 // -2 = Secret
-let arrNpcdisposition = [1, 0];
+let arrNpcdisposition = [0, 1, -1, -2];
 async function heraldHud_showDialogNpcsTarget() {
   const user = game.user;
   const selectedActor = user.character;
@@ -1922,7 +2120,7 @@ async function heraldHud_showDialogNpcsTarget() {
   const tokenDocument = targetedToken.document;
 
   if (!arrNpcdisposition.includes(tokenDocument.disposition)) {
-    ui.notifications.warn("Npc Not Friendly");
+    ui.notifications.warn("Npc Not Available");
     return;
   }
 
@@ -2214,7 +2412,7 @@ async function heraldHud_confirmAddNpcsTarget(data) {
 }
 
 /* ------------------------------------------------------------------------------
-   DIALOG NPCS TARGET
+   DIALOG NPCS 
 ------------------------------------------------------------------------------- */
 
 async function heraldHud_getViewNpcs() {
@@ -2314,7 +2512,7 @@ async function heraldHud_renderNpcsMiddleContainer() {
         <div id="heraldHud-npcsPartyContainer" class="heraldHud-npcsPartyContainer" data-journalId="${npc.journalId}" data-pageId="${npc.pageId}">
             <div id="heraldHud-npcsPartyLeft" class="heraldHud-npcsPartyLeft">
                 <div class="heraldHud-npcsPartyImageContainer">
-                  <img src="${npc.img}" alt="" class="heraldHud-npcsPartyImageView" />
+                  <img src="${npc.fullImg}" alt="" class="heraldHud-npcsPartyImageView" />
                   <div class="heraldHud-npcsPartyFavoriteButton" data-id="${npc.folderId}|${npc.journalId}|${npc.pageId}" data-type="isFavorited" style="color:gold;">
                     <i class="fa-solid fa-star"></i>
                   </div>
@@ -2355,7 +2553,7 @@ async function heraldHud_renderNpcsMiddleContainer() {
       <div id="heraldHud-npcsPartyContainer" class="heraldHud-npcsPartyContainer" data-journalId="${npc.journalId}" data-pageId="${npc.pageId}">
           <div id="heraldHud-npcsPartyLeft" class="heraldHud-npcsPartyLeft">
               <div class="heraldHud-npcsPartyImageContainer">
-                <img src="${npc.img}" alt="" class="heraldHud-npcsPartyImageView" />
+                <img src="${npc.fullImg}" alt="" class="heraldHud-npcsPartyImageView" />
                 <div class="heraldHud-npcsPartyFavoriteButton" data-id="${npc.folderId}|${npc.journalId}|${npc.pageId}" data-type="notFavorited" style="color:rgb(175, 175, 175);">
                   <i class="fa-solid fa-star"></i>
                 </div>
@@ -2534,5 +2732,47 @@ Hooks.on("updateJournalEntryPage", async (page, changes, options, userId) => {
   await heraldHud_renderListPersonalNotesMiddleContainer();
   await heraldHud_renderNpcsMiddleContainer();
 });
+
+// ?????????????????????????????????????????????????????????????
+
+async function heraldHud_deletePages(type, journalId, pageId) {
+  const confirmationDialog = new Dialog({
+    title: "Confirm Delete Page",
+    content: "<p>Are you sure you want to delete this Page?</p>",
+    buttons: {
+      confirm: {
+        label: "Delete",
+        callback: async () => {
+          try {
+            const journal = game.journal.get(journalId);
+            if (journal) {
+              const page = journal.pages.get(pageId);
+              if (page) {
+                await page.delete();
+                if (type == "personal notes") {
+                  await heraldHud_renderListPersonalNotesMiddleContainer();
+                } else if (type == "party journal") {
+                  await heraldHud_renderListPartyJournalMiddleContainer();
+                } else if (type == "npcs") {
+                }
+              } else {
+                ui.notifications.error("Page not found.");
+              }
+            } else {
+              ui.notifications.error("Journal not found.");
+            }
+          } catch (error) {}
+        },
+      },
+      cancel: {
+        label: "Cancel",
+        callback: () => {},
+      },
+    },
+    defaultButton: "cancel",
+  });
+
+  confirmationDialog.render(true);
+}
 
 export { heraldHud_renderListMenu };

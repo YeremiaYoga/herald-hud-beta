@@ -14,6 +14,8 @@ let heraldHud_speedHudbarOff = false;
 let heraldHud_heraldHudScale = ``;
 let heraldHud_dialogBorderColor = ``;
 let heraldHud_dialogBoxShadowColor = ``;
+let heraldHud_settingButtonColor = "";
+let heraldHud_informationButtonColor = "";
 
 let heraldHud_overlayHudbarNameImage = "";
 let heraldHud_listOverlayHudbarFrame = [
@@ -74,6 +76,14 @@ Hooks.once("ready", () => {
   heraldHud_dialogBoxShadowColor = game.settings.get(
     "herald-hud",
     "dialogBoxShadowColor"
+  );
+  heraldHud_settingButtonColor = game.settings.get(
+    "herald-hud",
+    "settingButtonColor"
+  );
+  heraldHud_informationButtonColor = game.settings.get(
+    "herald-hud",
+    "informationButtonColor"
   );
 });
 
@@ -147,6 +157,8 @@ let heraldHud_listChargeTracker = [
   "Sorcerous Restoration",
   "War Priest",
   "Knowledge from a Past Life",
+  "Magical Cunning",
+  "Magic Cunning"
 ];
 
 Hooks.on("ready", () => {
@@ -190,6 +202,7 @@ async function heraldHud_renderHeraldHud() {
     await heraldHud_renderActorInfo();
     await heraldHud_renderOverlayHudbarFrame();
     await heraldHud_viewHudbarWithoutSpeed();
+    await heraldHud_changeColorInHud();
   }, 500);
 }
 
@@ -3533,10 +3546,13 @@ async function heraldHud_openSettingHudDialog() {
             </select>
           </div>
           <div style="display: flex;align-items: center; justify-content: space-between; width: 100%;">
-            <label for="heraldHud-playerColor" style="flex: 1; text-align: left;">Player Color:</label>
-            <input type="text" id="heraldHud-playerColor" value="${
+            <label for="heraldHud-playerColorPicker" style="flex: 1; text-align: left;">Player Color:</label>
+            <color-picker name="heraldHud-playerColorPicker" value="${
               game.user.color
-            }" style="flex: 1;color: white !important;">
+            }" id="heraldHud-playerColorPicker" >
+              <input type="text" placeholder="" >
+              <input type="color">
+            </color-picker>
           </div>
         </div>
 
@@ -3610,18 +3626,43 @@ async function heraldHud_openSettingHudDialog() {
               game.settings.get("herald-hud", "heraldHudScale") || "100"
             }" style="flex: 1;color: white !important;">
           </div>
-          <div style="display: flex;align-items: center; justify-content: space-between; width: 100%;">
-            <label for="heraldHud-borderColorInput" style="flex: 1; text-align: left;">Border Color:</label>
-            <input type="text" id="heraldHud-borderColorInput" value="${
+          <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+            <label for="heraldHud-borderColorPicker" style="flex: 1; text-align: left;">Border Color:</label>
+            <color-picker id="heraldHud-borderColorPicker" name="heraldHud-borderColorPicker" value="${
               game.settings.get("herald-hud", "dialogBorderColor") || "#FFD700"
-            }" style="flex: 1;color: white !important;">
+            }" style="flex: 1;">
+              <input type="text"  >
+              <input type="color">
+            </color-picker>
           </div>
-          <div style="display: flex;align-items: center; justify-content: space-between; width: 100%;">
-            <label for="heraldHud-shadowColorInput" style="flex: 1; text-align: left;">Border Glow:</label>
-            <input type="text" id="heraldHud-shadowColorInput" value="${
+          <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+            <label for="heraldHud-shadowColorPicker" style="flex: 1; text-align: left;">Border Glow:</label>
+            <color-picker id="heraldHud-shadowColorPicker" name="heraldHud-shadowColorPicker" value="${
               game.settings.get("herald-hud", "dialogBoxShadowColor") ||
               "#CCAC00"
-            }" style="flex: 1;color: white !important;">
+            }" style="flex: 1;">
+              <input type="text"  >
+              <input type="color">
+            </color-picker>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+            <label for="heraldHud-settingButtonColorPicker" style="flex: 1; text-align: left;">Setting Button Color:</label>
+            <color-picker id="heraldHud-settingButtonColorPicker" name="heraldHud-settingButtonColorPicker" value="${
+              game.settings.get("herald-hud", "settingButtonColor") || "#FFFFFF"
+            }" style="flex: 1;">
+              <input type="text"  >
+              <input type="color">
+            </color-picker>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+            <label for="heraldHud-informationButtonColorPicker" style="flex: 1; text-align: left;">Information Button Color:</label>
+            <color-picker id="heraldHud-informationButtonColorPicker" name="heraldHud-informationButtonColorPicker" value="${
+              game.settings.get("herald-hud", "informationButtonColor") ||
+              "#FFFFFF"
+            }" style="flex: 1;">
+              <input type="text"  >
+              <input type="color">
+            </color-picker>
           </div>
         </div>
       </fieldset>
@@ -3636,12 +3677,13 @@ async function heraldHud_openSettingHudDialog() {
         label: "Save",
         style: "color: white;",
         callback: async (html) => {
+          let playerCharacterSelect = html.find(
+            "#heraldHud-playerCharacterSelect"
+          )[0];
+          let playerColorPicker = html.find("#heraldHud-playerColorPicker")[0];
+
           let spellTrackerCheckbox = html.find(
             "#heraldHud-spellsTrackerToggle"
-          )[0];
-          let dockHudCheckbox = html.find("#heraldHud-dockHudToggle")[0];
-          let statsAbbreviationsCheckbox = html.find(
-            "#heraldHud-statsAbbreviationsToggle"
           )[0];
           let displayChargeTrackerCheckbox = html.find(
             "#heraldHud-displayChargeTrackerToggle"
@@ -3652,31 +3694,26 @@ async function heraldHud_openSettingHudDialog() {
           let speedHudbarCheckbox = html.find(
             "#heraldHud-speedHudbarToggle"
           )[0];
-          let hudFrameSelect = html.find("#heraldHud-hudFrameSelect")[0];
-          let borderColorInput = html.find("#heraldHud-borderColorInput")[0];
-          let boxShadowColorInput = html.find("#heraldHud-shadowColorInput")[0];
-          let hudScaleInput = html.find("#heraldHud-hudScaleInput")[0];
-
-          let playerCharacterSelect = html.find(
-            "#heraldHud-playerCharacterSelect"
+          let statsAbbreviationsCheckbox = html.find(
+            "#heraldHud-statsAbbreviationsToggle"
           )[0];
-          let playerColorInput = html.find("#heraldHud-playerColor")[0];
 
-          heraldHud_spellsTrackerOff = spellTrackerCheckbox.checked;
-          heraldHud_dockHudToBottom = dockHudCheckbox.checked;
-          heraldHud_statsAbbreviations = statsAbbreviationsCheckbox.checked;
-          heraldHud_displayChargeTracker = displayChargeTrackerCheckbox.checked;
-          heraldHud_displayInformationButton =
-            informationButtonCheckbox.checked;
-          heraldHud_speedHudbarOff = speedHudbarCheckbox.checked;
-          heraldHud_overlayHudbarNameImage = hudFrameSelect.value;
+          let dockHudCheckbox = html.find("#heraldHud-dockHudToggle")[0];
+          let hudFrameSelect = html.find("#heraldHud-hudFrameSelect")[0];
+          let hudScaleInput = html.find("#heraldHud-hudScaleInput")[0];
+          let borderColorPicker = html.find("#heraldHud-borderColorPicker")[0];
+          let boxShadowColorPicker = html.find(
+            "#heraldHud-shadowColorPicker"
+          )[0];
+          let settingButtonColorPicker = html.find(
+            "#heraldHud-settingButtonColorPicker"
+          )[0];
+          let informationButtonColorPicker = html.find(
+            "#heraldHud-informationButtonColorPicker"
+          )[0];
 
-          heraldHud_dialogBorderColor = borderColorInput.value;
-          heraldHud_dialogBoxShadowColor = boxShadowColorInput.value;
-          heraldHud_heraldHudScale = hudScaleInput.value;
-
-          const selectedPlayerCharacter = playerCharacterSelect.value;
-          const selectedPlayerColor = playerColorInput.value;
+          let selectedPlayerCharacter = playerCharacterSelect.value;
+          let selectedPlayerColor = playerColorPicker.value;
 
           if (
             selectedPlayerCharacter !== selectedActor.id ||
@@ -3687,6 +3724,22 @@ async function heraldHud_openSettingHudDialog() {
               selectedPlayerColor
             );
           }
+
+          heraldHud_spellsTrackerOff = spellTrackerCheckbox.checked;
+          heraldHud_dockHudToBottom = dockHudCheckbox.checked;
+          heraldHud_statsAbbreviations = statsAbbreviationsCheckbox.checked;
+          heraldHud_displayChargeTracker = displayChargeTrackerCheckbox.checked;
+          heraldHud_displayInformationButton =
+            informationButtonCheckbox.checked;
+          heraldHud_speedHudbarOff = speedHudbarCheckbox.checked;
+          heraldHud_overlayHudbarNameImage = hudFrameSelect.value;
+
+          heraldHud_dialogBorderColor = borderColorPicker.value;
+          heraldHud_dialogBoxShadowColor = boxShadowColorPicker.value;
+          heraldHud_heraldHudScale = hudScaleInput.value;
+
+          heraldHud_settingButtonColor = settingButtonColorPicker.value;
+          heraldHud_informationButtonColor = informationButtonColorPicker.value;
 
           await game.settings.set(
             "herald-hud",
@@ -3740,12 +3793,24 @@ async function heraldHud_openSettingHudDialog() {
             heraldHud_heraldHudScale
           );
 
+          await game.settings.set(
+            "herald-hud",
+            "settingButtonColor",
+            heraldHud_settingButtonColor
+          );
+          await game.settings.set(
+            "herald-hud",
+            "informationButtonColor",
+            heraldHud_informationButtonColor
+          );
+
           heraldHud_settingHudToBottom();
           heraldHud_renderChargeTracker();
           heraldHud_renderActorInfo();
           heraldHud_renderOverlayHudbarFrame();
           heraldHud_viewHudbarWithoutSpeed();
           await heraldHud_changeScaleHud();
+          await heraldHud_changeColorInHud();
         },
       },
       clearFavorites: {
@@ -3778,8 +3843,18 @@ async function heraldHud_openSettingHudDialog() {
       },
     },
     default: "save",
+    close: async (html) => {
+      await heraldHud_renderOverlayHudbarFrame();
+    },
   }).render(true);
   Hooks.once("renderDialog", async (app) => {
+    document
+      .getElementById("heraldHud-hudFrameSelect")
+      .addEventListener("change", async (event) => {
+        const selectedValue = event.target.value;
+        await heraldHud_previewHudFrame(selectedValue);
+      });
+
     const dialogElement = app.element[0];
 
     const contentElement = dialogElement.querySelector(".window-content");
@@ -3801,6 +3876,26 @@ async function heraldHud_openSettingHudDialog() {
     });
   });
 }
+async function heraldHud_previewHudFrame(frame) {
+  let overlayDiv = document.getElementById(
+    "heraldHud-hudOverlayImageContainer"
+  );
+  let imageName = frame;
+  if (overlayDiv) {
+    let suffix = heraldHud_speedHudbarOff ? "_1_line" : "_2_line";
+    let urlImg = heraldHud_speedHudbarOff
+      ? "/modules/herald-hud-beta/assets/hudbar-frame/1-line/"
+      : "/modules/herald-hud-beta/assets/hudbar-frame/2-line/";
+    let imageFileName = `${imageName}${suffix}`;
+
+    overlayDiv.innerHTML = `
+        <img
+         src="${urlImg}${imageFileName}.png"
+         alt=""
+         class="heraldHud-hudOverlayImage"/>
+       `;
+  }
+}
 
 async function heraldHud_changeUserConfiguration(characterId, color) {
   const user = game.user;
@@ -3810,6 +3905,17 @@ async function heraldHud_changeUserConfiguration(characterId, color) {
   }
   await user.update({ color: color });
   await heraldHud_renderHeraldHud();
+}
+
+async function heraldHud_changeColorInHud() {
+  let settingButton = document.getElementById("heraldHud-settingButton");
+  let informationButton = document.getElementById("heraldHud-infoButton");
+  if (settingButton) {
+    settingButton.style.color = heraldHud_settingButtonColor;
+  }
+  if (informationButton) {
+    informationButton.style.backgroundColor = heraldHud_informationButtonColor;
+  }
 }
 
 async function heraldHud_changeScaleHud() {

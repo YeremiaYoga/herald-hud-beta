@@ -111,6 +111,7 @@ async function heraldHud_parsePageHTMLContent(htmlContent) {
   const doc = parser.parseFromString(htmlContent, "text/html");
 
   const data = {
+    fullImg: "",
     img: "",
     name: "",
     gender: "",
@@ -124,6 +125,7 @@ async function heraldHud_parsePageHTMLContent(htmlContent) {
   if (imgElement) {
     const src = imgElement.src;
     const match = src.match(/(systems\/.*)/);
+    data.fullImg = match ? src : "";
     data.img = match ? match[1] : "";
   }
 
@@ -238,6 +240,8 @@ function heraldHud_getSpellsPrepSchoolIcon(schoolCode) {
     </div>
   `;
 }
+
+
 
 export {
   heraldHud_getPlayerPartyList,

@@ -1,8 +1,10 @@
 async function heraldHud_createCompendiumPersonalNotesFolder(user) {
+ 
   const pack = game.packs.get("herald-hud-beta.herald-hud-backup");
+  // const pack = game.packs.get("world.herald-hud-backup");
   if (!pack) {
     return ui.notifications.error(
-      `Compendium "herald-hud.herald-hud-backup" not found.`
+      `Compendium "herald-hud-backup" not found.`
     );
   }
   let playerFolder = "";
@@ -44,9 +46,10 @@ async function heraldHud_createCompendiumPersonalNotesFolder(user) {
 async function heraldHud_backupJournalPersonalNotes(user, journalEntry) {
   console.log(journalEntry);
   const pack = game.packs.get("herald-hud-beta.herald-hud-backup");
+    // const pack = game.packs.get("world.herald-hud-backup");
   if (!pack) {
     return ui.notifications.error(
-      `Compendium "herald-hud.herald-hud-backup" not found.`
+      `Compendium "herald-hud-backup" not found.`
     );
   }
 
@@ -152,10 +155,11 @@ async function heraldHud_backupJournalPersonalNotes(user, journalEntry) {
 
 async function heraldHud_createCompediumPartyJournalFolder() {
   const pack = game.packs.get("herald-hud-beta.herald-hud-backup");
+    // const pack = game.packs.get("world.herald-hud-backup");
   const journalFolders = game.folders.filter((f) => f.type === "JournalEntry");
   if (!pack) {
     return ui.notifications.error(
-      `Compendium "herald-hud.herald-hud-backup" not found.`
+      `Compendium "herald-hud-backup" not found.`
     );
   }
   let heraldHudFolder = "";
@@ -211,10 +215,11 @@ async function heraldHud_createCompediumPartyJournalFolder() {
 
 async function heraldHud_backupJournalPartyJournal(journalEntry) {
   const pack = game.packs.get("herald-hud-beta.herald-hud-backup");
+    // const pack = game.packs.get("world.herald-hud-backup");
   const journalFolders = game.folders.filter((f) => f.type === "JournalEntry");
   if (!pack) {
     return ui.notifications.error(
-      `Compendium "herald-hud.herald-hud-backup" not found.`
+      `Compendium "herald-hud-backup" not found.`
     );
   }
 
@@ -329,10 +334,11 @@ async function heraldHud_backupJournalPartyJournal(journalEntry) {
 
 async function heraldHud_createCompediumNpcsFolder() {
   const pack = game.packs.get("herald-hud-beta.herald-hud-backup");
+    // const pack = game.packs.get("world.herald-hud-backup");
   const journalFolders = game.folders.filter((f) => f.type === "JournalEntry");
   if (!pack) {
     return ui.notifications.error(
-      `Compendium "herald-hud.herald-hud-backup" not found.`
+      `Compendium "herald-hud-backup" not found.`
     );
   }
   let heraldHudFolder = "";
@@ -391,10 +397,11 @@ async function heraldHud_backupJournalNpcs(uuid) {
   const journalEntry = await fromUuid(uuid);
 
   const pack = await game.packs.get("herald-hud-beta.herald-hud-backup");
+    // const pack = game.packs.get("world.herald-hud-backup");
   const journalFolders = game.folders.filter((f) => f.type === "JournalEntry");
   if (!pack) {
     return ui.notifications.error(
-      `Compendium "herald-hud.herald-hud-backup" not found.`
+      `Compendium "herald-hud-backup" not found.`
     );
   }
   let npcsCompendium = "";

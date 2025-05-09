@@ -103,5 +103,23 @@ Hooks.once("init", () => {
     default: "#CCAC00",
   });
 
+  game.settings.register("herald-hud", "settingButtonColor", {
+    name: "Setting Button Color",
+    hint: "Setting Button Color",
+    scope: "client",
+    config: true,
+    type: String,
+    default: "#ffffff",
+  });
+  game.settings.register("herald-hud", "informationButtonColor", {
+    name: "Information Button Color",
+    hint: "Information Button Color",
+    scope: "client",
+    config: true,
+    type: String,
+    default: "#ffffff",
+  });
+
+
 
 });
