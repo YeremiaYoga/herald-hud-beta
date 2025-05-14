@@ -126,7 +126,7 @@ async function heraldHud_parsePageHTMLContent(htmlContent) {
   if (imgElement) {
     const src = imgElement.src;
     const match = src.match(/(systems\/.*)/);
-    data.fullImg = match ? src : "";
+    data.fullImg = src;
     data.img = match ? match[1] : "";
   }
 

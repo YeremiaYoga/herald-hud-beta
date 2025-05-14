@@ -158,7 +158,7 @@ let heraldHud_listChargeTracker = [
   "War Priest",
   "Knowledge from a Past Life",
   "Magical Cunning",
-  "Magic Cunning"
+  "Magic Cunning",
 ];
 
 Hooks.on("ready", () => {
@@ -2848,6 +2848,27 @@ async function heraldHud_getDataSpellsList() {
         let displayRange = spellsRange ? `${spellsRange} ${target}`.trim() : "";
 
         let htmlDescription = item.system.description.value;
+        let arrPropertiTooltip = [];
+        let labelPropertiTooltip = "";
+        if (key) {
+          arrPropertiTooltip.push(key);
+        }
+        if (spellComponent) {
+          arrPropertiTooltip.push(spellComponent);
+        }
+        if (item.system.duration.value) {
+          let spellsDuration = `${item.system.duration.value}  ${
+            item.system.duration.units.charAt(0).toUpperCase() +
+            item.system.duration.units.slice(1)
+          }`;
+          arrPropertiTooltip.push(spellsDuration);
+        }
+
+        if (arrPropertiTooltip.length > 0) {
+          labelPropertiTooltip = arrPropertiTooltip
+            .map((str) => str.charAt(0).toUpperCase() + str.slice(1))
+            .join(" | ");
+        }
         listSpells += `
           <div class="heraldHud-spellsContainer">
             <div class="heraldHud-spellsItem" data-item-id="${item.id}">
@@ -2886,7 +2907,9 @@ async function heraldHud_getDataSpellsList() {
                 ${htmlDescription}
                 <hr style=" border: 1px solid grey; margin-top: 5px;">
                 </div>
-                <div class="heraldHud-spellsTooltipBottom"></div>
+                <div class="heraldHud-spellsTooltipBottom">
+                ${labelPropertiTooltip}
+                </div>
               </div>
           </div>
         `;

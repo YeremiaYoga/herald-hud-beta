@@ -54,6 +54,13 @@ Hooks.once("socketlib.ready", () => {
     await gmCreateQuestFolder();
   });
 
+  heraldHud_menuDetailSocket.register(
+    "heraldHudCreateQuest",
+    async (user, input, party, type) => {
+      await heraldHud_createJournalQuest(user, input, party, type);
+    }
+  );
+
   heraldHud_menuDetailSocket.register("createNpcsFolder", async (user) => {
     await heraldHud_gmCreateNpcsFolder(user);
     await bc.heraldHud_createCompediumNpcsFolder();
@@ -1959,18 +1966,34 @@ async function gmCreateQuestFolder() {
 async function heraldHud_getViewQuest() {
   let heraldHud_dialog2Div = document.getElementById("heraldHud-dialog2");
   heraldHud_menuDetailSocket.executeAsGM("createQuestFolder");
-
   const typeQuest = [
-    { name: "Main Quest", color: "red" },
-    { name: "Side Quest", color: "orange" },
-    { name: "Players Quest", color: "green" },
-    { name: "Characters Quest", color: "blue" },
+    {
+      name: "Main Quest",
+      src: "/modules/herald-hud-beta/assets/quest-icon/main_quest.png",
+    },
+    {
+      name: "Side Quest",
+      src: "/modules/herald-hud-beta/assets/quest-icon/side_quest.png",
+    },
+    {
+      name: "Players Quest",
+      src: "/modules/herald-hud-beta/assets/quest-icon/player_quest.png",
+    },
+    {
+      name: "Characters Quest",
+      src: "/modules/herald-hud-beta/assets/quest-icon/ch_quest.png",
+    },
   ];
   let listTypeQuest = "";
   for (let quest of typeQuest) {
+
     listTypeQuest += `
     <div class="heraldHud-typeQuestContainer">
-      <div class="heraldHud-typeQuest" style="background-color: ${quest.color};"></div>
+       <img
+            src="${quest.src}"
+            alt="${quest.name}"
+            class="heraldHud-typeQuestImage"
+          />
     </div>
     `;
   }
@@ -2015,12 +2038,134 @@ async function heraldHud_renderQuestMiddleLeftContainer() {
 
     let addQuest = document.getElementById("heraldHud-buttonAddQuest");
     if (addQuest) {
-      addQuest.addEventListener("click", async () => {});
+      addQuest.addEventListener("click", async () => {
+        if (user.isGM) {
+          await heraldHud_addQuestDM();
+        } else {
+          await heraldHud_addQuestPlayer();
+        }
+      });
     }
+  }
+
+  await heraldHud_renderListQuest();
+}
+
+async function heraldHud_renderListQuest() {
+  const user = game.user;
+  const selectedActor = user.character;
+  let listQuestView = document.getElementById(
+    "heraldHud-questListMiddleContainer"
+  );
+  let arrQuest = [
+    "Main Quest",
+    "Side Quest",
+    "Players Quest",
+    "Characters Quest",
+  ];
+  const folders = game.folders.filter((f) => f.type === "JournalEntry");
+  const heraldCoreFolder = folders.find((f) => f.name === "Herald Core");
+  const heraldCorePartyFolder = folders.find(
+    (f) => f.name === "Party" && f.folder?.id === heraldCoreFolder?.id
+  );
+  const heraldHudFolder = folders.find((f) => f.name === "Herald Hud");
+  const questFolder = folders.find(
+    (f) => f.name === "Quest" && f.folder?.id === heraldHudFolder?.id
+  );
+
+  const partyJournals = game.journal.filter(
+    (j) => j.folder?.id === heraldCorePartyFolder?.id
+  );
+
+  const userUuid = game.user.uuid;
+  const actorUuid = game.user.character?.uuid;
+  let listParty = [];
+
+  if (user.isGM) {
+    listParty = partyJournals;
+  } else {
+    for (const journal of partyJournals) {
+      const match = journal.pages.find(
+        (page) => page.name === `${userUuid} | ${actorUuid}`
+      );
+      if (match) listParty.push(journal);
+    }
+  }
+
+  let allQuestJournals = [];
+  for (let party of listParty) {
+    const partyFolder = folders.find(
+      (folder) =>
+        folder.name === party.name && folder.folder?.id === questFolder?.id
+    );
+    if (!partyFolder) continue;
+
+    for (let type of arrQuest) {
+      const typeFolder = folders.find(
+        (folder) => folder.name === type && folder.folder?.id === partyFolder.id
+      );
+      if (!typeFolder) continue;
+
+      const typeJournals = game.journal.filter(
+        (j) => j.folder?.id === typeFolder.id
+      );
+
+      allQuestJournals.push(...typeJournals);
+    }
+  }
+
+  const typeQuest = [
+    {
+      name: "Main Quest",
+      src: "/modules/herald-hud-beta/assets/quest-icon/main_quest.png",
+    },
+    {
+      name: "Side Quest",
+      src: "/modules/herald-hud-beta/assets/quest-icon/side_quest.png",
+    },
+    {
+      name: "Players Quest",
+      src: "/modules/herald-hud-beta/assets/quest-icon/player_quest.png",
+    },
+    {
+      name: "Characters Quest",
+      src: "/modules/herald-hud-beta/assets/quest-icon/ch_quest.png",
+    },
+  ];
+  let listQuest = ``;
+  for (let quest of allQuestJournals) {
+    const matchType = typeQuest.find((t) => t.name === quest.flags.type);
+    let src = matchType ? matchType.src : "";
+    listQuest += `
+    <div class="heraldHud-questItemContainer">
+      <div class="heraldHud-questItemLeftContainer">
+      <div class="heraldHud-questItemTypeContainer">
+         <img
+            src="${src}"
+            alt="${quest.flags.type}"
+            class="heraldHud-questItemTypeImage"
+          />
+      
+      </div>
+      </div>
+      <div class="heraldHud-questItemMiddleContainer">
+        <div class="heraldHud-listQuestName">${quest.name}</div>
+        <div class="heraldHud-questNameParty">${quest.flags.party}</div>
+      </div>
+      <div class="heraldHud-questItemRightContainer"></div>
+    </div>
+    `;
+  }
+
+  if (listQuestView) {
+    listQuestView.innerHTML = listQuest;
   }
 }
 
 async function heraldHud_addQuestPlayer() {
+  const user = game.user;
+  const selectedActor = user.character;
+
   const folders = game.folders.filter((f) => f.type === "JournalEntry");
   let heraldCoreFolder = "";
   let heraldCorePartyFolder = "";
@@ -2040,17 +2185,239 @@ async function heraldHud_addQuestPlayer() {
   );
   let userUuid = user.uuid;
   let actorUuid = selectedActor.uuid;
-
+  let listRadioButton = ``;
   for (let journal of partyJournals) {
     for (let page of journal.pages) {
       if (page.name === `${userUuid} | ${actorUuid}`) {
-      
+        listRadioButton += `
+          <div style="margin-bottom:4px;">
+            <input
+              type="radio"
+              id="heraldHud-questParty-${journal.id}"
+              name="heraldHud-questParty"
+              value="${journal.name}"
+         
+            />
+            <label
+              for="heraldHud-questParty-${journal.id}"
+              style=""
+            >${journal.name}</label>
+          </div>
+        `;
       }
     }
   }
+  new Dialog({
+    title: "Herald HUD - Add Quest",
+    content: `
+        <form>
+          <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom:10px;">
+            <label for="heraldHud-questNameInput"><strong>Quest Name</strong></label>
+            <textarea id="heraldHud-questNameInput" rows="3" style="width: 100%;" placeholder="Enter Name ..."></textarea>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            <div style=""><strong> Party</strong></div>
+            ${
+              listRadioButton ||
+              `<div style=" font-style:italic;">No journals found</div>`
+            }
+          </div>
+        </form>
+      `,
+    buttons: {
+      save: {
+        label: "Create",
+        callback: (html) => {
+          const questName = html.find("#heraldHud-questNameInput").val();
+          const questParty = html
+            .find("input[name='heraldHud-questParty']:checked")
+            .val();
+          console.log(user);
+          heraldHud_menuDetailSocket.executeAsGM(
+            "heraldHudCreateQuest",
+            user,
+            questName,
+            [questParty],
+            "Players Quest"
+          );
+          // setTimeout(async () => {
+          //   heraldHud_menuDetailSocket.executeAsGM("updatePartyJournalAllUser");
+          //   await heraldHud_renderListPartyJournalMiddleContainer();
+          // }, 500);
+        },
+      },
+      cancel: {
+        label: "Cancel",
+        callback: () => {},
+      },
+    },
+    default: "save",
+  }).render(true);
 }
 async function heraldHud_addQuestDM() {
+  const user = game.user;
+  const selectedActor = user.character;
+  let arrQuest = [
+    "Main Quest",
+    "Side Quest",
+    "Players Quest",
+    "Characters Quest",
+  ];
+
   const folders = game.folders.filter((f) => f.type === "JournalEntry");
+  let heraldCoreFolder = "";
+  let heraldCorePartyFolder = "";
+
+  for (let folder of folders) {
+    if (folder.name == "Herald Core") {
+      heraldCoreFolder = folder;
+    }
+
+    if (folder.name == "Party" && folder.folder.id == heraldCoreFolder.id) {
+      heraldCorePartyFolder = folder;
+    }
+  }
+
+  const partyJournals = game.journal.filter(
+    (j) => j.folder?.id === heraldCorePartyFolder.id
+  );
+
+  let listRadioButton = ``;
+  for (let quest of arrQuest) {
+    listRadioButton += `
+          <div style="margin-bottom:4px;">
+            <input
+              type="radio"
+              id="heraldHud-radioQuestType-${quest}"
+              name="heraldHud-radioQuestType"
+              value="${quest}"
+         
+            />
+            <label
+              for="heraldHud-radioQuestType-${quest}"
+              style=""
+            >${quest}</label>
+          </div>
+        `;
+  }
+  let listCheckbox = ``;
+  for (let journal of partyJournals) {
+    listCheckbox += `
+    <div >
+      <label 
+        for="heraldHud-checkboxQuestParty-${journal.id}" 
+        style="display: flex; align-items: center; cursor: pointer;"
+      >
+        <input
+          type="checkbox"
+          id="heraldHud-checkboxQuestParty-${journal.id}"
+          name="heraldHud-checkboxQuestParty"
+          value="${journal.name}"
+          style="margin-right: 8px;"
+        />
+        ${journal.name}
+      </label>
+    </div>
+  `;
+  }
+
+  new Dialog({
+    title: "Herald HUD - Add Quest",
+    content: `
+        <form>
+          <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom:10px;">
+            <label for="heraldHud-questNameInput"><strong>Quest Name</strong></label>
+            <textarea id="heraldHud-questNameInput" rows="3" style="width: 100%;" placeholder="Enter Name ..."></textarea>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            <div style=""><strong>Quest Type</strong></div>
+            ${
+              listRadioButton ||
+              `<div style=" font-style:italic;">No journals found</div>`
+            }
+          </div>
+           <div style="display:flex; flex-direction:column; gap:4px;">
+            <div style=""><strong>Party That Can See</strong></div>
+            ${
+              listCheckbox ||
+              `<div style=" font-style:italic;">No journals found</div>`
+            }
+          </div>
+        </form>
+      `,
+    buttons: {
+      save: {
+        label: "Create",
+        callback: async (html) => {
+          const questName = html.find("#heraldHud-questNameInput").val();
+          const questType = html
+            .find("input[name='heraldHud-radioQuestType']:checked")
+            .val();
+          const questParties = [];
+          html
+            .find("input[name='heraldHud-checkboxQuestParty']:checked")
+            .each(function () {
+              questParties.push(this.value);
+            });
+
+          await heraldHud_createJournalQuest(
+            user,
+            questName,
+            questParties,
+            questType
+          );
+
+          // setTimeout(async () => {
+          //   heraldHud_menuDetailSocket.executeAsGM("updatePartyJournalAllUser");
+          //   await heraldHud_renderListPartyJournalMiddleContainer();
+          // }, 500);
+        },
+      },
+      cancel: {
+        label: "Cancel",
+        callback: () => {},
+      },
+    },
+    default: "save",
+  }).render(true);
+}
+
+async function heraldHud_createJournalQuest(user, input, arrParty, type) {
+  const folders = game.folders.filter((f) => f.type === "JournalEntry");
+
+  let heraldHudFolder = "";
+  let questFolder = "";
+
+  for (let folder of folders) {
+    if (folder.name == "Herald Hud") {
+      heraldHudFolder = folder;
+    }
+
+    if (folder.name == "Quest" && folder.folder.id == heraldHudFolder.id) {
+      questFolder = folder;
+    }
+  }
+
+  for (let party of arrParty) {
+    const partyFolder = folders.find(
+      (folder) => folder.name === party && folder.folder.id === questFolder.id
+    );
+    const typeFolder = folders.find(
+      (folder) => folder.name === type && folder.folder.id === partyFolder.id
+    );
+    let journalEntry = await JournalEntry.create({
+      name: input,
+      content: "",
+      folder: typeFolder.id,
+      flags: {
+        party: party,
+        type: type,
+        user: user.uuid,
+        category: "Quest",
+      },
+      ownership: { default: 3 },
+    });
+  }
 }
 
 async function heraldHud_renderQuestMiddleRightContainer() {

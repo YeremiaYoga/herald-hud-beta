@@ -2226,6 +2226,12 @@
 .heraldHud-spellsContainer:hover .heraldHud-dialogSpellsTooltip {
     display: block;
 }
+.heraldHud-spellsTooltipBottom {
+    font-size: 12px;
+    color: rgb(200, 200, 200);
+    display: flex;
+    align-items: center;
+}
 
 .heraldHud-spellsSearchContainer {
     padding-bottom: 20%;
