@@ -1031,7 +1031,6 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
         const pageId = event.currentTarget.getAttribute("data-pageId");
 
         await heraldHud_deletePages("personal notes", journalId, pageId);
-
       });
     });
   }
@@ -1295,7 +1294,7 @@ async function heraldHud_getViewPartyJournal() {
           <div class="heraldHud-searchPartyJournalContainer" >
             <input type="text" id="heraldHud-searchPartyJournal" class="heraldHud-searchPartyJournal" placeholder="Search notes..." />
           </div>
-          <div id="heraldHud-buttonAddPartyJournalContainer" class="heraldHud-buttonAddPersonalNotesContainer">
+          <div id="heraldHud-buttonAddPartyJournalContainer" class="heraldHud-buttonAddPartyJournalContainer">
             <i class="fa-solid fa-plus"></i>
           </div>
         </div>
@@ -1773,7 +1772,6 @@ async function heraldHud_renderListPartyJournalMiddleContainer() {
         const pageId = event.currentTarget.getAttribute("data-pageId");
 
         await heraldHud_deletePages("party journal", journalId, pageId);
-
       });
     });
   }
@@ -1962,7 +1960,6 @@ async function heraldHud_getViewQuest() {
   let heraldHud_dialog2Div = document.getElementById("heraldHud-dialog2");
   heraldHud_menuDetailSocket.executeAsGM("createQuestFolder");
 
-
   const typeQuest = [
     { name: "Main Quest", color: "red" },
     { name: "Side Quest", color: "orange" },
@@ -1970,8 +1967,8 @@ async function heraldHud_getViewQuest() {
     { name: "Characters Quest", color: "blue" },
   ];
   let listTypeQuest = "";
-  for(let quest of typeQuest){
-    listTypeQuest+=`
+  for (let quest of typeQuest) {
+    listTypeQuest += `
     <div class="heraldHud-typeQuestContainer">
       <div class="heraldHud-typeQuest" style="background-color: ${quest.color};"></div>
     </div>
@@ -2005,10 +2002,55 @@ async function heraldHud_renderQuestMiddleLeftContainer() {
 
   if (dialogMiddleLeft) {
     dialogMiddleLeft.innerHTML = `
-       <div id="heraldHud-questListContainer" class="heraldHud-questListContainer"></div>
-    
+      <div id="heraldHud-questListContainer" class="heraldHud-questListContainer">
+        <div id="heraldHud-questListTopContainer" class="heraldHud-questListTopContainer"></div>
+        <div id="heraldHud-questListMiddleContainer" class="heraldHud-questListMiddleContainer"></div>
+        <div id="heraldHud-questListBottomContainer" class="heraldHud-questListBottomContainer">
+          <div id="heraldHud-buttonAddQuest" class="heraldHud-buttonAddQuest">
+            <i class="fa-solid fa-plus"></i>
+          </div>
+        </div>
+      </div>
     `;
+
+    let addQuest = document.getElementById("heraldHud-buttonAddQuest");
+    if (addQuest) {
+      addQuest.addEventListener("click", async () => {});
+    }
   }
+}
+
+async function heraldHud_addQuestPlayer() {
+  const folders = game.folders.filter((f) => f.type === "JournalEntry");
+  let heraldCoreFolder = "";
+  let heraldCorePartyFolder = "";
+
+  for (let folder of folders) {
+    if (folder.name == "Herald Core") {
+      heraldCoreFolder = folder;
+    }
+
+    if (folder.name == "Party" && folder.folder.id == heraldCoreFolder.id) {
+      heraldCorePartyFolder = folder;
+    }
+  }
+
+  const partyJournals = game.journal.filter(
+    (j) => j.folder?.id === heraldCorePartyFolder.id
+  );
+  let userUuid = user.uuid;
+  let actorUuid = selectedActor.uuid;
+
+  for (let journal of partyJournals) {
+    for (let page of journal.pages) {
+      if (page.name === `${userUuid} | ${actorUuid}`) {
+      
+      }
+    }
+  }
+}
+async function heraldHud_addQuestDM() {
+  const folders = game.folders.filter((f) => f.type === "JournalEntry");
 }
 
 async function heraldHud_renderQuestMiddleRightContainer() {
@@ -2020,8 +2062,8 @@ async function heraldHud_renderQuestMiddleRightContainer() {
 
   if (dialogMiddleRight) {
     dialogMiddleRight.innerHTML = `
-    <div id="heraldHud-questDetailContainer" class="heraldHud-questDetailContainer"></div>
- 
+    <div id="heraldHud-questDetailContainer" class="heraldHud-questDetailContainer">
+    </div>
  `;
   }
 }
@@ -2508,6 +2550,7 @@ async function heraldHud_renderNpcsMiddleContainer() {
         icon =
           '<i class="fa-solid fa-mars-and-venus" style="color:rgb(121, 0, 235)"></i>';
       }
+      console.log(npc);
       listNpcs += `
         <div id="heraldHud-npcsPartyContainer" class="heraldHud-npcsPartyContainer" data-journalId="${npc.journalId}" data-pageId="${npc.pageId}">
             <div id="heraldHud-npcsPartyLeft" class="heraldHud-npcsPartyLeft">

@@ -550,12 +550,36 @@
 .heraldHud-questMiddleLeftContainer,
 .heraldHud-questMiddleRightContainer {
   flex: 1 1 50%;
+  height: 340px;
 }
 
 .heraldHud-questListContainer {
   border: 2px solid gold;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+}
 
+.heraldHud-questListBottomContainer {
+  padding: 10px;
+  z-index: 14;
+  display: flex;
+  gap: 10px;
+  margin-top: auto; 
+}
+
+
+.heraldHud-buttonAddQuest {
+  width: 30px;
+  height: 30px;
+  border: 2px solid gold;
+  color: gold;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  cursor: pointer;
 }
 
 /* --------------------------------------------------------------------------------------
