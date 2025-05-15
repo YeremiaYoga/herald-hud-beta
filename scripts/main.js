@@ -120,6 +120,13 @@ Hooks.once("init", () => {
     default: "#ffffff",
   });
 
-
+ game.settings.register("herald-hud", "enableCombineFeature", {
+    name: "Enable Combine Features",
+    hint: "Enable Combine Features",
+    scope: "client",
+    config: true,
+    type: Boolean,
+    default: false,
+  });
 
 });

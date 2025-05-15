@@ -1,4 +1,4 @@
-.heraldHud-menuDetailContainer {
+.heraldHud-journalingContainer {
   position: absolute;
   left: 94%;
   z-index: 16;
@@ -7,7 +7,7 @@
 
 
 
-.heraldHud-menuDetailWrapper {
+.heraldHud-journalingWrapper {
   position: relative;
   display: flex;
   align-items: center;
@@ -17,7 +17,7 @@
 
 }
 
-.heraldHud-menuDetailButton {
+.heraldHud-journalingButton {
   width: 23px;
   height: 23px;
   background: rgb(0, 0, 0);
@@ -29,21 +29,44 @@
 
 }
 
-.heraldHud-menuDetailImage {
+
+.heraldHud-journalingTooltip {
+    position: absolute;
+    bottom: -100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+    pointer-events: none;
+}
+
+.heraldHud-journalingDivContainer:hover .heraldHud-journalingTooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+.heraldHud-journalingImage {
   border: none;
   width: 35px;
   height: 35px;
   position: absolute;
 }
 
-.heraldHud-menuDetailButton {}
+.heraldHud-journalingButton {}
 
-.heraldHud-menuDetailListItem {
+.heraldHud-journalingListItem {
   gap: 5px;
 
 }
 
-.heraldHud-menuDetailItem {
+.heraldHud-journalingItem {
   align-items: center;
   justify-content: space-between;
   display: flex;
@@ -62,11 +85,11 @@
   height: 35px;
 }
 
-.heraldHud-menuDetailItem:hover {
+.heraldHud-journalingItem:hover {
   background-color: rgba(75, 75, 75, 0.8);
 }
 
-.heraldHud-menuDetailName {
+.heraldHud-journalingName {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
@@ -533,8 +556,6 @@
 .heraldHud-typeQuestContainer {
   width: 50px;
   height: 50px;
-  border-radius: 5px;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -548,6 +569,20 @@
   border: none;
 }
 
+.heraldHud-typeQuestContainer.active {
+  position: relative;
+}
+
+.heraldHud-typeQuestContainer.active::after {
+  content: "";
+  position: absolute;
+  bottom: -15%;
+  width: 100%;
+  height: 3px;
+  background: gold;
+  box-shadow: 0 0 4px gold, 0 0 8px gold;
+  border-radius: 2px;
+}
 
 
 
@@ -611,6 +646,7 @@
   -moz-border-radius: 5px;
   -ms-border-radius: 5px;
   -o-border-radius: 5px;
+  cursor: pointer;
 }
 
 
@@ -631,6 +667,81 @@
   height: auto;
   object-fit: cover;
   border: none;
+}
+
+.heraldHud-listQuestName{
+  font-size: 20px;
+  color: white;
+  font-weight: bold;
+}
+
+.heraldHud-questNameParty{
+  font-size: 12px;
+  color: #999;
+}
+
+.heraldHud-questItemRightContainer{
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: 10px;
+  font-size: 16px;
+}
+
+.heraldHud-visibleButton{
+  cursor: pointer;
+}
+
+.heraldHud-questDetailContainer{
+ 
+}
+
+.heraldHud-questDetailItem{
+  color: white;
+}
+.heraldHud-questDetailTopContainer{
+  display: flex;
+
+  justify-content: space-between;
+}
+
+
+.heraldHud-questTitle{
+  font-size: 30px;
+  font-weight: bold;
+  color: white;
+}
+.heraldHud-questDetailType{
+  width: 50px;
+  height: auto;
+  object-fit: cover;
+  border: none;
+}
+.heraldHud-questHeaderContainer{
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.heraldHud-questHeaderName{
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.heraldHud-questDetailItem{
+  color: white;
+}
+
+.heraldHud-questPageListContainer{
+  height: 250px;
+  overflow-y: auto;
+}
+.heraldHud-questPageContainer{
+margin-bottom: 20px;
+}
+.heraldHud-questPageHeader{
+  display: flex;
+  align-items: center;
 }
 
 /* --------------------------------------------------------------------------------------

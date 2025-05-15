@@ -1,11 +1,12 @@
 import * as bc from "./backup.js";
 import * as hl from "./helper.js";
 
-let heraldHud_menuDetailSocket;
+let heraldHud_journalingSocket;
+let heraldHud_questShow;
 
 Hooks.once("socketlib.ready", () => {
-  heraldHud_menuDetailSocket = socketlib.registerModule("herald-hud-beta");
-  heraldHud_menuDetailSocket.register(
+  heraldHud_journalingSocket = socketlib.registerModule("herald-hud-beta");
+  heraldHud_journalingSocket.register(
     "createPersonalNotesFolder",
     async (user) => {
       await heraldHud_gmCreatePersonalNotesFolder(user);
@@ -13,14 +14,14 @@ Hooks.once("socketlib.ready", () => {
     }
   );
 
-  heraldHud_menuDetailSocket.register(
+  heraldHud_journalingSocket.register(
     "heraldHudCreatePersonalNotes",
     async (user, input, type) => {
       await heraldHud_createPersonalNotes(user, input, type);
     }
   );
 
-  heraldHud_menuDetailSocket.register(
+  heraldHud_journalingSocket.register(
     "createPartyJournalFolder",
     async (user) => {
       await heraldHud_gmCreatePartyJournalFolder(user);
@@ -28,16 +29,16 @@ Hooks.once("socketlib.ready", () => {
     }
   );
 
-  heraldHud_menuDetailSocket.register(
+  heraldHud_journalingSocket.register(
     "heraldHudCreatePartyJournal",
     async (user, input, type) => {
       await heraldHud_createPartyJournal(input, type);
     }
   );
-  heraldHud_menuDetailSocket.register("updatePartyJournalAllUser", async () => {
+  heraldHud_journalingSocket.register("updatePartyJournalAllUser", async () => {
     await heraldHud_renderListPartyJournalMiddleContainer();
   });
-  heraldHud_menuDetailSocket.register(
+  heraldHud_journalingSocket.register(
     "backupHeralHudJournalByPage",
     async (user, journalEntry) => {
       const uuid = journalEntry.uuid;
@@ -50,23 +51,27 @@ Hooks.once("socketlib.ready", () => {
       }
     }
   );
-  heraldHud_menuDetailSocket.register("createQuestFolder", async () => {
+  heraldHud_journalingSocket.register("createQuestFolder", async () => {
     await gmCreateQuestFolder();
   });
 
-  heraldHud_menuDetailSocket.register(
+  heraldHud_journalingSocket.register(
     "heraldHudCreateQuest",
     async (user, input, party, type) => {
       await heraldHud_createJournalQuest(user, input, party, type);
     }
   );
 
-  heraldHud_menuDetailSocket.register("createNpcsFolder", async (user) => {
+  heraldHud_journalingSocket.register("updateQuestAllUser", async () => {
+    await heraldHud_renderListQuest();
+  });
+
+  heraldHud_journalingSocket.register("createNpcsFolder", async (user) => {
     await heraldHud_gmCreateNpcsFolder(user);
     await bc.heraldHud_createCompediumNpcsFolder();
   });
 
-  heraldHud_menuDetailSocket.register("backupHeraldHudNpcs", async (uuid) => {
+  heraldHud_journalingSocket.register("backupHeraldHudNpcs", async (uuid) => {
     await bc.heraldHud_backupJournalNpcs(uuid);
   });
 });
@@ -95,8 +100,8 @@ async function heraldHud_renderListMenu() {
       menuTitle = "NPCs";
     }
     listMenu += `
-        <div id="heraldHud-menuDetailItem" class="heraldHud-menuDetailItem" data-name="${menu}">
-            <div class="heraldHud-menuDetailName">
+        <div id="heraldHud-journalingItem" class="heraldHud-journalingItem" data-name="${menu}">
+            <div class="heraldHud-journalingName">
                 ${menuTitle}
             </div>
             ${iconMenu}
@@ -105,14 +110,14 @@ async function heraldHud_renderListMenu() {
   }
   if (heraldHud_dialogDiv) {
     heraldHud_dialogDiv.innerHTML = `
-        <div class="heraldHud-menuDetailListItem">
+        <div class="heraldHud-journalingListItem">
             ${listMenu}
         </div> `;
 
     document
-      .querySelectorAll(".heraldHud-menuDetailItem")
-      .forEach((menuDetail) => {
-        menuDetail.addEventListener("click", async function (event) {
+      .querySelectorAll(".heraldHud-journalingItem")
+      .forEach((journaling) => {
+        journaling.addEventListener("click", async function (event) {
           if (event.target.closest(".heraldHud-menuIconContainer")) return;
           let name = this.getAttribute("data-name");
           await heraldHud_showDialogSubMenuDetail(name);
@@ -121,8 +126,8 @@ async function heraldHud_renderListMenu() {
 
     document
       .querySelectorAll(".heraldHud-menuIconContainer")
-      .forEach((menuDetail) => {
-        menuDetail.addEventListener("click", async function () {
+      .forEach((journaling) => {
+        journaling.addEventListener("click", async function () {
           let name = this.getAttribute("data-name");
           if (name == "npcs") {
             await heraldHud_showDialogNpcsTarget();
@@ -378,7 +383,7 @@ async function heraldHud_getDataBiographyBottom() {
 
 async function heraldHud_getViewPersonalNotes() {
   const user = game.user;
-  heraldHud_menuDetailSocket.executeAsGM("createPersonalNotesFolder", user);
+  heraldHud_journalingSocket.executeAsGM("createPersonalNotesFolder", user);
   let heraldHud_dialog2Div = document.getElementById("heraldHud-dialog2");
 
   if (heraldHud_dialog2Div) {
@@ -495,7 +500,7 @@ async function heraldHud_getViewPersonalNotes() {
               if (!personalNotesInput)
                 return ui.notifications.warn("Please enter a note name.");
 
-              heraldHud_menuDetailSocket.executeAsGM(
+              heraldHud_journalingSocket.executeAsGM(
                 "heraldHudCreatePersonalNotes",
                 user,
                 personalNotesInput,
@@ -1289,7 +1294,7 @@ async function heraldHud_createPartyJournal(input, type) {
 async function heraldHud_getViewPartyJournal() {
   const user = game.user;
   const selectedActor = user.character;
-  heraldHud_menuDetailSocket.executeAsGM("createPartyJournalFolder", user);
+  heraldHud_journalingSocket.executeAsGM("createPartyJournalFolder", user);
   let heraldHud_dialog2Div = document.getElementById("heraldHud-dialog2");
 
   if (heraldHud_dialog2Div) {
@@ -1397,14 +1402,14 @@ async function heraldHud_getViewPartyJournal() {
                   .find("input[name='heraldHud-partyJournalType']:checked")
                   .val();
 
-                heraldHud_menuDetailSocket.executeAsGM(
+                heraldHud_journalingSocket.executeAsGM(
                   "heraldHudCreatePartyJournal",
                   user,
                   partyJournalName,
                   selectedJournalId
                 );
                 setTimeout(async () => {
-                  heraldHud_menuDetailSocket.executeAsGM(
+                  heraldHud_journalingSocket.executeAsGM(
                     "updatePartyJournalAllUser"
                   );
                   await heraldHud_renderListPartyJournalMiddleContainer();
@@ -1965,7 +1970,7 @@ async function gmCreateQuestFolder() {
 
 async function heraldHud_getViewQuest() {
   let heraldHud_dialog2Div = document.getElementById("heraldHud-dialog2");
-  heraldHud_menuDetailSocket.executeAsGM("createQuestFolder");
+  heraldHud_journalingSocket.executeAsGM("createQuestFolder");
   const typeQuest = [
     {
       name: "Main Quest",
@@ -1986,9 +1991,8 @@ async function heraldHud_getViewQuest() {
   ];
   let listTypeQuest = "";
   for (let quest of typeQuest) {
-
     listTypeQuest += `
-    <div class="heraldHud-typeQuestContainer">
+    <div class="heraldHud-typeQuestContainer" data-name="${quest.name}">
        <img
             src="${quest.src}"
             alt="${quest.name}"
@@ -2011,6 +2015,21 @@ async function heraldHud_getViewQuest() {
       <div id="heraldHud-questBottomContainer" class="heraldHud-questBottomContainer"></div>
     </div>
   `;
+
+    document.querySelectorAll(".heraldHud-typeQuestContainer").forEach((el) => {
+      el.addEventListener("click", async function () {
+        const isActive = this.classList.contains("active");
+
+        document
+          .querySelectorAll(".heraldHud-typeQuestContainer")
+          .forEach((el) => el.classList.remove("active"));
+
+        if (!isActive) {
+          this.classList.add("active");
+        }
+        await heraldHud_renderListQuest();
+      });
+    });
   }
   await heraldHud_renderQuestMiddleLeftContainer();
   await heraldHud_renderQuestMiddleRightContainer();
@@ -2133,11 +2152,40 @@ async function heraldHud_renderListQuest() {
     },
   ];
   let listQuest = ``;
+  const activeTypeEl = document.querySelector(
+    ".heraldHud-typeQuestContainer.active"
+  );
   for (let quest of allQuestJournals) {
+    if (activeTypeEl && quest.flags.type !== activeTypeEl.dataset.name)
+      continue;
+    let visibleButton = ``;
+    if (user.isGM) {
+      const isVisible = quest.flags.visible === true;
+      const iconColor = isVisible ? "white" : "gray";
+
+      visibleButton = `
+    <div class="heraldHud-visibleButton" data-id="${quest.id}" data-visible="${isVisible}">
+      <i class="fa-solid fa-eye" style="color: ${iconColor};"></i>
+    </div>`;
+    } else {
+      if (quest.flags.visible == false) {
+        continue;
+      }
+    }
     const matchType = typeQuest.find((t) => t.name === quest.flags.type);
     let src = matchType ? matchType.src : "";
+
+    let page3 = "";
+    const pagesArray = quest.pages.contents;
+    if (pagesArray.length >= 3) {
+      if (pagesArray[2]) {
+        page3 = pagesArray[2].name;
+      }
+  
+    }
+
     listQuest += `
-    <div class="heraldHud-questItemContainer">
+    <div class="heraldHud-questItemContainer" data-id="${quest.id}">
       <div class="heraldHud-questItemLeftContainer">
       <div class="heraldHud-questItemTypeContainer">
          <img
@@ -2150,15 +2198,54 @@ async function heraldHud_renderListQuest() {
       </div>
       <div class="heraldHud-questItemMiddleContainer">
         <div class="heraldHud-listQuestName">${quest.name}</div>
-        <div class="heraldHud-questNameParty">${quest.flags.party}</div>
+        <div class="heraldHud-questNameParty">${page3}</div>
       </div>
-      <div class="heraldHud-questItemRightContainer"></div>
+      <div class="heraldHud-questItemRightContainer">
+        ${visibleButton}
+      </div>
     </div>
     `;
   }
 
   if (listQuestView) {
     listQuestView.innerHTML = listQuest;
+
+    const visible = listQuestView.querySelectorAll(".heraldHud-visibleButton");
+    visible.forEach((vsb) => {
+      vsb.addEventListener("click", async () => {
+        const questId = vsb.getAttribute("data-id");
+        const currentVisible = vsb.getAttribute("data-visible") === "true";
+
+        const journal = game.journal.get(questId);
+        if (!journal) return;
+
+        const newVisible = !currentVisible;
+
+        await journal.update({
+          "flags.visible": newVisible,
+        });
+        vsb.setAttribute("data-visible", newVisible);
+        const icon = vsb.querySelector("i");
+        icon.style.color = newVisible ? "white" : "gray";
+
+        heraldHud_journalingSocket.executeForEveryone(
+          "updatePartyJournalAllUser"
+        );
+      });
+    });
+
+    const questItem = listQuestView.querySelectorAll(
+      ".heraldHud-questItemContainer"
+    );
+    questItem.forEach((item) => {
+      item.addEventListener("click", async (event) => {
+        if (event.target.closest(".heraldHud-visibleButton")) return;
+
+        const questId = item.getAttribute("data-id");
+        heraldHud_questShow = questId;
+        await heraldHud_renderQuestPage();
+      });
+    });
   }
 }
 
@@ -2207,52 +2294,71 @@ async function heraldHud_addQuestPlayer() {
       }
     }
   }
-  new Dialog({
+  const dialog = new Dialog({
     title: "Herald HUD - Add Quest",
     content: `
-        <form>
-          <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom:10px;">
-            <label for="heraldHud-questNameInput"><strong>Quest Name</strong></label>
-            <textarea id="heraldHud-questNameInput" rows="3" style="width: 100%;" placeholder="Enter Name ..."></textarea>
-          </div>
-          <div style="display:flex; flex-direction:column; gap:4px;">
-            <div style=""><strong> Party</strong></div>
-            ${
-              listRadioButton ||
-              `<div style=" font-style:italic;">No journals found</div>`
-            }
-          </div>
-        </form>
-      `,
-    buttons: {
-      save: {
-        label: "Create",
-        callback: (html) => {
-          const questName = html.find("#heraldHud-questNameInput").val();
-          const questParty = html
-            .find("input[name='heraldHud-questParty']:checked")
-            .val();
-          console.log(user);
-          heraldHud_menuDetailSocket.executeAsGM(
-            "heraldHudCreateQuest",
-            user,
-            questName,
-            [questParty],
-            "Players Quest"
+    <form>
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom:10px;">
+        <label for="heraldHud-questNameInput"><strong>Quest Name</strong></label>
+        <textarea id="heraldHud-questNameInput" rows="3" style="width: 100%;" placeholder="Enter Name ..."></textarea>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:4px;">
+        <div><strong> Party</strong></div>
+        ${
+          listRadioButton ||
+          `<div style=" font-style:italic;">No journals found</div>`
+        }
+      </div>
+    </form>
+  `,
+    buttons: {},
+    render: async (html) => {
+      const confirmButton = $(
+        `<button type="button" class="dialog-button">Create</button>`
+      );
+      const cancelButton = $(
+        `<button type="button" class="dialog-button">Cancel</button>`
+      );
+
+      html
+        .closest(".app")
+        .find(".dialog-buttons")
+        .append(confirmButton, cancelButton);
+
+      confirmButton.on("click", async () => {
+        const questName = html.find("#heraldHud-questNameInput").val()?.trim();
+        const questParty = html
+          .find("input[name='heraldHud-questParty']:checked")
+          .val();
+
+        let missingFields = [];
+        if (!questName) missingFields.push("Quest Name");
+        if (!questParty) missingFields.push("Party");
+
+        if (missingFields.length > 0) {
+          ui.notifications.error(
+            `Please fill out: ${missingFields.join(", ")}`
           );
-          // setTimeout(async () => {
-          //   heraldHud_menuDetailSocket.executeAsGM("updatePartyJournalAllUser");
-          //   await heraldHud_renderListPartyJournalMiddleContainer();
-          // }, 500);
-        },
-      },
-      cancel: {
-        label: "Cancel",
-        callback: () => {},
-      },
+          return;
+        }
+
+        heraldHud_journalingSocket.executeAsGM(
+          "heraldHudCreateQuest",
+          user,
+          questName,
+          [questParty],
+          "Players Quest"
+        );
+        await heraldHud_renderListQuest();
+        dialog.close();
+      });
+
+      cancelButton.on("click", () => dialog.close());
     },
-    default: "save",
-  }).render(true);
+    default: "",
+  });
+
+  dialog.render(true);
 }
 async function heraldHud_addQuestDM() {
   const user = game.user;
@@ -2321,65 +2427,83 @@ async function heraldHud_addQuestDM() {
   `;
   }
 
-  new Dialog({
+  const dialog = new Dialog({
     title: "Herald HUD - Add Quest",
     content: `
-        <form>
-          <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom:10px;">
-            <label for="heraldHud-questNameInput"><strong>Quest Name</strong></label>
-            <textarea id="heraldHud-questNameInput" rows="3" style="width: 100%;" placeholder="Enter Name ..."></textarea>
-          </div>
-          <div style="display:flex; flex-direction:column; gap:4px;">
-            <div style=""><strong>Quest Type</strong></div>
-            ${
-              listRadioButton ||
-              `<div style=" font-style:italic;">No journals found</div>`
-            }
-          </div>
-           <div style="display:flex; flex-direction:column; gap:4px;">
-            <div style=""><strong>Party That Can See</strong></div>
-            ${
-              listCheckbox ||
-              `<div style=" font-style:italic;">No journals found</div>`
-            }
-          </div>
-        </form>
-      `,
-    buttons: {
-      save: {
-        label: "Create",
-        callback: async (html) => {
-          const questName = html.find("#heraldHud-questNameInput").val();
-          const questType = html
-            .find("input[name='heraldHud-radioQuestType']:checked")
-            .val();
-          const questParties = [];
-          html
-            .find("input[name='heraldHud-checkboxQuestParty']:checked")
-            .each(function () {
-              questParties.push(this.value);
-            });
+    <form>
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom:10px;">
+        <label for="heraldHud-questNameInput"><strong>Quest Name</strong></label>
+        <textarea id="heraldHud-questNameInput" rows="3" style="width: 100%;" placeholder="Enter Name ..."></textarea>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:4px;">
+        <div><strong>Quest Type</strong></div>
+        ${
+          listRadioButton ||
+          `<div style=" font-style:italic;">No journals found</div>`
+        }
+      </div>
+      <div style="display:flex; flex-direction:column; gap:4px;">
+        <div><strong>Party That Can See</strong></div>
+        ${
+          listCheckbox ||
+          `<div style=" font-style:italic;">No journals found</div>`
+        }
+      </div>
+    </form>
+  `,
+    buttons: {},
+    render: (html) => {
+      const confirmButton = $(
+        `<button type="button" class="dialog-button">Create</button>`
+      );
+      const cancelButton = $(
+        `<button type="button" class="dialog-button">Cancel</button>`
+      );
+      html
+        .closest(".app")
+        .find(".dialog-buttons")
+        .append(confirmButton, cancelButton);
 
-          await heraldHud_createJournalQuest(
-            user,
-            questName,
-            questParties,
-            questType
+      confirmButton.on("click", async () => {
+        const questName = html.find("#heraldHud-questNameInput").val()?.trim();
+        const questType = html
+          .find("input[name='heraldHud-radioQuestType']:checked")
+          .val();
+        const questParties = [];
+        html
+          .find("input[name='heraldHud-checkboxQuestParty']:checked")
+          .each(function () {
+            questParties.push(this.value);
+          });
+
+        let missingFields = [];
+        if (!questName) missingFields.push("Quest Name");
+        if (!questType) missingFields.push("Quest Type");
+        if (questParties.length === 0) missingFields.push("Party That Can See");
+
+        if (missingFields.length > 0) {
+          ui.notifications.error(
+            `Please fill out: ${missingFields.join(", ")}`
           );
+          return;
+        }
 
-          // setTimeout(async () => {
-          //   heraldHud_menuDetailSocket.executeAsGM("updatePartyJournalAllUser");
-          //   await heraldHud_renderListPartyJournalMiddleContainer();
-          // }, 500);
-        },
-      },
-      cancel: {
-        label: "Cancel",
-        callback: () => {},
-      },
+        await heraldHud_createJournalQuest(
+          user,
+          questName,
+          questParties,
+          questType
+        );
+        await heraldHud_renderListQuest();
+        dialog.close();
+      });
+
+      cancelButton.on("click", () => dialog.close());
     },
-    default: "save",
-  }).render(true);
+    default: "",
+  });
+
+  dialog.render(true);
 }
 
 async function heraldHud_createJournalQuest(user, input, arrParty, type) {
@@ -2410,6 +2534,7 @@ async function heraldHud_createJournalQuest(user, input, arrParty, type) {
       content: "",
       folder: typeFolder.id,
       flags: {
+        visible: true,
         party: party,
         type: type,
         user: user.uuid,
@@ -2432,6 +2557,76 @@ async function heraldHud_renderQuestMiddleRightContainer() {
     <div id="heraldHud-questDetailContainer" class="heraldHud-questDetailContainer">
     </div>
  `;
+  }
+  await heraldHud_renderQuestPage();
+}
+
+async function heraldHud_renderQuestPage() {
+  if (!heraldHud_questShow) {
+    return;
+  }
+  const typeQuest = [
+    {
+      name: "Main Quest",
+      src: "/modules/herald-hud-beta/assets/quest-icon/main_quest.png",
+    },
+    {
+      name: "Side Quest",
+      src: "/modules/herald-hud-beta/assets/quest-icon/side_quest.png",
+    },
+    {
+      name: "Players Quest",
+      src: "/modules/herald-hud-beta/assets/quest-icon/player_quest.png",
+    },
+    {
+      name: "Characters Quest",
+      src: "/modules/herald-hud-beta/assets/quest-icon/ch_quest.png",
+    },
+  ];
+  let questDetail = document.getElementById("heraldHud-questDetailContainer");
+  const journal = game.journal.get(heraldHud_questShow);
+  const pages = journal.pages.contents.slice(0, 3);
+  const [page1, page2, page3] = pages;
+
+  const matchType = typeQuest.find((t) => t.name === journal.flags.type);
+  let src = matchType ? matchType.src : "";
+
+  let pageDetail = "";
+  let numberPage = 0;
+  for (let page of [page1, page2]) {
+    numberPage++;
+    pageDetail += `
+    <div class="heraldHud-questPageContainer">
+      <div class="heraldHud-questPageHeader">
+      </div>
+      <div>${page.text.content}</div>
+       <div style="flex: 1; height: 2px; background-color: #aaa;"></div>
+    </div>`;
+  }
+  //  <div class="heraldHud-questPageNumber">Page ${numberPage}</div>
+  //       <div style="flex: 1; height: 2px; background-color: #aaa;"></div>
+  if (questDetail) {
+    questDetail.innerHTML = `
+    <div class="heraldHud-questDetailItem">
+      <div class="heraldHud-questDetailTopContainer">
+        <div class="heraldHud-questTitle">${journal.name}</div>
+        <div>  
+          <img
+            src="${src}"
+            alt="${journal.flags.type}"
+            class="heraldHud-questDetailType"
+          /></div>
+      </div>
+      <div class="heraldHud-questHeaderContainer">
+        <div style="width: 20px; height: 2px; background-color: #aaa;"></div>
+        <div class="heraldHud-questHeaderName">${page3.name}</div>
+        <div style="flex: 1; height: 2px; background-color: #aaa;"></div>
+      </div>
+      
+      <div class="heraldHud-questPageListContainer">
+        ${pageDetail}
+      </div>
+    </div>`;
   }
 }
 
@@ -2533,7 +2728,7 @@ async function heraldHud_showDialogNpcsTarget() {
     return;
   }
 
-  heraldHud_menuDetailSocket.executeAsGM("createNpcsFolder", user);
+  heraldHud_journalingSocket.executeAsGM("createNpcsFolder", user);
 
   const actor = tokenDocument.actor;
   const image = tokenDocument.texture?.src || actor.img;
@@ -2661,49 +2856,71 @@ async function heraldHud_showDialogNpcsTarget() {
     </div>
   </div>
 `;
-  new Dialog({
+  const dialog = new Dialog({
     title: `NPC Target Info - ${name}`,
     content: dialogContent,
-    buttons: {
-      save: {
-        label: "Confirm",
-        callback: async (html) => {
-          const selectedGender = html
-            .find(".heraldHud-npcsGenderOption.selected")
-            .data("gender");
-          const faction = html
-            .find("#heraldHud-npcsFactionUnknown")
-            .prop("checked")
-            ? "Unknown"
-            : html.find("#heraldHud-npcsFactionInput").val();
-          const race = html.find("#heraldHud-npcsRaceUnknown").prop("checked")
-            ? "Unknown"
-            : html.find("#heraldHud-npcsRaceInput").val();
-          const party = html
-            .find('input[name="heraldHud-npcsPartyInput"]:checked')
-            .val();
-
-          let data = {
-            actor: actor,
-            gender: selectedGender,
-            faction: faction,
-            race: race,
-            party: party,
-          };
-          await heraldHud_confirmAddNpcsTarget(data);
-        },
-      },
-      cancel: {
-        label: "Cancel",
-      },
-    },
+    buttons: {},
     render: (html) => {
+      const confirmButton = $(
+        `<button type="button" class="dialog-button">Confirm</button>`
+      );
+      const cancelButton = $(
+        `<button type="button" class="dialog-button">Cancel</button>`
+      );
+      html
+        .closest(".app")
+        .find(".dialog-buttons")
+        .append(confirmButton, cancelButton);
+
+      confirmButton.on("click", async () => {
+        const selectedGender = html
+          .find(".heraldHud-npcsGenderOption.selected")
+          .data("gender");
+        const faction = html
+          .find("#heraldHud-npcsFactionUnknown")
+          .prop("checked")
+          ? "Unknown"
+          : html.find("#heraldHud-npcsFactionInput").val()?.trim();
+        const race = html.find("#heraldHud-npcsRaceUnknown").prop("checked")
+          ? "Unknown"
+          : html.find("#heraldHud-npcsRaceInput").val()?.trim();
+        const party = html
+          .find('input[name="heraldHud-npcsPartyInput"]:checked')
+          .val();
+
+        let missingFields = [];
+
+        if (!selectedGender) missingFields.push("Gender");
+        if (!faction) missingFields.push("Faction");
+        if (!race) missingFields.push("Race");
+        if (!party) missingFields.push("Party");
+
+        if (missingFields.length > 0) {
+          const message = `Please fill out the following field(s): ${missingFields.join(
+            ", "
+          )}`;
+          ui.notifications.error(message);
+          return;
+        }
+
+        let data = {
+          actor: actor,
+          gender: selectedGender,
+          faction: faction,
+          race: race,
+          party: party,
+        };
+        await heraldHud_confirmAddNpcsTarget(data);
+        dialog.close();
+      });
+
+      cancelButton.on("click", () => dialog.close());
+
       html.find(".heraldHud-npcsGenderOption").on("click", function () {
         html.find(".heraldHud-npcsGenderOption").removeClass("selected").css({
           backgroundColor: "",
           color: "",
         });
-
         $(this)
           .addClass("selected")
           .css("background-color", "rgba(100, 100, 100, 0.8)")
@@ -2713,7 +2930,6 @@ async function heraldHud_showDialogNpcsTarget() {
       html.find(".heraldHud-npcsFactionUnknownBtn").on("click", function () {
         const input = html.find("#heraldHud-npcsFactionInput");
         const isActive = $(this).hasClass("selected");
-
         if (isActive) {
           $(this).removeClass("selected").css({
             backgroundColor: "",
@@ -2732,7 +2948,6 @@ async function heraldHud_showDialogNpcsTarget() {
       html.find(".heraldHud-npcsRaceUnknownBtn").on("click", function () {
         const input = html.find("#heraldHud-npcsRaceInput");
         const isActive = $(this).hasClass("selected");
-
         if (isActive) {
           $(this).removeClass("selected").css({
             backgroundColor: "",
@@ -2748,8 +2963,10 @@ async function heraldHud_showDialogNpcsTarget() {
         }
       });
     },
-    default: "save",
-  }).render(true);
+    default: "",
+  });
+
+  dialog.render(true);
 }
 
 async function heraldHud_confirmAddNpcsTarget(data) {
@@ -2778,6 +2995,7 @@ async function heraldHud_confirmAddNpcsTarget(data) {
         <p><strong>Public Notes :</strong></p>
         ${data.actor.system.details.biography.public}
         <p><strong>Extra Notes :</strong> </p>
+        <p></p>
       `,
       format: 1,
     },
@@ -2816,7 +3034,7 @@ async function heraldHud_confirmAddNpcsTarget(data) {
     }
 
     const uuid = partyJournal.uuid;
-    await heraldHud_menuDetailSocket.executeAsGM("backupHeraldHudNpcs", uuid);
+    await heraldHud_journalingSocket.executeAsGM("backupHeraldHudNpcs", uuid);
   }
 }
 
@@ -2917,7 +3135,6 @@ async function heraldHud_renderNpcsMiddleContainer() {
         icon =
           '<i class="fa-solid fa-mars-and-venus" style="color:rgb(121, 0, 235)"></i>';
       }
-      console.log(npc);
       listNpcs += `
         <div id="heraldHud-npcsPartyContainer" class="heraldHud-npcsPartyContainer" data-journalId="${npc.journalId}" data-pageId="${npc.pageId}">
             <div id="heraldHud-npcsPartyLeft" class="heraldHud-npcsPartyLeft">
@@ -3123,7 +3340,7 @@ Hooks.on("createJournalEntryPage", (page, options, userId) => {
   const user = game.users.get(userId);
   const journal = page.parent;
 
-  heraldHud_menuDetailSocket.executeAsGM(
+  heraldHud_journalingSocket.executeAsGM(
     "backupHeralHudJournalByPage",
     user,
     journal
@@ -3133,7 +3350,7 @@ Hooks.on("updateJournalEntryPage", async (page, changes, options, userId) => {
   const user = game.users.get(userId);
   const journal = page.parent;
 
-  heraldHud_menuDetailSocket.executeAsGM(
+  heraldHud_journalingSocket.executeAsGM(
     "backupHeralHudJournalByPage",
     user,
     journal

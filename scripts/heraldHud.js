@@ -1,4 +1,4 @@
-import * as md from "./menuDetail.js";
+import * as md from "./journaling.js";
 import * as hl from "./helper.js";
 
 let heraldHud_actorSelected = null;
@@ -16,7 +16,7 @@ let heraldHud_dialogBorderColor = ``;
 let heraldHud_dialogBoxShadowColor = ``;
 let heraldHud_settingButtonColor = "";
 let heraldHud_informationButtonColor = "";
-
+let heraldHud_enableCombineFeature = false;
 let heraldHud_overlayHudbarNameImage = "";
 let heraldHud_listOverlayHudbarFrame = [
   "basic_frame",
@@ -84,6 +84,10 @@ Hooks.once("ready", () => {
   heraldHud_informationButtonColor = game.settings.get(
     "herald-hud",
     "informationButtonColor"
+  );
+  heraldHud_enableCombineFeature = game.settings.get(
+    "herald-hud",
+    "enableCombineFeature"
   );
 });
 
@@ -371,39 +375,32 @@ async function heraldHud_renderActorData() {
       preparedSpellsActionContainerDiv.innerHTML = ``;
     }
   }
-  let menuDetailContainerDiv = document.getElementById(
-    "heraldHud-menuDetailContainer"
+  let journalingContainerDiv = document.getElementById(
+    "heraldHud-journalingContainer"
   );
 
-  // if (menuDetailContainerDiv) {
-  //   menuDetailContainerDiv.innerHTML = `
-  //   <div id="heraldHud-menuDetailWrapper" class="heraldHud-menuDetailWrapper">
-  //     <div id="heraldHud-menuDetailButton" class="heraldHud-menuDetailButton"></div>
-  //   </div>
-  //   `;
-  // }
-
-  if (menuDetailContainerDiv) {
-    menuDetailContainerDiv.innerHTML = `
-    <div id="heraldHud-menuDetailDivContainer" class="heraldHud-menuDetailDivContainer">
-      <div id="heraldHud-menuDetailWrapper" class="heraldHud-menuDetailWrapper">
-      <div id="heraldHud-menuDetailButton" class="heraldHud-menuDetailButton"></div>
+  if (journalingContainerDiv) {
+    journalingContainerDiv.innerHTML = `
+    <div id="heraldHud-journalingDivContainer" class="heraldHud-journalingDivContainer">
+      <div id="heraldHud-journalingWrapper" class="heraldHud-journalingWrapper">
+      <div id="heraldHud-journalingButton" class="heraldHud-journalingButton"></div>
        <img
           src="/modules/herald-hud-beta/assets/menudetail_icon.webp"
           alt=""
-          class="heraldHud-menuDetailImage"
+          class="heraldHud-journalingImage"
         />
       </div>
+      <div class="heraldHud-journalingTooltip">Journaling</div>
     </div>
 
   
     `;
   }
-  let menuDetailWrapper = document.getElementById(
-    "heraldHud-menuDetailWrapper"
+  let journalingWrapper = document.getElementById(
+    "heraldHud-journalingWrapper"
   );
-  if (menuDetailWrapper) {
-    menuDetailWrapper.addEventListener("click", (event) => {
+  if (journalingWrapper) {
+    journalingWrapper.addEventListener("click", (event) => {
       event.stopPropagation();
       heraldHud_showDialog("menu");
     });
@@ -2363,6 +2360,39 @@ async function heraldHud_renderItemFeatures() {
         </div>
       </div>
     </div>`;
+
+    let dialogItemFeatures = document.getElementById(
+      "heraldHud-dialogItemFeatures"
+    );
+    let dialogActiveContainer = document.getElementById(
+      "heraldHud-dialogFeaturesActiveContainer"
+    );
+    let dialogPassiveContainer = document.getElementById(
+      "heraldHud-dialogFeaturesPassiveContainer"
+    );
+    let listActiveContainer = document.getElementById(
+      "heraldHud-dialogListFeaturesActive"
+    );
+    let listPassiveContainer = document.getElementById(
+      "heraldHud-dialogListFeaturesPassive"
+    );
+    if (heraldHud_enableCombineFeature == true) {
+      dialogItemFeatures.style.overflowY = "auto";
+      dialogActiveContainer.style.overflowY = "";
+      dialogPassiveContainer.style.overflowY = "";
+      dialogActiveContainer.style.height = "";
+      dialogPassiveContainer.style.height = "";
+      listActiveContainer.style.overflowY = "";
+      listPassiveContainer.style.overflowY = "";
+    } else {
+      dialogItemFeatures.style.overflowY = "";
+      dialogActiveContainer.style.overflowY = "auto";
+      dialogPassiveContainer.style.overflowY = "auto";
+       dialogActiveContainer.style.height = "50%";
+      dialogPassiveContainer.style.height = "50%";
+      listActiveContainer.style.overflowY = "auto";
+      listPassiveContainer.style.overflowY = "auto";
+    }
   }
   await heraldHud_getDataFeatures();
 }
@@ -3637,6 +3667,14 @@ async function heraldHud_openSettingHudDialog() {
             }>
             <label for="heraldHud-dockHudToggle">Dock Herald's HUD to Bottom</label>
           </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+            <input type="checkbox" id="heraldHud-enableCombineFeature" ${
+              game.settings.get("herald-hud", "enableCombineFeature")
+                ? "checked"
+                : ""
+            }>
+            <label for="heraldHud-enableCombineFeature">Enable Combine Feature</label>
+          </div>
           <div style="display: flex;align-items: center;color:white;  justify-content: space-between; width: 100%;">
             <label for="heraldHud-hudFrameSelect"style="flex: 1; text-align: left;">HUD Bar Frame Style:</label>
             <select id="heraldHud-hudFrameSelect" style="flex: 1;color: white !important;">
@@ -3722,6 +3760,9 @@ async function heraldHud_openSettingHudDialog() {
           )[0];
 
           let dockHudCheckbox = html.find("#heraldHud-dockHudToggle")[0];
+          let enableCombineFeature = html.find(
+            "#heraldHud-enableCombineFeature"
+          )[0];
           let hudFrameSelect = html.find("#heraldHud-hudFrameSelect")[0];
           let hudScaleInput = html.find("#heraldHud-hudScaleInput")[0];
           let borderColorPicker = html.find("#heraldHud-borderColorPicker")[0];
@@ -3755,6 +3796,7 @@ async function heraldHud_openSettingHudDialog() {
           heraldHud_displayInformationButton =
             informationButtonCheckbox.checked;
           heraldHud_speedHudbarOff = speedHudbarCheckbox.checked;
+          heraldHud_enableCombineFeature = enableCombineFeature.checked;
           heraldHud_overlayHudbarNameImage = hudFrameSelect.value;
 
           heraldHud_dialogBorderColor = borderColorPicker.value;
@@ -3793,6 +3835,11 @@ async function heraldHud_openSettingHudDialog() {
             "herald-hud",
             "speedHudbarOff",
             heraldHud_speedHudbarOff
+          );
+          await game.settings.set(
+            "herald-hud",
+            "enableCombineFeature",
+            heraldHud_enableCombineFeature
           );
           await game.settings.set(
             "herald-hud",
