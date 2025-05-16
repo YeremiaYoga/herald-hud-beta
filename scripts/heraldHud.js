@@ -2781,7 +2781,7 @@ async function heraldHud_getDataSpellsList() {
       if (key >= 1 && key <= 9) {
         let slotValue = actor.system?.spells?.[`spell${key}`]?.value || 0;
         let slotMax = actor.system?.spells?.[`spell${key}`]?.max || 0;
-        spellSlotDisplay = `(${slotValue}/${slotMax})`;
+        spellSlotDisplay = ` (${slotValue}/${slotMax})`;
       }
 
       listSpells += `
@@ -3057,7 +3057,7 @@ async function heraldHud_getDataSpellsSlot() {
 
       let slotValue = actor.system?.spells?.[`spell${level}`]?.value || 0;
       let slotMax = actor.system?.spells?.[`spell${level}`]?.max || 0;
-      let spellSlotDisplay = `${slotValue}/${slotMax}`;
+      let spellSlotDisplay = ` (${slotValue}/${slotMax})`;
       let spellSlotElement = document.querySelector(
         `.heraldHud-spellLevelSlot[data-level="${level}"]`
       );

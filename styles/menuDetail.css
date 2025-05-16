@@ -31,25 +31,25 @@
 
 
 .heraldHud-journalingTooltip {
-    position: absolute;
-    bottom: -100%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
-    padding: 5px 10px;
-    border-radius: 4px;
-    font-size: 12px;
-    white-space: nowrap;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
-    pointer-events: none;
+  position: absolute;
+  bottom: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+  pointer-events: none;
 }
 
 .heraldHud-journalingDivContainer:hover .heraldHud-journalingTooltip {
-    opacity: 1;
-    visibility: visible;
+  opacity: 1;
+  visibility: visible;
 }
 
 .heraldHud-journalingImage {
@@ -589,12 +589,16 @@
 .heraldHud-questMiddleContainer {
   display: flex;
   width: 100%;
-  gap: 1rem;
+  gap: 10px;
 }
 
-.heraldHud-questMiddleLeftContainer,
+.heraldHud-questMiddleLeftContainer {
+  flex: 0 0 40%;
+  height: 300px;
+}
+
 .heraldHud-questMiddleRightContainer {
-  flex: 1 1 50%;
+  flex: 0 0 57%;
   height: 340px;
 }
 
@@ -669,18 +673,18 @@
   border: none;
 }
 
-.heraldHud-listQuestName{
+.heraldHud-listQuestName {
   font-size: 20px;
   color: white;
   font-weight: bold;
 }
 
-.heraldHud-questNameParty{
+.heraldHud-questNameParty {
   font-size: 12px;
   color: #999;
 }
 
-.heraldHud-questItemRightContainer{
+.heraldHud-questItemRightContainer {
   margin-left: auto;
   display: flex;
   align-items: center;
@@ -689,59 +693,72 @@
   font-size: 16px;
 }
 
-.heraldHud-visibleButton{
+.heraldHud-visibleButton {
   cursor: pointer;
 }
 
-.heraldHud-questDetailContainer{
- 
-}
+.heraldHud-questDetailContainer {}
 
-.heraldHud-questDetailItem{
+.heraldHud-questDetailItem {
   color: white;
 }
-.heraldHud-questDetailTopContainer{
+
+.heraldHud-questDetailTopContainer {
   display: flex;
 
   justify-content: space-between;
 }
 
 
-.heraldHud-questTitle{
+.heraldHud-questTitle {
   font-size: 30px;
   font-weight: bold;
   color: white;
+  cursor: pointer;
 }
-.heraldHud-questDetailType{
+
+.heraldHud-questDetailType {
   width: 50px;
   height: auto;
   object-fit: cover;
   border: none;
 }
-.heraldHud-questHeaderContainer{
+
+.heraldHud-questHeaderContainer {
   display: flex;
   align-items: center;
   margin-bottom: 10px;
 }
-.heraldHud-questHeaderName{
+
+.heraldHud-questHeaderName {
   font-size: 18px;
   font-weight: bold;
+  cursor: pointer;
 }
 
-.heraldHud-questDetailItem{
+.heraldHud-questDetailItem {
   color: white;
 }
 
-.heraldHud-questPageListContainer{
+.heraldHud-questPageListContainer {
   height: 250px;
   overflow-y: auto;
 }
-.heraldHud-questPageContainer{
-margin-bottom: 20px;
+
+.heraldHud-questPageContainer {
+  margin-bottom: 20px;
 }
-.heraldHud-questPageHeader{
+
+.heraldHud-questPageHeader {
   display: flex;
   align-items: center;
+}
+
+.heraldHud-editQuestPageContent {
+  display: flex;
+  justify-content: flex-end;
+  cursor: pointer;
+  margin-bottom: 10px;
 }
 
 /* --------------------------------------------------------------------------------------

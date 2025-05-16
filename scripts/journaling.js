@@ -57,8 +57,8 @@ Hooks.once("socketlib.ready", () => {
 
   heraldHud_journalingSocket.register(
     "heraldHudCreateQuest",
-    async (user, input, party, type) => {
-      await heraldHud_createJournalQuest(user, input, party, type);
+    async (user, input, party, type, location) => {
+      await heraldHud_createJournalQuest(user, input, party, type, location);
     }
   );
 
@@ -2181,7 +2181,6 @@ async function heraldHud_renderListQuest() {
       if (pagesArray[2]) {
         page3 = pagesArray[2].name;
       }
-  
     }
 
     listQuest += `
@@ -2229,7 +2228,7 @@ async function heraldHud_renderListQuest() {
         icon.style.color = newVisible ? "white" : "gray";
 
         heraldHud_journalingSocket.executeForEveryone(
-          "updatePartyJournalAllUser"
+          "updateQuestAllUser"
         );
       });
     });
@@ -2309,6 +2308,13 @@ async function heraldHud_addQuestPlayer() {
           `<div style=" font-style:italic;">No journals found</div>`
         }
       </div>
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom:10px;">
+        <label>Location:</label>
+        <div style="display: flex; gap: 5px; align-items: center;">
+          <input type="text" id="heraldHud-questLocationInput" style="flex: 1;" />
+          <div class="heraldHud-questLocationUnknownBtn" style="padding:4px 9px;border-radius: 4px;cursor: pointer;border: 1px solid rgba(100, 100, 100, 0.8);">?</div>
+        </div>
+      </div>
     </form>
   `,
     buttons: {},
@@ -2325,15 +2331,37 @@ async function heraldHud_addQuestPlayer() {
         .find(".dialog-buttons")
         .append(confirmButton, cancelButton);
 
+      html.find(".heraldHud-questLocationUnknownBtn").on("click", function () {
+        const input = html.find("#heraldHud-questLocationInput");
+        const isActive = $(this).hasClass("selected");
+        if (isActive) {
+          $(this).removeClass("selected").css({
+            backgroundColor: "",
+            color: "",
+          });
+          input.prop("disabled", false).val("");
+        } else {
+          $(this).addClass("selected").css({
+            backgroundColor: "rgba(100, 100, 100, 0.8)",
+            color: "#fff",
+          });
+          input.prop("disabled", true).val("Unknown");
+        }
+      });
+
       confirmButton.on("click", async () => {
         const questName = html.find("#heraldHud-questNameInput").val()?.trim();
         const questParty = html
           .find("input[name='heraldHud-questParty']:checked")
           .val();
-
+        const location = html
+          .find("#heraldHud-questLocationInput")
+          .val()
+          ?.trim();
         let missingFields = [];
         if (!questName) missingFields.push("Quest Name");
         if (!questParty) missingFields.push("Party");
+        if (!location) missingFields.push("Location");
 
         if (missingFields.length > 0) {
           ui.notifications.error(
@@ -2347,10 +2375,13 @@ async function heraldHud_addQuestPlayer() {
           user,
           questName,
           [questParty],
-          "Players Quest"
+          "Players Quest",
+          location
         );
-        await heraldHud_renderListQuest();
         dialog.close();
+        setTimeout(async () => {
+          await heraldHud_renderListQuest();
+        }, 500);
       });
 
       cancelButton.on("click", () => dialog.close());
@@ -2449,6 +2480,13 @@ async function heraldHud_addQuestDM() {
           `<div style=" font-style:italic;">No journals found</div>`
         }
       </div>
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom:10px;">
+        <label>Location:</label>
+        <div style="display: flex; gap: 5px; align-items: center;">
+          <input type="text" id="heraldHud-questLocationInput" style="flex: 1;" />
+          <div class="heraldHud-questLocationUnknownBtn" style="padding:4px 9px;border-radius: 4px;cursor: pointer;border: 1px solid rgba(100, 100, 100, 0.8);">?</div>
+        </div>
+      </div>
     </form>
   `,
     buttons: {},
@@ -2464,6 +2502,24 @@ async function heraldHud_addQuestDM() {
         .find(".dialog-buttons")
         .append(confirmButton, cancelButton);
 
+      html.find(".heraldHud-questLocationUnknownBtn").on("click", function () {
+        const input = html.find("#heraldHud-questLocationInput");
+        const isActive = $(this).hasClass("selected");
+        if (isActive) {
+          $(this).removeClass("selected").css({
+            backgroundColor: "",
+            color: "",
+          });
+          input.prop("disabled", false).val("");
+        } else {
+          $(this).addClass("selected").css({
+            backgroundColor: "rgba(100, 100, 100, 0.8)",
+            color: "#fff",
+          });
+          input.prop("disabled", true).val("Unknown");
+        }
+      });
+
       confirmButton.on("click", async () => {
         const questName = html.find("#heraldHud-questNameInput").val()?.trim();
         const questType = html
@@ -2475,11 +2531,16 @@ async function heraldHud_addQuestDM() {
           .each(function () {
             questParties.push(this.value);
           });
-
+        const location = html
+          .find("#heraldHud-questLocationInput")
+          .val()
+          ?.trim();
+        console.log(location);
         let missingFields = [];
         if (!questName) missingFields.push("Quest Name");
         if (!questType) missingFields.push("Quest Type");
         if (questParties.length === 0) missingFields.push("Party That Can See");
+        if (!location) missingFields.push("Location");
 
         if (missingFields.length > 0) {
           ui.notifications.error(
@@ -2492,10 +2553,14 @@ async function heraldHud_addQuestDM() {
           user,
           questName,
           questParties,
-          questType
+          questType,
+          location
         );
-        await heraldHud_renderListQuest();
+
         dialog.close();
+        setTimeout(async () => {
+          await heraldHud_renderListQuest();
+        }, 500);
       });
 
       cancelButton.on("click", () => dialog.close());
@@ -2506,7 +2571,13 @@ async function heraldHud_addQuestDM() {
   dialog.render(true);
 }
 
-async function heraldHud_createJournalQuest(user, input, arrParty, type) {
+async function heraldHud_createJournalQuest(
+  user,
+  input,
+  arrParty,
+  type,
+  location
+) {
   const folders = game.folders.filter((f) => f.type === "JournalEntry");
 
   let heraldHudFolder = "";
@@ -2541,6 +2612,32 @@ async function heraldHud_createJournalQuest(user, input, arrParty, type) {
         category: "Quest",
       },
       ownership: { default: 3 },
+      pages: [
+        {
+          name: "DM Information",
+          type: "text",
+          text: {
+            content: "",
+            format: 1,
+          },
+        },
+        {
+          name: "Player Information",
+          type: "text",
+          text: {
+            content: "",
+            format: 1,
+          },
+        },
+        {
+          name: location,
+          type: "text",
+          text: {
+            content: "On Going",
+            format: 1,
+          },
+        },
+      ],
     });
   }
 }
@@ -2562,6 +2659,8 @@ async function heraldHud_renderQuestMiddleRightContainer() {
 }
 
 async function heraldHud_renderQuestPage() {
+  const user = game.user;
+  const selectedActor = user.character;
   if (!heraldHud_questShow) {
     return;
   }
@@ -2593,23 +2692,45 @@ async function heraldHud_renderQuestPage() {
 
   let pageDetail = "";
   let numberPage = 0;
-  for (let page of [page1, page2]) {
+  const progressName = new DOMParser().parseFromString(
+    page3.text.content,
+    "text/html"
+  ).body.textContent;
+
+  let editPageDM = ``;
+  let editPagePlayer = ``;
+
+  if (user.isGM) {
+    editPageDM = `<div class="heraldHud-editQuestPageContent" data-pageId="${page1.id}"><i class="fa-solid fa-gopuram" style="font-size:20px;"></i></div>`;
+  }
+  editPagePlayer = `<div class="heraldHud-editQuestPageContent" data-pageId="${page2.id}"><i class="fa-solid fa-gopuram" style="font-size:20px;"></i></div>`;
+
+  const pagesToRender = [page1, page2];
+
+  for (let i = 0; i < pagesToRender.length; i++) {
+    const page = pagesToRender[i];
+    if (!page.text.content) continue;
+
     numberPage++;
+
+    const editIcon = i === 0 ? editPageDM : editPagePlayer;
+
     pageDetail += `
     <div class="heraldHud-questPageContainer">
-      <div class="heraldHud-questPageHeader">
-      </div>
+  
       <div>${page.text.content}</div>
-       <div style="flex: 1; height: 2px; background-color: #aaa;"></div>
+      <div >
+        ${editIcon}
+      </div>
+      
+      <div style="flex: 1; height: 2px; background-color: #aaa;"></div>
     </div>`;
   }
-  //  <div class="heraldHud-questPageNumber">Page ${numberPage}</div>
-  //       <div style="flex: 1; height: 2px; background-color: #aaa;"></div>
   if (questDetail) {
     questDetail.innerHTML = `
     <div class="heraldHud-questDetailItem">
       <div class="heraldHud-questDetailTopContainer">
-        <div class="heraldHud-questTitle">${journal.name}</div>
+        <div id="heraldHud-questTitle"  class="heraldHud-questTitle">${journal.name}</div>
         <div>  
           <img
             src="${src}"
@@ -2619,14 +2740,111 @@ async function heraldHud_renderQuestPage() {
       </div>
       <div class="heraldHud-questHeaderContainer">
         <div style="width: 20px; height: 2px; background-color: #aaa;"></div>
-        <div class="heraldHud-questHeaderName">${page3.name}</div>
+        <div id="heraldHud-questHeaderName" class="heraldHud-questHeaderName">${page3.name} / ${progressName}</div>
         <div style="flex: 1; height: 2px; background-color: #aaa;"></div>
       </div>
-      
       <div class="heraldHud-questPageListContainer">
         ${pageDetail}
       </div>
     </div>`;
+
+    if (user.isGM || journal.flags.type == "Players Quest") {
+      document
+        .getElementById("heraldHud-questTitle")
+        ?.addEventListener("click", async () => {
+          const content = `
+      <form>
+        <div class="form-group">
+          <label>Quest Name</label>
+          <input type="text" name="heraldHud-editQuestName" value="${journal.name}"/>
+        </div>
+        <div class="form-group">
+          <label>Progress :</label>
+          <input type="text" name="heraldHud-editQuestProgress" value="${progressName}"/>
+        </div>
+      </form>
+    `;
+          new Dialog({
+            title: "Edit Quest Info",
+            content: content,
+            buttons: {
+              save: {
+                label: "Save",
+                callback: async (html) => {
+                  const title = html
+                    .find("[name='heraldHud-editQuestName']")
+                    .val();
+                  const textContent = html
+                    .find("[name='heraldHud-editQuestProgress']")
+                    .val();
+
+                  await journal.update({ name: title });
+                  await page3.update({
+                    "text.content": `<p>${textContent}</p>`,
+                    "text.format": 1,
+                  });
+
+                  await heraldHud_renderQuestPage();
+                  await heraldHud_renderListQuest();
+                },
+              },
+              cancel: {
+                label: "Cancel",
+              },
+            },
+            default: "save",
+          }).render(true);
+        });
+
+      document
+        .getElementById("heraldHud-questHeaderName")
+        ?.addEventListener("click", async () => {
+          const content = `
+      <form>
+        <div class="form-group">
+          <label>Location Name</label>
+          <input type="text" name="heraldHud-editLocationName" value="${page3.name}"/>
+        </div>
+      </form>
+    `;
+          new Dialog({
+            title: "Edit Location Name",
+            content: content,
+            buttons: {
+              save: {
+                label: "Save",
+                callback: async (html) => {
+                  const locationName = html
+                    .find("[name='heraldHud-editLocationName']")
+                    .val();
+                  await page3.update({ name: locationName });
+
+                  await heraldHud_renderQuestPage();
+                  await heraldHud_renderListQuest();
+                },
+              },
+              cancel: {
+                label: "Cancel",
+              },
+            },
+            default: "save",
+          }).render(true);
+        });
+    }
+    document
+      .querySelectorAll(".heraldHud-editQuestPageContent")
+      .forEach((el) => {
+        el.addEventListener("click", async (e) => {
+          const pageId = e.currentTarget.dataset.pageid;
+          const page = game.journal.get(heraldHud_questShow).pages.get(pageId);
+
+          if (page) {
+            page.sheet.render(true);
+          } else {
+            ui.notifications.warn("Page not found.");
+          }
+        });
+      });
   }
 }
 
@@ -3358,6 +3576,8 @@ Hooks.on("updateJournalEntryPage", async (page, changes, options, userId) => {
   await heraldHud_renderListPartyJournalMiddleContainer();
   await heraldHud_renderListPersonalNotesMiddleContainer();
   await heraldHud_renderNpcsMiddleContainer();
+  await heraldHud_renderQuestPage();
+  await heraldHud_renderListQuest();
 });
 
 // ?????????????????????????????????????????????????????????????
@@ -3402,4 +3622,4 @@ async function heraldHud_deletePages(type, journalId, pageId) {
   confirmationDialog.render(true);
 }
 
-export { heraldHud_renderListMenu };
+export { heraldHud_renderListMenu };   
