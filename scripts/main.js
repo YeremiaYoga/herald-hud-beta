@@ -135,6 +135,6 @@ Hooks.once("init", () => {
     scope: "client",
     config: true,
     type: String,
-    default: "aura",
+    default: "pattern",
   });
 });

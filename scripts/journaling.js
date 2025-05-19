@@ -1136,54 +1136,94 @@ async function heraldHud_addPagePersonalNotes(journalId) {
   }).render(true);
 }
 
+// async function heraldHud_gmCreatePersonalNotesFolder(user) {
+//   const folders = await game.folders.filter((f) => f.type === "JournalEntry");
+//   let heraldHudFolder = "";
+//   let personalNotesFolder = "";
+//   let playerFolder = "";
+//   for (let folder of folders) {
+//     if (folder.name == "Herald Hud") {
+//       heraldHudFolder = folder;
+//     }
+
+//     if (
+//       folder.name == "Personal Notes" &&
+//       folder.folder.id == heraldHudFolder.id
+//     ) {
+//       personalNotesFolder = folder;
+//     }
+//     if (
+//       folder.name == user.name &&
+//       folder.folder.id == personalNotesFolder.id
+//     ) {
+//       playerFolder = folder;
+//     }
+//   }
+
+//   if (!heraldHudFolder) {
+//     heraldHudFolder = await Folder.create({
+//       name: "Herald Hud",
+//       type: "JournalEntry",
+//     });
+//   }
+
+//   if (!personalNotesFolder) {
+//     personalNotesFolder = await Folder.create({
+//       name: "Personal Notes",
+//       type: "JournalEntry",
+//       folder: heraldHudFolder.id,
+//     });
+//   }
+
+//   if (!playerFolder) {
+//     const hexColor = `${user.color.toString(16).padStart(6, "0")}`;
+//     playerFolder = await Folder.create({
+//       name: user.name,
+//       type: "JournalEntry",
+//       folder: personalNotesFolder.id,
+//       color: hexColor,
+//     });
+//   }
+// }
+
 async function heraldHud_gmCreatePersonalNotesFolder(user) {
   const folders = game.folders.filter((f) => f.type === "JournalEntry");
-  let heraldHudFolder = "";
-  let personalNotesFolder = "";
-  let playerFolder = "";
-  for (let folder of folders) {
-    if (folder.name == "Herald Hud") {
-      heraldHudFolder = folder;
-    }
 
-    if (
-      folder.name == "Personal Notes" &&
-      folder.folder.id == heraldHudFolder.id
-    ) {
-      personalNotesFolder = folder;
-    }
-    if (
-      folder.name == user.name &&
-      folder.folder.id == personalNotesFolder.id
-    ) {
-      playerFolder = folder;
-    }
-  }
-
-  if (!heraldHudFolder) {
-    heraldHudFolder = await Folder.create({
+  let heraldHud = folders.find((f) => f.name === "Herald Hud");
+  if (!heraldHud) {
+    heraldHud = await Folder.create({
       name: "Herald Hud",
       type: "JournalEntry",
     });
   }
 
-  if (!personalNotesFolder) {
-    personalNotesFolder = await Folder.create({
+  let personalNotes = folders.find(
+    (f) => f.name === "Personal Notes" && f.folder === heraldHud.id
+  );
+  if (!personalNotes) {
+    personalNotes = await Folder.create({
       name: "Personal Notes",
       type: "JournalEntry",
-      folder: heraldHudFolder.id,
+      folder: heraldHud.id,
     });
   }
 
-  if (!playerFolder) {
-    const hexColor = `${user.color.toString(16).padStart(6, "0")}`;
-    playerFolder = await Folder.create({
-      name: user.name,
-      type: "JournalEntry",
-      folder: personalNotesFolder.id,
-      color: hexColor,
-    });
-  }
+  setTimeout(async () => {
+    let playerFolder = folders.find(
+      (f) => f.name === user.name && f.folder === personalNotes.id
+    );
+    if (!playerFolder) {
+      const hex = user.color
+        ? `#${user.color.toString(16).padStart(6, "0")}`
+        : "#ffffff";
+      playerFolder = await Folder.create({
+        name: user.name,
+        type: "JournalEntry",
+        folder: personalNotes.id,
+        color: hex,
+      });
+    }
+  }, 500);
 }
 
 /* ------------------------------------------------------------------------------
@@ -2572,7 +2612,6 @@ async function heraldHud_addQuestDM() {
           .find("#heraldHud-questLocationInput")
           .val()
           ?.trim();
-        console.log(location);
         let missingFields = [];
         if (!questName) missingFields.push("Quest Name");
         if (!questType) missingFields.push("Quest Type");

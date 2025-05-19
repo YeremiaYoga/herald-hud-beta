@@ -99,7 +99,6 @@ async function heraldHud_getAllNpcsByParty(partylist) {
         data.pageId = page.id;
         data.journalId = group.journalId;
         data.folderId = group.folder;
-        console.log(data);
         allNpcsData.push(data);
       }
     }

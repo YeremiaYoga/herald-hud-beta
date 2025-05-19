@@ -44,7 +44,7 @@ let heraldHud_listOverlayHudbarFrame = [
 ];
 let heraldHud_bgBehindDialogImage = "";
 let heraldHud_listBgBehindDialog = [
-  "aura_",
+  "aura",
   "floral",
   "magical",
   "mirror_glass",
@@ -248,20 +248,35 @@ async function heraldHud_renderOverlayHudbarFrame() {
 
 async function heraldHud_renderBgBehindDialog() {
   let imageName = heraldHud_bgBehindDialogImage;
-  for (const sheet of document.styleSheets) {
-    try {
-      for (const rule of sheet.cssRules) {
-        if (rule.selectorText === ".heraldHud-dialog::before") {
-          rule.style.backgroundImage = `url("/modules/herald-hud-beta/assets/hudbg-dialog/${imageName}_bg.png")`;
-          return true;
-        }
-      }
-    } catch (e) {
-      continue;
-    }
+  const dialog = document.querySelector(".heraldHud-dialog");
+  if (dialog) {
+    dialog.style.backgroundImage = `
+      url("/modules/herald-hud-beta/assets/hudbg-dialog/${imageName}_bg.png"),
+      url("/modules/herald-hud-beta/assets/hudbg-dialog/splash_bottom_bg.png")
+    `;
+    dialog.style.backgroundRepeat = "no-repeat, no-repeat";
+    dialog.style.backgroundPosition = "top right, center bottom";
+    dialog.style.backgroundSize = "100% auto, 100% auto";
   }
-  return false;
 }
+
+
+// async function heraldHud_renderBgBehindDialog() {
+//   let imageName = heraldHud_bgBehindDialogImage;
+//   for (const sheet of document.styleSheets) {
+//     try {
+//       for (const rule of sheet.cssRules) {
+//         if (rule.selectorText === ".heraldHud-dialog::before") {
+//           rule.style.backgroundImage = `url("/modules/herald-hud-beta/assets/hudbg-dialog/${imageName}_bg.png")`;
+//           return true;
+//         }
+//       }
+//     } catch (e) {
+//       continue;
+//     }
+//   }
+//   return false;
+// }
 
 async function heraldHud_getActorData() {
   const user = game.user;
@@ -1812,7 +1827,7 @@ async function heraldHud_getDataInventory() {
     }
 
     listWeapons += `
-      <div id="heraldHud-dialogWeaponContainer" class="heraldHud-dialogWeaponContainer">
+      <div  class="heraldHud-dialogWeaponContainer">
         <div id="heraldHud-dialogWeaponItem" class="heraldHud-dialogWeaponItem" data-item-id="${item.id}">
             <div id="heraldHud-weaponLeft" class="heraldHud-weaponLeft">
                 <div class="heraldHud-dialogWeaponImageContainer">
@@ -1836,7 +1851,7 @@ async function heraldHud_getDataInventory() {
                 </div>
             </div>
         </div>
-        <div id="heraldHud-dialogWeaponTooltip" class="heraldHud-dialogWeaponTooltip">
+        <div  class="heraldHud-dialogWeaponTooltip">
           <div class="heraldHud-weaponTooltipTop">${item.name}  
           <hr style=" border: 1px solid grey; margin-top: 5px;"></div>
           <div class="heraldHud-weaponTooltipMiddle">${htmlDescription} 
@@ -3272,7 +3287,6 @@ async function heraldHud_renderDataStatsSkill() {
     let skillTotal =
       skillData.total >= 0 ? `+${skillData.total}` : skillData.total;
     let proficientData = ``;
-    console.log(skillData);
     if (skillData.proficient == 1) {
       proficientData = `
           <div class="heraldHud-skillProficientWrapper">
@@ -4101,7 +4115,6 @@ async function heraldHud_getDataInformation() {
   let dialogInformationDiv = document.getElementById(
     "heraldHud-dialogActorInformation"
   );
-  console.log(actor.system);
   let sensesDiv = ``;
   let resistancesDiv = ``;
   let damageImmunitiesDiv = ``;
