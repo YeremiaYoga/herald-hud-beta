@@ -2159,14 +2159,21 @@ async function heraldHud_renderListQuest() {
     if (activeTypeEl && quest.flags.type !== activeTypeEl.dataset.name)
       continue;
     let visibleButton = ``;
+    let deleteButton = ``;
     if (user.isGM) {
       const isVisible = quest.flags.visible === true;
       const iconColor = isVisible ? "white" : "gray";
 
       visibleButton = `
-    <div class="heraldHud-visibleButton" data-id="${quest.id}" data-visible="${isVisible}">
+    <div class="heraldHud-questVisibleButton" data-id="${quest.id}" data-visible="${isVisible}">
       <i class="fa-solid fa-eye" style="color: ${iconColor};"></i>
     </div>`;
+
+      deleteButton = `
+    <div class="heraldHud-questDeleteButton" data-id="${quest.id}">
+     <i class="fa-solid fa-trash" style="color: red;"></i>
+    </div>
+    `;
     } else {
       if (quest.flags.visible == false) {
         continue;
@@ -2201,6 +2208,7 @@ async function heraldHud_renderListQuest() {
       </div>
       <div class="heraldHud-questItemRightContainer">
         ${visibleButton}
+        ${deleteButton}
       </div>
     </div>
     `;
@@ -2209,7 +2217,9 @@ async function heraldHud_renderListQuest() {
   if (listQuestView) {
     listQuestView.innerHTML = listQuest;
 
-    const visible = listQuestView.querySelectorAll(".heraldHud-visibleButton");
+    const visible = listQuestView.querySelectorAll(
+      ".heraldHud-questVisibleButton"
+    );
     visible.forEach((vsb) => {
       vsb.addEventListener("click", async () => {
         const questId = vsb.getAttribute("data-id");
@@ -2227,9 +2237,32 @@ async function heraldHud_renderListQuest() {
         const icon = vsb.querySelector("i");
         icon.style.color = newVisible ? "white" : "gray";
 
-        heraldHud_journalingSocket.executeForEveryone(
-          "updateQuestAllUser"
-        );
+        heraldHud_journalingSocket.executeForEveryone("updateQuestAllUser");
+      });
+    });
+
+    const deleteButton = listQuestView.querySelectorAll(
+      ".heraldHud-questDeleteButton"
+    );
+
+    deleteButton.forEach((dlt) => {
+      dlt.addEventListener("click", async () => {
+        const questId = dlt.getAttribute("data-id");
+        const journal = game.journal.get(questId);
+        if (!journal) return;
+        const confirm = await Dialog.confirm({
+          title: "Delete Quest",
+          content: `<p>Are you sure you want to delete the quest <strong>${journal.name}</strong>?</p>`,
+          yes: () => true,
+          no: () => false,
+          defaultYes: false,
+        });
+
+        if (!confirm) return;
+
+        await journal.delete();
+
+        heraldHud_journalingSocket.executeForEveryone("updateQuestAllUser");
       });
     });
 
@@ -2238,7 +2271,11 @@ async function heraldHud_renderListQuest() {
     );
     questItem.forEach((item) => {
       item.addEventListener("click", async (event) => {
-        if (event.target.closest(".heraldHud-visibleButton")) return;
+        if (
+          event.target.closest(".heraldHud-questVisibleButton") ||
+          event.target.closest(".heraldHud-questDeleteButton")
+        )
+          return;
 
         const questId = item.getAttribute("data-id");
         heraldHud_questShow = questId;
@@ -2818,7 +2855,6 @@ async function heraldHud_renderQuestPage() {
                     .find("[name='heraldHud-editLocationName']")
                     .val();
                   await page3.update({ name: locationName });
-
                   await heraldHud_renderQuestPage();
                   await heraldHud_renderListQuest();
                 },
@@ -3622,4 +3658,4 @@ async function heraldHud_deletePages(type, journalId, pageId) {
   confirmationDialog.render(true);
 }
 
-export { heraldHud_renderListMenu };   
+export { heraldHud_renderListMenu };

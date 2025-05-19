@@ -42,6 +42,15 @@ let heraldHud_listOverlayHudbarFrame = [
   "raven_frame",
   "dragon_frame",
 ];
+let heraldHud_bgBehindDialogImage = "";
+let heraldHud_listBgBehindDialog = [
+  "aura_",
+  "floral",
+  "magical",
+  "mirror_glass",
+  "norse_runes",
+  "pattern",
+];
 Hooks.once("ready", () => {
   heraldHud_spellsTrackerOff = game.settings.get(
     "herald-hud",
@@ -67,6 +76,11 @@ Hooks.once("ready", () => {
   heraldHud_overlayHudbarNameImage = game.settings.get(
     "herald-hud",
     "hudbarImageFrame"
+  );
+
+  heraldHud_bgBehindDialogImage = game.settings.get(
+    "herald-hud",
+    "hudBgDialog"
   );
   heraldHud_heraldHudScale = game.settings.get("herald-hud", "heraldHudScale");
   heraldHud_dialogBorderColor = game.settings.get(
@@ -205,6 +219,7 @@ async function heraldHud_renderHeraldHud() {
     await heraldHud_renderChargeTracker();
     await heraldHud_renderActorInfo();
     await heraldHud_renderOverlayHudbarFrame();
+    await heraldHud_renderBgBehindDialog();
     await heraldHud_viewHudbarWithoutSpeed();
     await heraldHud_changeColorInHud();
   }, 500);
@@ -229,6 +244,23 @@ async function heraldHud_renderOverlayHudbarFrame() {
        class="heraldHud-hudOverlayImage"/>
      `;
   }
+}
+
+async function heraldHud_renderBgBehindDialog() {
+  let imageName = heraldHud_bgBehindDialogImage;
+  for (const sheet of document.styleSheets) {
+    try {
+      for (const rule of sheet.cssRules) {
+        if (rule.selectorText === ".heraldHud-dialog::before") {
+          rule.style.backgroundImage = `url("/modules/herald-hud-beta/assets/hudbg-dialog/${imageName}_bg.png")`;
+          return true;
+        }
+      }
+    } catch (e) {
+      continue;
+    }
+  }
+  return false;
 }
 
 async function heraldHud_getActorData() {
@@ -2388,7 +2420,7 @@ async function heraldHud_renderItemFeatures() {
       dialogItemFeatures.style.overflowY = "";
       dialogActiveContainer.style.overflowY = "auto";
       dialogPassiveContainer.style.overflowY = "auto";
-       dialogActiveContainer.style.height = "50%";
+      dialogActiveContainer.style.height = "50%";
       dialogPassiveContainer.style.height = "50%";
       listActiveContainer.style.overflowY = "auto";
       listPassiveContainer.style.overflowY = "auto";
@@ -3587,6 +3619,20 @@ async function heraldHud_openSettingHudDialog() {
       }>${label}</option>`;
     })
     .join("");
+
+  let currentBgDialog =
+    game.settings.get("herald-hud", "hudBgDialog") ?? "aura_bg";
+  let hudBgDialogOptions = heraldHud_listBgBehindDialog
+    .map((image) => {
+      let label = image
+        .split("_")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+      return `<option value="${image}" style="background-color: #121212; color: white;" ${
+        currentBgDialog === image ? "selected" : ""
+      }>${label}</option>`;
+    })
+    .join("");
   let dialogContent = `
     <div style="display: flex; flex-direction: column; gap: 10px; padding-top:10px;padding-bottom:10px;">
       <fieldset style="border-radius:5px; padding:10px;">
@@ -3681,6 +3727,12 @@ async function heraldHud_openSettingHudDialog() {
               ${hudFrameOptions}
             </select>
           </div>
+          <div style="display: flex;align-items: center;color:white;  justify-content: space-between; width: 100%;">
+            <label for="heraldHud-bgDialogSelect"style="flex: 1; text-align: left;">Background Dialog Style :</label>
+            <select id="heraldHud-bgDialogSelect" style="flex: 1;color: white !important;">
+              ${hudBgDialogOptions}
+            </select>
+          </div>
           <div style="display: flex;align-items: center; justify-content: space-between; width: 100%;">
             <label for="heraldHud-hudScaleInput" style="flex: 1; text-align: left;">HUD Scale (%):</label>
             <input type="number" id="heraldHud-hudScaleInput" min="50" max="200" value="${
@@ -3764,6 +3816,7 @@ async function heraldHud_openSettingHudDialog() {
             "#heraldHud-enableCombineFeature"
           )[0];
           let hudFrameSelect = html.find("#heraldHud-hudFrameSelect")[0];
+          let bgDialogSelect = html.find("#heraldHud-bgDialogSelect")[0];
           let hudScaleInput = html.find("#heraldHud-hudScaleInput")[0];
           let borderColorPicker = html.find("#heraldHud-borderColorPicker")[0];
           let boxShadowColorPicker = html.find(
@@ -3798,6 +3851,7 @@ async function heraldHud_openSettingHudDialog() {
           heraldHud_speedHudbarOff = speedHudbarCheckbox.checked;
           heraldHud_enableCombineFeature = enableCombineFeature.checked;
           heraldHud_overlayHudbarNameImage = hudFrameSelect.value;
+          heraldHud_bgBehindDialogImage = bgDialogSelect.value;
 
           heraldHud_dialogBorderColor = borderColorPicker.value;
           heraldHud_dialogBoxShadowColor = boxShadowColorPicker.value;
@@ -3846,6 +3900,11 @@ async function heraldHud_openSettingHudDialog() {
             "hudbarImageFrame",
             heraldHud_overlayHudbarNameImage
           );
+          await game.settings.set(
+            "herald-hud",
+            "hudBgDialog",
+            heraldHud_bgBehindDialogImage
+          );
 
           await game.settings.set(
             "herald-hud",
@@ -3878,6 +3937,7 @@ async function heraldHud_openSettingHudDialog() {
           heraldHud_renderChargeTracker();
           heraldHud_renderActorInfo();
           heraldHud_renderOverlayHudbarFrame();
+          heraldHud_renderBgBehindDialog();
           heraldHud_viewHudbarWithoutSpeed();
           await heraldHud_changeScaleHud();
           await heraldHud_changeColorInHud();

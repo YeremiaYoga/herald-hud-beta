@@ -129,4 +129,12 @@ Hooks.once("init", () => {
     default: false,
   });
 
+    game.settings.register("herald-hud", "hudBgDialog", {
+    name: "Hud Background Dialog",
+    hint: "Hud Background Dialog",
+    scope: "client",
+    config: true,
+    type: String,
+    default: "aura",
+  });
 });
