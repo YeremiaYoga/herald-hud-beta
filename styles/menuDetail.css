@@ -716,6 +716,9 @@
   color: white;
   cursor: pointer;
 }
+.heraldHud-questDetailTypeContainer{
+  cursor: pointer;
+}
 
 .heraldHud-questDetailType {
   width: 50px;

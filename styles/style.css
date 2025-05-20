@@ -1425,32 +1425,9 @@
     z-index: 16;
     padding: 10px;
     background-color: rgba(0, 0, 0, 0.8);
-    background-image: 
-      url("/modules/herald-hud-beta/assets/hudbg-dialog/aura_bg.png"),
-      url("/modules/herald-hud-beta/assets/hudbg-dialog/splash_bottom_bg.png");
-    background-repeat: no-repeat, no-repeat;
-    background-position: top right, center bottom;
-    background-size: 100% auto, 100% auto;
-
 }
 
-/* .heraldHud-dialog {
-    position: fixed;
-    bottom: 14%;
-    transform: translateX(-50%);
-    border-radius: 10px;
-    background-color: rgba(0, 0, 0, 0.8);
-    z-index: 16;
-    padding: 10px;
-    overflow: hidden;
-}
 
-.heraldHud-dialog::before {
-    position: absolute;
-    background: url("/modules/herald-hud-beta/assets/hudbg-dialog/aura_bg.png") no-repeat top right;
-    background-size: 100% auto;
-    opacity: 0.5;
-} */
 
 
 .heraldHud-dialog2 {
@@ -3625,6 +3602,59 @@
 
 
 
+/* INSPIRATION  */
+.heraldHud-inspirationLevelContainer {
+    position: absolute;
+    bottom: 55px;
+    right: -4%;
+}
+
+/* Tambahkan wrapper dengan flex agar horizontal */
+.heraldHud-inspirationLevelWrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.heraldHud-inspirationActorContainer {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    z-index: 18;
+    right: 75%;
+}
+
+.heraldHud-inspirationActorImage {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border: none;
+}
+
+.heraldHud-levelActorContainer {
+    position: relative;
+    width: 40px;
+    height: 40px;
+}
+
+.heraldHud-levelImageIcon {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border: none;
+}
+
+.heraldHud-actorLevelValue {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+    pointer-events: none;
+}
 
 
 /* SETTING */

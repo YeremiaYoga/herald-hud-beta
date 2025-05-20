@@ -44,6 +44,7 @@ let heraldHud_listOverlayHudbarFrame = [
 ];
 let heraldHud_bgBehindDialogImage = "";
 let heraldHud_listBgBehindDialog = [
+  "none",
   "aura",
   "floral",
   "magical",
@@ -215,6 +216,7 @@ async function heraldHud_renderHeraldHud() {
     await heraldHud_updateItemFavoriteActor();
     await heraldHud_updateItemCosumablesActor();
     await heraldHud_updateShorcutButton();
+    await heraldHud_addInspirationView();
     await heraldHud_settingHudToBottom();
     await heraldHud_renderChargeTracker();
     await heraldHud_renderActorInfo();
@@ -248,35 +250,25 @@ async function heraldHud_renderOverlayHudbarFrame() {
 
 async function heraldHud_renderBgBehindDialog() {
   let imageName = heraldHud_bgBehindDialogImage;
+  console.log(imageName);
   const dialog = document.querySelector(".heraldHud-dialog");
+
   if (dialog) {
-    dialog.style.backgroundImage = `
-      url("/modules/herald-hud-beta/assets/hudbg-dialog/${imageName}_bg.png"),
-      url("/modules/herald-hud-beta/assets/hudbg-dialog/splash_bottom_bg.png")
-    `;
-    dialog.style.backgroundRepeat = "no-repeat, no-repeat";
-    dialog.style.backgroundPosition = "top right, center bottom";
-    dialog.style.backgroundSize = "100% auto, 100% auto";
+    if (!imageName || imageName === "none") {
+      dialog.style.backgroundImage = "";
+      dialog.style.backgroundRepeat = "";
+      dialog.style.backgroundPosition = "";
+      dialog.style.backgroundSize = "";
+    } else {
+      dialog.style.backgroundImage = `
+      url("/modules/herald-hud-beta/assets/hudbg-dialog/opacity-50/${imageName}_50bg.png"),
+      url("/modules/herald-hud-beta/assets/hudbg-dialog/opacity-50/splash_bottom_bg.png")`;
+      dialog.style.backgroundRepeat = "no-repeat, no-repeat";
+      dialog.style.backgroundPosition = "top right, center bottom";
+      dialog.style.backgroundSize = "100% auto, 100% auto";
+    }
   }
 }
-
-
-// async function heraldHud_renderBgBehindDialog() {
-//   let imageName = heraldHud_bgBehindDialogImage;
-//   for (const sheet of document.styleSheets) {
-//     try {
-//       for (const rule of sheet.cssRules) {
-//         if (rule.selectorText === ".heraldHud-dialog::before") {
-//           rule.style.backgroundImage = `url("/modules/herald-hud-beta/assets/hudbg-dialog/${imageName}_bg.png")`;
-//           return true;
-//         }
-//       }
-//     } catch (e) {
-//       continue;
-//     }
-//   }
-//   return false;
-// }
 
 async function heraldHud_getActorData() {
   const user = game.user;
@@ -6353,6 +6345,76 @@ async function heraldHud_npcRollInitiatve(id) {
   rollTimeout = setTimeout(async () => {
     await npc.rollInitiativeDialog();
   }, 1000);
+}
+
+async function heraldHud_addInspirationView() {
+  let actor = heraldHud_actorSelected;
+
+  let inspirationContainer = document.getElementById(
+    "heraldHud-inspirationLevelContainer"
+  );
+  const hasInspiration = actor.system?.attributes?.inspiration === true;
+
+  const inspirationIcon = hasInspiration
+    ? "/modules/herald-hud-beta/assets/inspiration_on.webp"
+    : "/modules/herald-hud-beta/assets/inspiration_off.webp";
+  if (inspirationContainer) {
+    inspirationContainer.innerHTML = `
+      <div class="heraldHud-inspirationLevelWrapper">
+    <div id="heraldHud-inspirationActorContainer" class="heraldHud-inspirationActorContainer">
+      <img
+      id="heraldHud-inspirationActorImage"
+        src="${inspirationIcon}"
+        alt="Inspiration Icon"
+        class="heraldHud-inspirationActorImage"
+      />
+    </div>
+    <div class="heraldHud-levelActorContainer">
+      <img
+        src="/modules/herald-hud-beta/assets/level_icon.webp"
+        alt="Level Icon"
+        class="heraldHud-levelImageIcon"
+      />
+      <div class="heraldHud-actorLevelValue">5</div>
+    </div>
+  </div>
+    `;
+
+    const inspirationToggle = document.getElementById(
+      "heraldHud-inspirationActorContainer"
+    );
+    inspirationToggle.addEventListener("click", () => {
+      new Dialog({
+        title: "Inspiration Toggle",
+        content: `<p>Do you wish to use your Inspiration Point?</p>`,
+        buttons: {
+          yes: {
+            label: "yes",
+            callback: () => {
+              const current = actor.system?.attributes?.inspiration === true;
+              const newValue = !current;
+              actor.update({ "system.attributes.inspiration": newValue });
+              ui.notifications.info(
+                `${actor.name} has spent their Inspiration!`
+              );
+
+              const imgEl = document.getElementById(
+                "heraldHud-inspirationActorImage"
+              );
+              // imgEl.src ="/modules/herald-hud-beta/assets/inspiration_on.webp"
+              imgEl.src = newValue
+                ? "/modules/herald-hud-beta/assets/inspiration_on.webp"
+                : "/modules/herald-hud-beta/assets/inspiration_off.webp";
+            },
+          },
+          no: {
+            label: "No",
+          },
+        },
+        default: "yes",
+      }).render(true);
+    });
+  }
 }
 
 Hooks.on("updateActor", async (actor, data) => {
