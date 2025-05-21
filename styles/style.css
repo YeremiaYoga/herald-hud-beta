@@ -3718,6 +3718,7 @@ display: flex;
   left: 102%;
   z-index: 16;
   cursor: pointer;
+  display: none;
 }
 
 .heraldHud-weaponMasteryWrapper {

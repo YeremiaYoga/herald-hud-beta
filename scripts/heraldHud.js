@@ -6472,11 +6472,11 @@ async function heraldHud_addInspirationView() {
       "heraldHud-inspirationActorContainer"
     );
     inspirationToggle.addEventListener("click", () => {
-      let Question = "Do you wish to use your Inspiration Point?";
-      let ChatNotif = `<p><strong>${actor.name}</strong> has spent their Inspiration!</p>`;
+      let Question = "Do you want to give yourself inspiration?";
+      let ChatNotif = `<p><strong>${actor.name}</strong> have given themself Inspiration!</p>`;
       if (actor.system?.attributes?.inspiration === true) {
-        Question = "Do you want to give yourself inspiration?";
-        ChatNotif = `<p><strong>${actor.name}</strong> have given themself Inspiration!</p>`;
+         Question = "Do you wish to use your Inspiration Point?";
+        ChatNotif = `<p><strong>${actor.name}</strong> has spent their Inspiration!</p>`;
       }
       const current = actor.system?.attributes?.inspiration === true;
       const newValue = !current;
