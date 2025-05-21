@@ -1050,6 +1050,36 @@
     visibility: visible;
 }
 
+ .heraldHud-settingKofiSupportContainer {
+display: flex;
+  justify-content: flex-end;
+  position: relative;
+ 
+}
+  .heraldHud-settingKofiSupportTooltip {
+    
+    visibility: hidden;
+    width: 140px;
+    background-color: black;
+    color: white;
+    text-align: center;
+    border-radius: 5px;
+    padding: 6px 8px;
+    position: absolute;
+    right: 150px;
+    top: -10px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 12px;
+    z-index: 1000;
+    pointer-events: none;
+  }
+
+.heraldHud-settingKofiSupportContainer img:hover + .heraldHud-settingKofiSupportTooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
 
 .heraldHud-actorInfoContainer {
     position: absolute;
@@ -3609,11 +3639,33 @@
     right: -4%;
 }
 
-/* Tambahkan wrapper dengan flex agar horizontal */
 .heraldHud-inspirationLevelWrapper {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.heraldHud-inspirationLevelTooltip {
+    visibility: hidden;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    position: absolute;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    z-index: 99;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.heraldHud-inspirationLevelWrapper:hover .heraldHud-inspirationLevelTooltip {
+    visibility: visible;
+    opacity: 1;
 }
 
 .heraldHud-inspirationActorContainer {
@@ -3622,6 +3674,7 @@
     height: 20px;
     z-index: 18;
     right: 75%;
+    top: 10px;
 }
 
 .heraldHud-inspirationActorImage {
@@ -3654,6 +3707,69 @@
     color: white;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
     pointer-events: none;
+    z-index: 19;
+}
+
+
+/* WEAPON MASTERY */
+
+.heraldHud-weaponMasteryContainer {
+  position: absolute;
+  left: 102%;
+  z-index: 16;
+  cursor: pointer;
+}
+
+.heraldHud-weaponMasteryWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+
+}
+
+.heraldHud-weaponMasteryButton {
+  width: 23px;
+  height: 23px;
+  background: rgb(0, 0, 0);
+  transform: rotate(45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+
+}
+
+
+.heraldHud-weaponMasteryTooltip {
+  position: absolute;
+  bottom: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+  pointer-events: none;
+}
+
+.heraldHud-journalingDivContainer:hover .heraldHud-weaponMasteryTooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+.heraldHud-weaponMasteryImage {
+  border: none;
+  width: 35px;
+  height: 35px;
+  position: absolute;
 }
 
 

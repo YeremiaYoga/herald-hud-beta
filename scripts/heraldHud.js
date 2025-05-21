@@ -204,6 +204,11 @@ async function heraldHud_renderHtml() {
   }
 }
 
+Hooks.on("canvasReady", async (canvas) => {
+  console.log("pindah scene");
+await heraldHud_renderViewListNpc();
+});
+
 async function heraldHud_renderHeraldHud() {
   await heraldHud_getActorData();
   setTimeout(async () => {
@@ -442,6 +447,54 @@ async function heraldHud_renderActorData() {
     journalingWrapper.addEventListener("click", (event) => {
       event.stopPropagation();
       heraldHud_showDialog("menu");
+    });
+  }
+
+  let weaponMasteryContainer = document.getElementById(
+    "heraldHud-weaponMasteryContainer"
+  );
+
+  if (weaponMasteryContainer) {
+    weaponMasteryContainer.innerHTML = `
+    <div id="heraldHud-weaponMasteryDiv" class="heraldHud-weaponMasteryDiv">
+      <div id="heraldHud-weaponMasteryWrapper" class="heraldHud-weaponMasteryWrapper">
+      <div id="heraldHud-weaponMasteryButton" class="heraldHud-weaponMasteryButton"></div>
+       <img
+          src="/modules/herald-hud-beta/assets/tempshield_icon.png"
+          alt=""
+          class="heraldHud-weaponMasteryImage"
+        />
+      </div>
+      <div class="heraldHud-weaponMasteryTooltip">Weapon Mastery</div>
+    </div>
+
+  
+    `;
+  }
+  let weaponMasteryWrapper = document.getElementById(
+    "heraldHud-weaponMasteryWrapper"
+  );
+  if (weaponMasteryWrapper) {
+    weaponMasteryWrapper.addEventListener("click", async (event) => {
+      event.stopPropagation();
+const TraitSelector = game.dnd5e?.applications?.actor?.TraitSelector;
+if (!TraitSelector) {
+  return ui.notifications.error("TraitSelector class tidak ditemukan di sistem DND5e");
+}
+
+const actor = heraldHud_actorSelected;
+if (!actor) {
+  return ui.notifications.error("Actor tidak ditemukan");
+}
+
+new TraitSelector(actor, {
+  name: "system.traits.weaponProf",
+  title: game.i18n.localize("DND5E.WeaponProficiencies"),
+  choices: CONFIG.DND5E.weaponProficiencies,
+  trait: "weaponProf",
+  l10nPrefix: "DND5E.WeaponProficiency"
+}).render(true);
+
     });
   }
 
@@ -1231,7 +1284,12 @@ async function heraldHud_updateItemFavoriteActor() {
   let newFavorites = [];
 
   for (let favorite of favoritesActor) {
-    let rawItemId = favorite.id.split(".Item.")[1];
+    console.log(favorite);
+    let rawItemId = favorite.id.split(".Item.")[1];  
+
+    if (rawItemId.includes(".Activity.")) {
+      rawItemId = rawItemId.split(".Activity.")[0];  
+    }
     let item =
       actor.items.get(rawItemId) ||
       actor.getEmbeddedDocument("Item", rawItemId);
@@ -1240,6 +1298,7 @@ async function heraldHud_updateItemFavoriteActor() {
     }
 
     newFavorites.push(favorite);
+    console.log(newFavorites);
     listFavorites += `
     <div class="heraldHud-favoriteItem" data-item-id="${item.id}" data-name="${item.name}">
       <img src="${item.img}" alt="${item.name}" class="heraldHud-favoriteItemImage">
@@ -3640,7 +3699,12 @@ async function heraldHud_openSettingHudDialog() {
     })
     .join("");
   let dialogContent = `
-    <div style="display: flex; flex-direction: column; gap: 10px; padding-top:10px;padding-bottom:10px;">
+    <div style="display: flex; flex-direction: column; gap: 10px; padding-top:10px;padding-bottom:5px;">
+      <div id="heraldHud-settingKofiSupportContainer" class="heraldHud-settingKofiSupportContainer" style="cursor:pointer;">
+        <img src="/modules/herald-hud-beta/assets/kofi_image.png" alt="Ko-fi" style="border:none;height:30px;"/>
+        <div class="heraldHud-settingKofiSupportTooltip">Support Us</div>
+      </div>
+
       <fieldset style="border-radius:5px; padding:10px;">
         <legend>Player Configuration</legend>
         <div style="display: flex; flex-direction: column; gap: 10px;">
@@ -3984,6 +4048,13 @@ async function heraldHud_openSettingHudDialog() {
     },
   }).render(true);
   Hooks.once("renderDialog", async (app) => {
+
+     document
+      .getElementById("heraldHud-settingKofiSupportContainer")
+      .addEventListener("click", async (event) => {
+         window.open("https://ko-fi.com/candlenote", "_blank");
+      });
+
     document
       .getElementById("heraldHud-hudFrameSelect")
       .addEventListener("change", async (event) => {
@@ -4904,8 +4975,13 @@ async function heraldHud_showDialogAddSummon() {
         callback: async (html) => {
           heraldHud_npcPlayerSelected = [];
           html.find(".heraldHud-dialogNpcCheckbox:checked").each(function () {
-            let npcId = this.value;
-            heraldHud_npcPlayerSelected.push(npcId);
+            let parts = this.value.split("|");
+            let tokenId = parts[0];
+            let actorId = parts[1];
+            heraldHud_npcPlayerSelected.push({
+              tokenId:tokenId,
+              actorId:actorId
+            });
           });
           await heraldHud_renderViewListNpc();
         },
@@ -4965,6 +5041,12 @@ async function heraldHud_renderDataDialogAddSummoner() {
     let token = npc.getActiveTokens()[0];
     let tokenUuid = token?.document?.uuid;
     let isLinked = token?.document.actorLink;
+    let npcUuid = "";
+    if (npc.uuid.includes(".Actor.")) {
+      npcUuid = "Actor." + npc.uuid.split(".Actor.")[1];
+    } else {
+      npcUuid = npc.uuid;
+    }
 
     let linkActorDataDiv = ``;
     if (isLinked) {
@@ -4998,7 +5080,7 @@ async function heraldHud_renderDataDialogAddSummoner() {
         </div>
          <div id="heraldHud-dialogNpcRight" class="heraldHud-dialogNpcRight">
           <label>
-            <input type="checkbox" class="heraldHud-dialogNpcCheckbox" value="${tokenUuid}" ${isChecked}>
+            <input type="checkbox" class="heraldHud-dialogNpcCheckbox" value="${tokenUuid}|${npcUuid}" ${isChecked}>
           </label>
         </div>
     </div>`;
@@ -5016,31 +5098,34 @@ async function heraldHud_renderViewListNpc() {
   }
   let listNpcPlayer = ``;
   for (let id of heraldHud_npcPlayerSelected) {
-    let tokenDocument = await fromUuid(id);
+    let tokenDocument = await fromUuid(id.tokenId);
     let token = tokenDocument.object;
-    let npc = token.actor;
+    let isLinked = token?.document.actorLink;
+    let npc = await fromUuid(`Actor.${tokenDocument.actorId}`);
+ 
+
     let npcTooltip = `
-    <div id="heraldHud-npcDataTooltipContainer" class="heraldHud-npcDataTooltipContainer" data-id="${id}" style="display:none;" >
+    <div id="heraldHud-npcDataTooltipContainer" class="heraldHud-npcDataTooltipContainer" data-id="${id.tokenId}" style="display:none;" >
       <div id="heraldHud-npcDataTooltip" class="heraldHud-npcDataTooltip">
         <div id="heraldHud-npcTooltipTop" class="heraldHud-npcTooltipTop" >
-          <div id="heraldHud-npcTooltipName" class="heraldHud-npcTooltipName" data-id="${id}">${
+          <div id="heraldHud-npcTooltipName" class="heraldHud-npcTooltipName" data-id="${id.tokenId}">${
       npc.name
     }</div>
           <hr style=" border: 1px solid grey; margin-top: 5px;">
         </div>
         <div id="heraldHud-npcTooltipMiddle" class="heraldHud-npcTooltipMiddle"">
-          <div id="heraldHud-npcTooltipMidLeft-${id}" class="heraldHud-npcTooltipMidLeft" data-id="${id}">
+          <div id="heraldHud-npcTooltipMidLeft-${id.tokenId}" class="heraldHud-npcTooltipMidLeft" data-id="${id.tokenId}">
           
           </div>
-          <div id="heraldHud-npcTooltipMidRight-${id}" class="heraldHud-npcTooltipMidRight" data-id="${id}">
+          <div id="heraldHud-npcTooltipMidRight-${id.tokenId}" class="heraldHud-npcTooltipMidRight" data-id="${id.tokenId}">
           
           </div>
         </div>
-        <div id="heraldHud-npcTooltipBottom" class="heraldHud-npcTooltipBottom" data-id="${id}">
-           <div id="heraldHud-npcTooltipBotLeft" class="heraldHud-npcTooltipBotLeft" data-id="${id}">
+        <div id="heraldHud-npcTooltipBottom" class="heraldHud-npcTooltipBottom" data-id="${id.tokenId}">
+           <div id="heraldHud-npcTooltipBotLeft" class="heraldHud-npcTooltipBotLeft" data-id="${id.tokenId}">
           
           </div>
-            <div id="heraldHud-npcTooltipBotRight" class="heraldHud-npcTooltipBotRight" data-id="${id}">
+            <div id="heraldHud-npcTooltipBotRight" class="heraldHud-npcTooltipBotRight" data-id="${id.tokenId}">
               <div>CR ${npc.system.details?.cr || "Unknown"}</div>
               <div>-</div>
               <div> ${
@@ -5062,28 +5147,28 @@ async function heraldHud_renderViewListNpc() {
        <div id="heraldHud-npcContainer" class="heraldHud-npcContainer">
           <div id="heraldHud-npcViewActor" class="heraldHud-npcViewActor">
             <div id="heraldHud-npcViewTop" class="heraldHud-npcViewTop">
-              <div id="heraldHud-npcActionContainer-${id}" class="heraldHud-npcActionContainer">
+              <div id="heraldHud-npcActionContainer-${id.tokenId}" class="heraldHud-npcActionContainer">
                 <div class="heraldHud-npcActionButtonContainer">
-                  <div class="heraldHud-npcActionButton" data-id="${id}" data-type="actions">
+                  <div class="heraldHud-npcActionButton" data-id="${id.tokenId}" data-type="actions">
                     
                     <span class="heraldHud-npcActionButtonTooltip">Actions</span>
                   </div>
-                  <div class="heraldHud-npcActionButton" data-id="${id}" data-type="passive">
+                  <div class="heraldHud-npcActionButton" data-id="${id.tokenId}" data-type="passive">
                     
                     <span class="heraldHud-npcActionButtonTooltip">Passive</span>
                   </div>
-                  <div class="heraldHud-npcActionButton" data-id="${id}" data-type="status">
+                  <div class="heraldHud-npcActionButton" data-id="${id.tokenId}" data-type="status">
                     
                     <span class="heraldHud-npcActionButtonTooltip">Stats</span>
                   </div>
-                  <div class="heraldHud-npcActionButton" data-id="${id}" data-type="remove">
+                  <div class="heraldHud-npcActionButton" data-id="${id.tokenId}" data-type="remove">
                     <span class="heraldHud-npcActionButtonTooltip">Remove</span>
                   </div>
-                  <div id="heraldHud-npcActionButton" class="heraldHud-npcActionButton" data-id="${id}" data-type="initiative" >
+                  <div id="heraldHud-npcActionButton" class="heraldHud-npcActionButton" data-id="${id.tokenId}" data-type="initiative" >
                     <img src="/modules/herald-hud-beta/assets/blued20_icon.png" alt="Initiative" style="width:20px;height:20px; border:none"/>
                     <span class="heraldHud-npcActionButtonTooltip">Initiative</span>
                   </div>
-                  <div id="heraldHud-npcActionButton" class="heraldHud-npcActionButton" data-id="${id}" data-type="endturn">
+                  <div id="heraldHud-npcActionButton" class="heraldHud-npcActionButton" data-id="${id.tokenId}" data-type="endturn">
                     <img src="/modules/herald-hud-beta/assets/blued20_icon.png" alt="End Turn" style="width:20px;height:20px; border:none"/>
                     <span class="heraldHud-npcActionButtonTooltip">End Turn</span>
                   </div>
@@ -5095,15 +5180,15 @@ async function heraldHud_renderViewListNpc() {
                 <div id="heraldHud-npcBarContainer" class="heraldHud-npcBarContainer">
                   <div id="heraldHud-npcHpBarContainer" class="heraldHud-npcHpBarContainer">
                      <svg width="50" height="50" viewBox="0 0 100 100" class="heraldHud-npcHpBarSvg">
-                      <circle cx="50" cy="50" r="45" id="heraldHud-npHpBarBackground-${id}"  class="heraldHud-npHpBarBackground" stroke-dasharray="300" stroke-dashoffset="200" />
-                      <circle cx="50" cy="50" r="45" id="heraldHud-npcHpBarValueBar-${id}"  class="heraldHud-npcHpBarValueBar" stroke-dasharray="300" stroke-dashoffset="200" />
+                      <circle cx="50" cy="50" r="45" id="heraldHud-npHpBarBackground-${id.tokenId}"  class="heraldHud-npHpBarBackground" stroke-dasharray="300" stroke-dashoffset="200" />
+                      <circle cx="50" cy="50" r="45" id="heraldHud-npcHpBarValueBar-${id.tokenId}"  class="heraldHud-npcHpBarValueBar" stroke-dasharray="300" stroke-dashoffset="200" />
                     </svg>
                   </div>
-                  <div id="heraldHud-npcTempHpBarContainer-${id}" class="heraldHud-npcTempHpBarContainer"></div>
+                  <div id="heraldHud-npcTempHpBarContainer-${id.tokenId}" class="heraldHud-npcTempHpBarContainer"></div>
                 </div>
               </div>
               <div id="heraldHud-npcMidContainerMiddle" class="heraldHud-npcMidContainerMiddle">
-                <div id="heraldHud-npcImageContainer" class="heraldHud-npcImageContainer" data-id="${id}">
+                <div id="heraldHud-npcImageContainer" class="heraldHud-npcImageContainer" data-id="${id.tokenId}">
                    <img src="${npc.img}" alt="npc" class="heraldHud-npcImageView">
                 </div>
                 <div id="heraldHud-npcAcContainer" class="heraldHud-npcAcContainer">
@@ -5113,18 +5198,18 @@ async function heraldHud_renderViewListNpc() {
                         alt="Armor Class"
                         class="heraldHud-npcAcIcon"
                       />
-                      <div id="heraldHud-npcAcValue-${id}" class="heraldHud-npcAcValue"></div>
+                      <div id="heraldHud-npcAcValue-${id.tokenId}" class="heraldHud-npcAcValue"></div>
                      
                   </div>
                 </div>
-                 <div id="heraldHud-npcTempShieldContainer-${id}" class="heraldHud-npcTempShieldContainer"></div>
+                 <div id="heraldHud-npcTempShieldContainer-${id.tokenId}" class="heraldHud-npcTempShieldContainer"></div>
               </div>
               <div id="heraldHud-npcMidContainerRight" class="heraldHud-npcMidContainerRight"></div>
             </div>
             <div id="heraldHud-npcViewBottom" class="heraldHud-npcViewBottom">
                <div id="heraldHud-npcHpValueContainer" class="heraldHud-npcHpValueContainer">
-                  <div id="heraldHud-npcHpValue-${id}" class="heraldHud-npcHpValue" ></div>
-                  <div id="heraldHud-npcTempHpValue-${id}" class="heraldHud-npcTempHpValue" ></div>
+                  <div id="heraldHud-npcHpValue-${id.tokenId}" class="heraldHud-npcHpValue" ></div>
+                  <div id="heraldHud-npcTempHpValue-${id.tokenId}" class="heraldHud-npcTempHpValue" ></div>
                </div>
             </div>
           </div>
@@ -5281,9 +5366,11 @@ async function heraldHud_getDataListNpc() {
     return;
   }
   for (let id of heraldHud_npcPlayerSelected) {
-    let tokenDocument = await fromUuid(id);
+    console.log(id);
+    let tokenDocument = await fromUuid(id.tokenId);
     let token = tokenDocument.object;
-    let npc = token.actor;
+    let npc = await fromUuid(`Actor.${tokenDocument.actorId}`);
+     console.log(npc);
     const hp = npc.system.attributes.hp.value;
     const maxHp = npc.system.attributes.hp.max;
     let tempHp = npc.system.attributes.hp.temp || 0;
@@ -5296,10 +5383,10 @@ async function heraldHud_getDataListNpc() {
     let acValue = npc.system.attributes.ac.value;
 
     let hpBarValueDiv = document.getElementById(
-      `heraldHud-npcHpBarValueBar-${id}`
+      `heraldHud-npcHpBarValueBar-${id.tokenId}`
     );
     if (hpBarValueDiv) {
-      let hpValueDiv = document.getElementById(`heraldHud-npcHpValue-${id}`);
+      let hpValueDiv = document.getElementById(`heraldHud-npcHpValue-${id.tokenId}`);
       if (hpValueDiv) {
         hpValueDiv.innerText = `${hp}/${totalMaxHp}`;
       }
@@ -5320,7 +5407,7 @@ async function heraldHud_getDataListNpc() {
       }
     }
 
-    let acValueDiv = document.getElementById(`heraldHud-npcAcValue-${id}`);
+    let acValueDiv = document.getElementById(`heraldHud-npcAcValue-${id.tokenId}`);
     if (acValueDiv) {
       acValueDiv.innerText = acValue;
     }
@@ -5329,26 +5416,26 @@ async function heraldHud_getDataListNpc() {
       let npcTempValueBar = 0;
       npcTempValueBar = 300 - tempPercent;
       let tempShieldDiv = document.getElementById(
-        `heraldHud-npcTempShieldContainer-${id}`
+        `heraldHud-npcTempShieldContainer-${id.tokenId}`
       );
       if (tempShieldDiv) {
         tempShieldDiv.innerHTML = `<img src="/modules/herald-hud-beta/assets/tempshield_icon.png" alt="shield" class="heraldHud-npcTempShield" />`;
       }
 
       let npcTempHpBarContinerDiv = document.getElementById(
-        `heraldHud-npcTempHpBarContainer-${id}`
+        `heraldHud-npcTempHpBarContainer-${id.tokenId}`
       );
       let npcTempHpBarContainerLeftDiv = document.getElementById(
-        `heraldHud-npcTempHpBarContainerLeft-${id}`
+        `heraldHud-npcTempHpBarContainerLeft-${id.tokenId}`
       );
       let npcTempHpLeftDiv = document.getElementById(
-        `heraldHud-npcTempHpLeft-${id}`
+        `heraldHud-npcTempHpLeft-${id.tokenId}`
       );
 
       if (!npcTempHpBarContainerLeftDiv) {
         if (npcTempHpBarContinerDiv) {
           npcTempHpBarContinerDiv.innerHTML = `
-              <div id="heraldHud-npcTempHpBarContainerLeft-${id}" class="heraldHud-npcTempHpBarContainerLeft">
+              <div id="heraldHud-npcTempHpBarContainerLeft-${id.tokenId}" class="heraldHud-npcTempHpBarContainerLeft">
                 <svg
                   width="56"
                   height="56"
@@ -5359,7 +5446,7 @@ async function heraldHud_getDataListNpc() {
                     cx="50"
                     cy="50"
                     r="45"
-                    id="heraldHud-npcTempHpLeft-${id}"
+                    id="heraldHud-npcTempHpLeft-${id.tokenId}"
                     class="heraldHud-npcTempHpLeft"
                     stroke-dasharray="300"
                     stroke-dashoffset="${npcTempValueBar}"
@@ -5375,7 +5462,7 @@ async function heraldHud_getDataListNpc() {
       }
 
       let tempHpValueDiv = document.getElementById(
-        `heraldHud-npcTempHpValue-${id}`
+        `heraldHud-npcTempHpValue-${id.tokenId}`
       );
       if (tempHpValueDiv) {
         tempHpValueDiv.innerText = `+${tempHp}`;
@@ -5384,10 +5471,10 @@ async function heraldHud_getDataListNpc() {
 
     // data tooltip npc
     let npcTooltipMidLeftDiv = document.getElementById(
-      `heraldHud-npcTooltipMidLeft-${id}`
+      `heraldHud-npcTooltipMidLeft-${id.tokenId}`
     );
     let npcTooltipMidRightDiv = document.getElementById(
-      `heraldHud-npcTooltipMidRight-${id}`
+      `heraldHud-npcTooltipMidRight-${id.tokenId}`
     );
 
     if (npcTooltipMidLeftDiv) {
@@ -5570,7 +5657,7 @@ async function heraldHud_npcRenderViewActions(id) {
 async function heraldHud_npcGetDataActions(id) {
   let tokenDocument = await fromUuid(id);
   let token = tokenDocument.object;
-  let npc = token.actor;
+  let npc = await fromUuid(`Actor.${tokenDocument.actorId}`);
   await heraldHud_renderNpcDataActions(id);
   await heraldHud_renderNpcDataBonus(id);
   await heraldHud_renderNpcDataReaction(id);
@@ -5606,7 +5693,7 @@ async function heraldHud_npcGetDataActions(id) {
 async function heraldHud_renderNpcDataActions(id) {
   let tokenDocument = await fromUuid(id);
   let token = tokenDocument.object;
-  let npc = token.actor;
+  let npc = await fromUuid(`Actor.${tokenDocument.actorId}`);
   let actionsListDiv = document.getElementById("heraldHud-npcActionsList");
   let actionItems = npc.items.filter(
     (item) => item.system.activation?.type == "action"
@@ -6354,54 +6441,60 @@ async function heraldHud_addInspirationView() {
     "heraldHud-inspirationLevelContainer"
   );
   const hasInspiration = actor.system?.attributes?.inspiration === true;
-
+  let levelActor = actor.system.details.level;
   const inspirationIcon = hasInspiration
     ? "/modules/herald-hud-beta/assets/inspiration_on.webp"
     : "/modules/herald-hud-beta/assets/inspiration_off.webp";
   if (inspirationContainer) {
     inspirationContainer.innerHTML = `
       <div class="heraldHud-inspirationLevelWrapper">
-    <div id="heraldHud-inspirationActorContainer" class="heraldHud-inspirationActorContainer">
-      <img
-      id="heraldHud-inspirationActorImage"
-        src="${inspirationIcon}"
-        alt="Inspiration Icon"
-        class="heraldHud-inspirationActorImage"
-      />
-    </div>
-    <div class="heraldHud-levelActorContainer">
-      <img
-        src="/modules/herald-hud-beta/assets/level_icon.webp"
-        alt="Level Icon"
-        class="heraldHud-levelImageIcon"
-      />
-      <div class="heraldHud-actorLevelValue">5</div>
-    </div>
-  </div>
+        <div id="heraldHud-inspirationActorContainer" class="heraldHud-inspirationActorContainer">
+          <img
+          id="heraldHud-inspirationActorImage"
+            src="${inspirationIcon}"
+            alt="Inspiration Icon"
+            class="heraldHud-inspirationActorImage"
+          />
+        </div>
+        <div class="heraldHud-levelActorContainer">
+          <img
+            src="/modules/herald-hud-beta/assets/level_icon.webp"
+            alt="Level Icon"
+            class="heraldHud-levelImageIcon"
+          />
+          <div class="heraldHud-actorLevelValue">${levelActor}</div>
+        </div>
+        <div class="heraldHud-inspirationLevelTooltip">Inspiration/Level</div>
+      </div>
     `;
 
     const inspirationToggle = document.getElementById(
       "heraldHud-inspirationActorContainer"
     );
     inspirationToggle.addEventListener("click", () => {
+      let Question = "Do you wish to use your Inspiration Point?";
+      let ChatNotif = `<p><strong>${actor.name}</strong> has spent their Inspiration!</p>`;
+      if (actor.system?.attributes?.inspiration === true) {
+        Question = "Do you want to give yourself inspiration?";
+        ChatNotif = `<p><strong>${actor.name}</strong> have given themself Inspiration!</p>`;
+      }
+      const current = actor.system?.attributes?.inspiration === true;
+      const newValue = !current;
       new Dialog({
         title: "Inspiration Toggle",
-        content: `<p>Do you wish to use your Inspiration Point?</p>`,
+        content: `<p>${Question}</p>`,
         buttons: {
           yes: {
-            label: "yes",
+            label: "Yes",
             callback: () => {
-              const current = actor.system?.attributes?.inspiration === true;
-              const newValue = !current;
               actor.update({ "system.attributes.inspiration": newValue });
-              ui.notifications.info(
-                `${actor.name} has spent their Inspiration!`
-              );
-
+              ChatMessage.create({
+                content: `${ChatNotif}`,
+                speaker: ChatMessage.getSpeaker({ actor }),
+              });
               const imgEl = document.getElementById(
                 "heraldHud-inspirationActorImage"
               );
-              // imgEl.src ="/modules/herald-hud-beta/assets/inspiration_on.webp"
               imgEl.src = newValue
                 ? "/modules/herald-hud-beta/assets/inspiration_on.webp"
                 : "/modules/herald-hud-beta/assets/inspiration_off.webp";
@@ -6424,6 +6517,8 @@ Hooks.on("updateActor", async (actor, data) => {
   await heraldHud_updateItemCosumablesActor();
   await heraldHud_getDataSpellsSlot();
   await heraldHud_getDataListNpc();
+
+  await heraldHud_addInspirationView();
 });
 
 function heraldHud_darkHex(hex, percent) {
@@ -6500,7 +6595,7 @@ function heraldHud_getSpellIcons(item) {
   if (!item.system || !item.system.properties) return "";
 
   let icons = [];
-  let properties = Array.from(item.system.properties); // Konversi Set ke Array
+  let properties = Array.from(item.system.properties);
 
   let spellIcons = {
     vocal: { label: "Verbal", symbol: "V" },
