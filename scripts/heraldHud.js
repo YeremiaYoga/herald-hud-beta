@@ -206,7 +206,7 @@ async function heraldHud_renderHtml() {
 
 Hooks.on("canvasReady", async (canvas) => {
   console.log("pindah scene");
-await heraldHud_renderViewListNpc();
+  await heraldHud_renderViewListNpc();
 });
 
 async function heraldHud_renderHeraldHud() {
@@ -477,24 +477,19 @@ async function heraldHud_renderActorData() {
   if (weaponMasteryWrapper) {
     weaponMasteryWrapper.addEventListener("click", async (event) => {
       event.stopPropagation();
-const TraitSelector = game.dnd5e?.applications?.actor?.TraitSelector;
-if (!TraitSelector) {
-  return ui.notifications.error("TraitSelector class tidak ditemukan di sistem DND5e");
-}
+      const WeaponsConfig = game.dnd5e?.applications?.actor?.WeaponsConfig;
+      if (!WeaponsConfig) {
+        return ui.notifications.error(
+          "WeaponsConfig class tidak ditemukan di sistem DND5e"
+        );
+      }
 
-const actor = heraldHud_actorSelected;
-if (!actor) {
-  return ui.notifications.error("Actor tidak ditemukan");
-}
+      const actor = heraldHud_actorSelected;
+      if (!actor) {
+        return ui.notifications.error("Actor tidak ditemukan");
+      }
 
-new TraitSelector(actor, {
-  name: "system.traits.weaponProf",
-  title: game.i18n.localize("DND5E.WeaponProficiencies"),
-  choices: CONFIG.DND5E.weaponProficiencies,
-  trait: "weaponProf",
-  l10nPrefix: "DND5E.WeaponProficiency"
-}).render(true);
-
+      new WeaponsConfig({ document: actor, trait: "weapon" }).render(true);
     });
   }
 
@@ -1284,10 +1279,10 @@ async function heraldHud_updateItemFavoriteActor() {
 
   for (let favorite of favoritesActor) {
     console.log(favorite);
-    let rawItemId = favorite.id.split(".Item.")[1];  
+    let rawItemId = favorite.id.split(".Item.")[1];
 
     if (rawItemId.includes(".Activity.")) {
-      rawItemId = rawItemId.split(".Activity.")[0];  
+      rawItemId = rawItemId.split(".Activity.")[0];
     }
     let item =
       actor.items.get(rawItemId) ||
@@ -4047,11 +4042,10 @@ async function heraldHud_openSettingHudDialog() {
     },
   }).render(true);
   Hooks.once("renderDialog", async (app) => {
-
-     document
+    document
       .getElementById("heraldHud-settingKofiSupportContainer")
       .addEventListener("click", async (event) => {
-         window.open("https://ko-fi.com/candlenote", "_blank");
+        window.open("https://ko-fi.com/candlenote", "_blank");
       });
 
     document
@@ -4978,8 +4972,8 @@ async function heraldHud_showDialogAddSummon() {
             let tokenId = parts[0];
             let actorId = parts[1];
             heraldHud_npcPlayerSelected.push({
-              tokenId:tokenId,
-              actorId:actorId
+              tokenId: tokenId,
+              actorId: actorId,
             });
           });
           await heraldHud_renderViewListNpc();
@@ -5101,30 +5095,41 @@ async function heraldHud_renderViewListNpc() {
     let token = tokenDocument.object;
     let isLinked = token?.document.actorLink;
     let npc = await fromUuid(`Actor.${tokenDocument.actorId}`);
- 
 
     let npcTooltip = `
-    <div id="heraldHud-npcDataTooltipContainer" class="heraldHud-npcDataTooltipContainer" data-id="${id.tokenId}" style="display:none;" >
+    <div id="heraldHud-npcDataTooltipContainer" class="heraldHud-npcDataTooltipContainer" data-id="${
+      id.tokenId
+    }" style="display:none;" >
       <div id="heraldHud-npcDataTooltip" class="heraldHud-npcDataTooltip">
         <div id="heraldHud-npcTooltipTop" class="heraldHud-npcTooltipTop" >
-          <div id="heraldHud-npcTooltipName" class="heraldHud-npcTooltipName" data-id="${id.tokenId}">${
-      npc.name
-    }</div>
+          <div id="heraldHud-npcTooltipName" class="heraldHud-npcTooltipName" data-id="${
+            id.tokenId
+          }">${npc.name}</div>
           <hr style=" border: 1px solid grey; margin-top: 5px;">
         </div>
         <div id="heraldHud-npcTooltipMiddle" class="heraldHud-npcTooltipMiddle"">
-          <div id="heraldHud-npcTooltipMidLeft-${id.tokenId}" class="heraldHud-npcTooltipMidLeft" data-id="${id.tokenId}">
+          <div id="heraldHud-npcTooltipMidLeft-${
+            id.tokenId
+          }" class="heraldHud-npcTooltipMidLeft" data-id="${id.tokenId}">
           
           </div>
-          <div id="heraldHud-npcTooltipMidRight-${id.tokenId}" class="heraldHud-npcTooltipMidRight" data-id="${id.tokenId}">
+          <div id="heraldHud-npcTooltipMidRight-${
+            id.tokenId
+          }" class="heraldHud-npcTooltipMidRight" data-id="${id.tokenId}">
           
           </div>
         </div>
-        <div id="heraldHud-npcTooltipBottom" class="heraldHud-npcTooltipBottom" data-id="${id.tokenId}">
-           <div id="heraldHud-npcTooltipBotLeft" class="heraldHud-npcTooltipBotLeft" data-id="${id.tokenId}">
+        <div id="heraldHud-npcTooltipBottom" class="heraldHud-npcTooltipBottom" data-id="${
+          id.tokenId
+        }">
+           <div id="heraldHud-npcTooltipBotLeft" class="heraldHud-npcTooltipBotLeft" data-id="${
+             id.tokenId
+           }">
           
           </div>
-            <div id="heraldHud-npcTooltipBotRight" class="heraldHud-npcTooltipBotRight" data-id="${id.tokenId}">
+            <div id="heraldHud-npcTooltipBotRight" class="heraldHud-npcTooltipBotRight" data-id="${
+              id.tokenId
+            }">
               <div>CR ${npc.system.details?.cr || "Unknown"}</div>
               <div>-</div>
               <div> ${
@@ -5340,7 +5345,7 @@ async function heraldHud_npcInitiativeEndturn() {
 
       let tokenDocument = await fromUuid(npcId);
       let token = tokenDocument.object;
-      let npc = token.actor;
+      let npc = await fromUuid(`Actor.${tokenDocument.actorId}`);
 
       if (npc.id === currentNpcId) {
         if (type === "endturn") {
@@ -5369,7 +5374,7 @@ async function heraldHud_getDataListNpc() {
     let tokenDocument = await fromUuid(id.tokenId);
     let token = tokenDocument.object;
     let npc = await fromUuid(`Actor.${tokenDocument.actorId}`);
-     console.log(npc);
+    console.log(npc);
     const hp = npc.system.attributes.hp.value;
     const maxHp = npc.system.attributes.hp.max;
     let tempHp = npc.system.attributes.hp.temp || 0;
@@ -5385,7 +5390,9 @@ async function heraldHud_getDataListNpc() {
       `heraldHud-npcHpBarValueBar-${id.tokenId}`
     );
     if (hpBarValueDiv) {
-      let hpValueDiv = document.getElementById(`heraldHud-npcHpValue-${id.tokenId}`);
+      let hpValueDiv = document.getElementById(
+        `heraldHud-npcHpValue-${id.tokenId}`
+      );
       if (hpValueDiv) {
         hpValueDiv.innerText = `${hp}/${totalMaxHp}`;
       }
@@ -5406,7 +5413,9 @@ async function heraldHud_getDataListNpc() {
       }
     }
 
-    let acValueDiv = document.getElementById(`heraldHud-npcAcValue-${id.tokenId}`);
+    let acValueDiv = document.getElementById(
+      `heraldHud-npcAcValue-${id.tokenId}`
+    );
     if (acValueDiv) {
       acValueDiv.innerText = acValue;
     }
@@ -5793,7 +5802,7 @@ async function heraldHud_renderNpcDataActions(id) {
 async function heraldHud_renderNpcDataBonus(id) {
   let tokenDocument = await fromUuid(id);
   let token = tokenDocument.object;
-  let npc = token.actor;
+  let npc = await fromUuid(`Actor.${tokenDocument.actorId}`);
   let actionsListDiv = document.getElementById("heraldHud-npcBonusList");
   let actionItems = npc.items.filter(
     (item) => item.system.activation?.type == "bonus"
@@ -5892,7 +5901,7 @@ async function heraldHud_renderNpcDataBonus(id) {
 async function heraldHud_renderNpcDataReaction(id) {
   let tokenDocument = await fromUuid(id);
   let token = tokenDocument.object;
-  let npc = token.actor;
+  let npc = await fromUuid(`Actor.${tokenDocument.actorId}`);
   let actionsListDiv = document.getElementById("heraldHud-npcReactionList");
   let actionItems = npc.items.filter(
     (item) => item.system.activation?.type == "reaction"
@@ -5990,7 +5999,7 @@ async function heraldHud_renderNpcDataReaction(id) {
 async function heraldHud_renderNpcDataOther(id) {
   let tokenDocument = await fromUuid(id);
   let token = tokenDocument.object;
-  let npc = token.actor;
+  let npc = await fromUuid(`Actor.${tokenDocument.actorId}`);
   let actionsListDiv = document.getElementById("heraldHud-npcOtherList");
   let otherActions = npc.items.filter(
     (item) =>
@@ -6125,7 +6134,7 @@ async function heraldHud_npcRenderViewPassive(id) {
 async function heraldHud_npcGetDataPassive(id) {
   let tokenDocument = await fromUuid(id);
   let token = tokenDocument.object;
-  let npc = token.actor;
+  let npc = await fromUuid(`Actor.${tokenDocument.actorId}`);
   let passiveListDiv = document.getElementById("heraldHud-npcPassiveList");
   let passiveItems = npc.items.filter(
     (item) =>
@@ -6243,7 +6252,7 @@ async function heraldHud_npcRenderViewStats(id) {
 async function heraldHud_npcGetDataStats(id) {
   let tokenDocument = await fromUuid(id);
   let token = tokenDocument.object;
-  let npc = token.actor;
+  let npc = await fromUuid(`Actor.${tokenDocument.actorId}`);
 
   let statsListAbilitiesDiv = document.getElementById(
     "heraldHud-npcStatsListAbilities"
@@ -6311,7 +6320,7 @@ async function heraldHud_npcGetDataStats(id) {
 async function heraldHud_renderNpcDataStatsSkill(id) {
   let tokenDocument = await fromUuid(id);
   let token = tokenDocument.object;
-  let npc = token.actor;
+  let npc = await fromUuid(`Actor.${tokenDocument.actorId}`);
   let searchInput = document.getElementById(
     "heraldHud-npcStatsSkillsSearchValue"
   );
@@ -6400,7 +6409,7 @@ async function heraldHud_renderNpcDataStatsSkill(id) {
 async function heraldHud_deleteNpcFromList(id) {
   let tokenDocument = await fromUuid(id);
   let token = tokenDocument.object;
-  let npc = token.actor;
+  let npc = await fromUuid(`Actor.${tokenDocument.actorId}`);
   new Dialog({
     title: "Confirm Remove NPC",
     content: `<p>Would you like to remove <strong>${npc.name}</strong> from your Summon Tracker?</p>`,
@@ -6409,7 +6418,7 @@ async function heraldHud_deleteNpcFromList(id) {
         label: "Remove",
         callback: async () => {
           heraldHud_npcPlayerSelected = heraldHud_npcPlayerSelected.filter(
-            (npcId) => npcId !== id
+            (npcId) => npcId.tokenId !== id
           );
           await heraldHud_renderViewListNpc();
         },
@@ -6425,7 +6434,7 @@ async function heraldHud_deleteNpcFromList(id) {
 async function heraldHud_npcRollInitiatve(id) {
   let tokenDocument = await fromUuid(id);
   let token = tokenDocument.object;
-  let npc = token.actor;
+  let npc = await fromUuid(`Actor.${tokenDocument.actorId}`);
   let rollTimeout;
   clearTimeout(rollTimeout);
   rollTimeout = setTimeout(async () => {
@@ -6474,7 +6483,7 @@ async function heraldHud_addInspirationView() {
       let Question = "Do you want to give yourself inspiration?";
       let ChatNotif = `<p><strong>${actor.name}</strong> have given themself Inspiration!</p>`;
       if (actor.system?.attributes?.inspiration === true) {
-         Question = "Do you wish to use your Inspiration Point?";
+        Question = "Do you wish to use your Inspiration Point?";
         ChatNotif = `<p><strong>${actor.name}</strong> has spent their Inspiration!</p>`;
       }
       const current = actor.system?.attributes?.inspiration === true;

@@ -1050,14 +1050,15 @@
     visibility: visible;
 }
 
- .heraldHud-settingKofiSupportContainer {
-display: flex;
-  justify-content: flex-end;
-  position: relative;
- 
+.heraldHud-settingKofiSupportContainer {
+    display: flex;
+    justify-content: flex-end;
+    position: relative;
+
 }
-  .heraldHud-settingKofiSupportTooltip {
-    
+
+.heraldHud-settingKofiSupportTooltip {
+
     visibility: hidden;
     width: 140px;
     background-color: black;
@@ -1073,11 +1074,11 @@ display: flex;
     font-size: 12px;
     z-index: 1000;
     pointer-events: none;
-  }
+}
 
-.heraldHud-settingKofiSupportContainer img:hover + .heraldHud-settingKofiSupportTooltip {
-  visibility: visible;
-  opacity: 1;
+.heraldHud-settingKofiSupportContainer img:hover+.heraldHud-settingKofiSupportTooltip {
+    visibility: visible;
+    opacity: 1;
 }
 
 
@@ -3714,63 +3715,64 @@ display: flex;
 /* WEAPON MASTERY */
 
 .heraldHud-weaponMasteryContainer {
-  position: absolute;
-  left: 102%;
-  z-index: 16;
-  cursor: pointer;
-  display: none;
+    position: absolute;
+    left: 102%;
+    z-index: 16;
+    cursor: pointer;
+    display: none;
+
 }
 
 .heraldHud-weaponMasteryWrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
 
 }
 
 .heraldHud-weaponMasteryButton {
-  width: 23px;
-  height: 23px;
-  background: rgb(0, 0, 0);
-  transform: rotate(45deg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: absolute;
+    width: 23px;
+    height: 23px;
+    background: rgb(0, 0, 0);
+    transform: rotate(45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
 
 }
 
 
 .heraldHud-weaponMasteryTooltip {
-  position: absolute;
-  bottom: -100%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 5px 10px;
-  border-radius: 4px;
-  font-size: 12px;
-  white-space: nowrap;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
-  pointer-events: none;
+    position: absolute;
+    bottom: -100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+    pointer-events: none;
 }
 
 .heraldHud-journalingDivContainer:hover .heraldHud-weaponMasteryTooltip {
-  opacity: 1;
-  visibility: visible;
+    opacity: 1;
+    visibility: visible;
 }
 
 .heraldHud-weaponMasteryImage {
-  border: none;
-  width: 35px;
-  height: 35px;
-  position: absolute;
+    border: none;
+    width: 35px;
+    height: 35px;
+    position: absolute;
 }
 
 
