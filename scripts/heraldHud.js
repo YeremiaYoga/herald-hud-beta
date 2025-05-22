@@ -1700,7 +1700,20 @@ async function heraldHud_renderItemInventory() {
       
         </div>
       </div>
+      <div class="heraldHud-filterButtonInventoryContainer">
+        <div class="heraldHud-filterButtonInventory" data-filter="action">Action</div>
+        <div class="heraldHud-filterButtonInventory" data-filter="bonus">Bonus Action</div>
+        <div class="heraldHud-filterButtonInventory" data-filter="special">Special</div>
+        <div class="heraldHud-filterButtonInventory" data-filter="reaction">Reaction</div>
+      </div>
     </div>`;
+
+    document.querySelectorAll(".heraldHud-filterButtonInventory").forEach((button) => {
+      button.addEventListener("click", () => {
+        button.classList.toggle("active");
+        const filterType = button.dataset.filter;
+      });
+    });
   }
   await heraldHud_getDataInventory();
 }
