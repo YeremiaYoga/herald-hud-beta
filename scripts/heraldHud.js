@@ -460,7 +460,7 @@ async function heraldHud_renderActorData() {
       <div id="heraldHud-weaponMasteryWrapper" class="heraldHud-weaponMasteryWrapper">
       <div id="heraldHud-weaponMasteryButton" class="heraldHud-weaponMasteryButton"></div>
        <img
-          src="/modules/herald-hud-beta/assets/tempshield_icon.png"
+          src="/modules/herald-hud-beta/assets/weaponmastery_img.webp"
           alt=""
           class="heraldHud-weaponMasteryImage"
         />
@@ -2376,7 +2376,7 @@ async function heraldHud_getDataLoots() {
     let currencyHTML = `<div class="heraldHud-currencyContainer">`;
 
     for (let currency of currencyTypes) {
-      let icon = heraldHud_getCurrencyIcon(currency);
+      let icon = hl.heraldHud_getCurrencyIcon(currency);
       let value = actor.system.currency[currency] || 0;
       let name = currencyNames[currency];
 
@@ -6570,31 +6570,6 @@ function heraldHud_getGameIconDamage(type) {
     <div class="heraldHud-damageIconContainer">
       <img src="${basePath}${iconType}.svg" width="13" height="13" style="border:none; filter:invert(1);">
       <div class="heraldHud-damageTooltip">${tooltipText}</div>
-    </div>
-  `;
-}
-
-function heraldHud_getCurrencyIcon(type) {
-  const currencyIcons = {
-    pp: {
-      src: "/systems/dnd5e/icons/currency/platinum.webp",
-      label: "Platinum",
-    },
-    gp: { src: "/systems/dnd5e/icons/currency/gold.webp", label: "Gold" },
-    ep: {
-      src: "/systems/dnd5e/icons/currency/electrum.webp",
-      label: "Electrum",
-    },
-    sp: { src: "/systems/dnd5e/icons/currency/silver.webp", label: "Silver" },
-    cp: { src: "/systems/dnd5e/icons/currency/copper.webp", label: "Copper" },
-  };
-
-  let iconData = currencyIcons[type];
-
-  return `
-    <div class="heraldHud-currencyIconContainer">
-      <img src="${iconData.src}" >
-      <div class="heraldHud-currencyTooltip">${iconData.label}</div>
     </div>
   `;
 }

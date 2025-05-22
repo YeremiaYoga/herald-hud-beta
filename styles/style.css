@@ -3719,8 +3719,6 @@
     left: 102%;
     z-index: 16;
     cursor: pointer;
-    display: none;
-
 }
 
 .heraldHud-weaponMasteryWrapper {
@@ -3771,7 +3769,7 @@
 .heraldHud-weaponMasteryImage {
     border: none;
     width: 35px;
-    height: 35px;
+    height: auto;
     position: absolute;
 }
 

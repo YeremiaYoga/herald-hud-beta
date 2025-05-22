@@ -241,10 +241,36 @@ function heraldHud_getSpellsPrepSchoolIcon(schoolCode) {
   `;
 }
 
+function heraldHud_getCurrencyIcon(type) {
+  const currencyIcons = {
+    pp: {
+      src: "/systems/dnd5e/icons/currency/platinum.webp",
+      label: "Platinum",
+    },
+    gp: { src: "/systems/dnd5e/icons/currency/gold.webp", label: "Gold" },
+    ep: {
+      src: "/systems/dnd5e/icons/currency/electrum.webp",
+      label: "Electrum",
+    },
+    sp: { src: "/systems/dnd5e/icons/currency/silver.webp", label: "Silver" },
+    cp: { src: "/systems/dnd5e/icons/currency/copper.webp", label: "Copper" },
+  };
+
+  let iconData = currencyIcons[type];
+
+  return `
+    <div class="heraldHud-currencyIconContainer">
+      <img src="${iconData.src}" >
+      <div class="heraldHud-currencyTooltip">${iconData.label}</div>
+    </div>
+  `;
+}
+
 
 
 export {
   heraldHud_getPlayerPartyList,
   heraldHud_getAllNpcsByParty,
   heraldHud_getSpellsPrepSchoolIcon,
+  heraldHud_getCurrencyIcon
 };
