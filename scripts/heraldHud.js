@@ -544,7 +544,6 @@ new TraitSelector(actor, {
   let equipmentShortcutContainerDiv = document.getElementById(
     "heraldHud-equipmentShortcutContainer"
   );
-
   if (equipmentShortcutContainerDiv) {
     equipmentShortcutContainerDiv.innerHTML = `
     <div id="heraldHud-equipmentContainer" class="heraldHud-equipmentContainer">
