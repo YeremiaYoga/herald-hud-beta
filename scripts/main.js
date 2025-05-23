@@ -137,4 +137,22 @@ Hooks.once("init", () => {
     type: String,
     default: "pattern",
   });
+
+    game.settings.register("herald-hud", "speedIconColor", {
+    name: "Speed Icon Color",
+    hint: "Speed Icon Color",
+    scope: "client",
+    config: true,
+    type: String,
+    default: "#1ad1ff",
+  });
+
+   game.settings.register("herald-hud", "overwriteWeaponMastery", {
+    name: "Overwrite Weapon Mastery",
+    hint: "Overwrite Weapon Mastery",
+    scope: "client",
+    config: true,
+    type: Boolean,
+    default: false,
+  });
 });

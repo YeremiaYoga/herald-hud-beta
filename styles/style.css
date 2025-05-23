@@ -518,7 +518,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgb(26, 209, 255);
+
     opacity: 0.5;
 }
 
@@ -552,7 +552,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgb(26, 209, 255);
+
     opacity: 0.5;
 }
 
@@ -585,7 +585,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgb(26, 209, 255);
+
     opacity: 0.5;
 }
 
@@ -618,7 +618,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgb(26, 209, 255);
     opacity: 0.5;
 }
 
@@ -1740,7 +1739,7 @@
 }
 
 .heraldHud-dialogListConsumbleContainer {
-    padding-bottom: 20px;
+    padding-bottom: 50px;
 }
 
 .heraldHud-dialogConsumableItem {
@@ -1802,37 +1801,37 @@
     border-radius: 5px;
 }
 
-.heraldHud-filterButtonInventoryContainer {
-    position: fixed;
+.heraldHud-inventoryBottomContainer {
+    position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 10%;
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
     padding: 10px;
+    z-index: 14;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    background-color: black;
     gap: 10px;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5);
-    z-index: 9999;
 }
 
-.heraldHud-filterButtonInventory {
-    padding: 4px 8px;
-    background: #444;
-    color: white;
-    border-radius: 5px;
-    cursor: pointer;
-    user-select: none;
-    transition: background 0.2s;
-    font-size: 10px;
+.heraldHud-inventorySearchContainer {
+    width: 100%;
 }
 
-.heraldHud-filterButton.active {
-    background: #2ecc71;
+.heraldHud-inventorySearchInput {
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 14px;
+    border: 2px solid gold !important;
+    border-radius: 4px;
+    color: white !important;
+    background-color: #222;
 }
+
+.heraldHud-inventorySearchInput::placeholder {
+    color: white !important;
+    opacity: 1;
+}
+
 
 
 /* Loots */
@@ -2003,6 +2002,10 @@
     justify-content: flex-start;
 }
 
+.heraldHud-dialogFeaturesPassiveContainer{
+    padding-bottom: 50px;
+}
+
 .heraldHud-dialogListFeaturesActive,
 .heraldHud-dialogListFeaturesPassive {
     display: grid;
@@ -2106,6 +2109,38 @@
     display: block;
 }
 
+
+.heraldHud-featuresBottomContainer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 10px;
+    z-index: 14;
+    display: flex;
+    background-color: black;
+    gap: 10px;
+}
+
+.heraldHud-featuresSearchContainer {
+    width: 100%;
+}
+
+.heraldHud-featuresSearchInput {
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 14px;
+    border: 2px solid gold !important;
+    border-radius: 4px;
+    color: white !important;
+    background-color: #222;
+}
+
+.heraldHud-featuresSearchInput::placeholder {
+    color: white !important;
+    opacity: 1;
+}
+
 /* Spells */
 .heraldHud-dialogSpellsContainer {
     width: 100%;
@@ -2114,6 +2149,7 @@
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: thin;
+    padding-bottom: 50px;
 }
 
 .heraldHud-spellCategoryDiv {
@@ -2301,34 +2337,35 @@
     align-items: center;
 }
 
-.heraldHud-spellsSearchContainer {
-    padding-bottom: 20%;
-}
-
-.heraldHud-spellsSearchView {
-    position: fixed;
+.heraldHud-spellsBottomContainer {
+    position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 15%;
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
     padding: 10px;
+    z-index: 14;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    background-color: black;
     gap: 10px;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.heraldHud-spellsSearchView {
+   width: 100%;
 }
 
 .heraldHud-spellsSearchValue {
+       width: 100%;
+    padding: 6px 10px;
+    font-size: 14px;
+    border: 2px solid gold !important;
+    border-radius: 4px;
     color: white !important;
-
-    outline: 2px solid gold;
+    background-color: #222;
 }
 
 .heraldHud-spellsSearchValue::placeholder {
-    color: rgba(255, 255, 255, 0.7);
+     color: white !important;
+    opacity: 1;
 }
 
 .heraldHud-dialogSpellsSlotContainer {
@@ -3797,7 +3834,7 @@
     pointer-events: none;
 }
 
-.heraldHud-journalingDivContainer:hover .heraldHud-weaponMasteryTooltip {
+.heraldHud-weaponMasteryDiv:hover .heraldHud-weaponMasteryTooltip {
     opacity: 1;
     visibility: visible;
 }
@@ -3810,12 +3847,67 @@
 }
 
 
+
+
 /* SETTING */
+
+
 
 #heraldHud-playerColorPicker input[type="text"],
 #heraldHud-borderColorPicker input[type="text"],
 #heraldHud-shadowColorPicker input[type="text"],
 #heraldHud-settingButtonColorPicker input[type="text"],
-#heraldHud-informationButtonColorPicker input[type="text"] {
+#heraldHud-informationButtonColorPicker input[type="text"],
+#heraldHud-speedIconColorPicker input[type="text"] {
     color: white;
+}
+
+
+/* FILTER DIALOG */
+
+.heraldHud-dialogFilterContainer {
+    width: 30px;
+    height: 30px;
+    color: gold;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    cursor: pointer;
+}
+
+.heraldHud-itemFilterMenuContainer {
+    position: absolute;
+    bottom: 15%;
+    right: 0;
+    z-index: 14;
+}
+
+.heraldHud-itemFilterMenu {
+    background-color: rgba(82, 82, 82, 0.9);
+    width: 150px;
+    height: auto;
+    padding: 10px;
+    border-radius: 5px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.heraldHud-itemFilter {
+    padding: 2px;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+}
+
+.heraldHud-itemFilter:hover {
+    background-color: rgba(58, 58, 58, 0.9);
 }

@@ -17,7 +17,10 @@ let heraldHud_dialogBoxShadowColor = ``;
 let heraldHud_settingButtonColor = "";
 let heraldHud_informationButtonColor = "";
 let heraldHud_enableCombineFeature = false;
+let heraldHud_speedIconColor = ``;
+let heraldHud_overwriteWeaponeMastery = false;
 let heraldHud_overlayHudbarNameImage = "";
+let heraldHud_arrFilterItem = [];
 let heraldHud_listOverlayHudbarFrame = [
   "basic_frame",
   "blue_frame",
@@ -52,6 +55,7 @@ let heraldHud_listBgBehindDialog = [
   "norse_runes",
   "pattern",
 ];
+
 Hooks.once("ready", () => {
   heraldHud_spellsTrackerOff = game.settings.get(
     "herald-hud",
@@ -103,6 +107,12 @@ Hooks.once("ready", () => {
   heraldHud_enableCombineFeature = game.settings.get(
     "herald-hud",
     "enableCombineFeature"
+  );
+
+  heraldHud_speedIconColor = game.settings.get("herald-hud", "speedIconColor");
+  heraldHud_overwriteWeaponeMastery = game.settings.get(
+    "herald-hud",
+    "overwriteWeaponMastery"
   );
 });
 
@@ -228,7 +238,8 @@ async function heraldHud_renderHeraldHud() {
     await heraldHud_renderOverlayHudbarFrame();
     await heraldHud_renderBgBehindDialog();
     await heraldHud_viewHudbarWithoutSpeed();
-    await heraldHud_changeColorInHud();
+    await heraldHud_updateSettingView();
+    await heraldHud_renderWeaponMasteryButton();
   }, 500);
 }
 
@@ -449,49 +460,7 @@ async function heraldHud_renderActorData() {
       heraldHud_showDialog("menu");
     });
   }
-
-  let weaponMasteryContainer = document.getElementById(
-    "heraldHud-weaponMasteryContainer"
-  );
-
-  if (weaponMasteryContainer) {
-    weaponMasteryContainer.innerHTML = `
-    <div id="heraldHud-weaponMasteryDiv" class="heraldHud-weaponMasteryDiv">
-      <div id="heraldHud-weaponMasteryWrapper" class="heraldHud-weaponMasteryWrapper">
-      <div id="heraldHud-weaponMasteryButton" class="heraldHud-weaponMasteryButton"></div>
-       <img
-          src="/modules/herald-hud-beta/assets/weaponmastery_img.webp"
-          alt=""
-          class="heraldHud-weaponMasteryImage"
-        />
-      </div>
-      <div class="heraldHud-weaponMasteryTooltip">Weapon Mastery</div>
-    </div>
-
-  
-    `;
-  }
-  let weaponMasteryWrapper = document.getElementById(
-    "heraldHud-weaponMasteryWrapper"
-  );
-  if (weaponMasteryWrapper) {
-    weaponMasteryWrapper.addEventListener("click", async (event) => {
-      event.stopPropagation();
-      const WeaponsConfig = game.dnd5e?.applications?.actor?.WeaponsConfig;
-      if (!WeaponsConfig) {
-        return ui.notifications.error(
-          "WeaponsConfig class tidak ditemukan di sistem DND5e"
-        );
-      }
-
-      const actor = heraldHud_actorSelected;
-      if (!actor) {
-        return ui.notifications.error("Actor tidak ditemukan");
-      }
-
-      new WeaponsConfig({ document: actor, trait: "weapon" }).render(true);
-    });
-  }
+  await heraldHud_renderWeaponMasteryButton();
 
   let restShortcutContainerDiv = document.getElementById(
     "heraldHud-restShortcutContainer"
@@ -601,6 +570,65 @@ async function heraldHud_renderActorData() {
       addSummonerButton.addEventListener("click", async () => {
         await heraldHud_showDialogAddSummon();
       });
+    }
+  }
+}
+
+async function heraldHud_renderWeaponMasteryButton() {
+  let weaponMasteryContainer = document.getElementById(
+    "heraldHud-weaponMasteryContainer"
+  );
+  let showWeaponMaster = heraldHud_overwriteWeaponeMastery;
+  for (let item of heraldHud_actorSelected.items) {
+    if (
+      item.type === "feat" &&
+      (item.name.includes("Weapon Master") ||
+        item.name.includes("Weapon Mastery"))
+    ) {
+      showWeaponMaster = true;
+    }
+  }
+
+  if (showWeaponMaster) {
+    if (weaponMasteryContainer) {
+      weaponMasteryContainer.innerHTML = `
+    <div id="heraldHud-weaponMasteryDiv" class="heraldHud-weaponMasteryDiv">
+      <div id="heraldHud-weaponMasteryWrapper" class="heraldHud-weaponMasteryWrapper">
+      <div id="heraldHud-weaponMasteryButton" class="heraldHud-weaponMasteryButton"></div>
+       <img
+          src="/modules/herald-hud-beta/assets/weaponmastery_img.webp"
+          alt=""
+          class="heraldHud-weaponMasteryImage"
+        />
+      </div>
+      <div class="heraldHud-weaponMasteryTooltip">Weapon Mastery</div>
+    </div>
+    `;
+    }
+    let weaponMasteryWrapper = document.getElementById(
+      "heraldHud-weaponMasteryWrapper"
+    );
+    if (weaponMasteryWrapper) {
+      weaponMasteryWrapper.addEventListener("click", async (event) => {
+        event.stopPropagation();
+        const WeaponsConfig = game.dnd5e?.applications?.actor?.WeaponsConfig;
+        if (!WeaponsConfig) {
+          return ui.notifications.error(
+            "WeaponsConfig class tidak ditemukan di sistem DND5e"
+          );
+        }
+
+        const actor = heraldHud_actorSelected;
+        if (!actor) {
+          return ui.notifications.error("Actor tidak ditemukan");
+        }
+
+        new WeaponsConfig({ document: actor, trait: "weapon" }).render(true);
+      });
+    }
+  } else {
+    if (weaponMasteryContainer) {
+      weaponMasteryContainer.innerHTML = ``;
     }
   }
 }
@@ -1653,6 +1681,7 @@ async function heraldHud_resetDialog() {
     heraldHud_dialog2Div.className = "heraldHud-dialog2";
     heraldHud_dialog2Div.style.display = "none";
   }
+  heraldHud_arrFilterItem = [];
 }
 async function heraldHud_renderHtmlDialog() {
   try {
@@ -1675,6 +1704,24 @@ async function heraldHud_renderHtmlDialog() {
 async function heraldHud_renderItemInventory() {
   let actor = heraldHud_actorSelected;
   let heraldHud_dialogDiv = document.getElementById("heraldHud-dialog");
+
+  let arrFilter = ["action", "bonus", "special", "reaction"];
+
+  let listFilter = ``;
+  for (let filter of arrFilter) {
+    const isChecked = heraldHud_arrFilterItem.includes(filter) ? "checked" : "";
+    let title = filter.charAt(0).toUpperCase() + filter.slice(1).toLowerCase();
+
+    if (title === "Bonus") {
+      title = "Bonus Action";
+    }
+    listFilter += `
+    <label class="heraldHud-itemFilter">
+      <input class="heraldHud-itemFilterCheckbox" type="checkbox" value="${filter}" data-name="${filter}" ${isChecked}/>
+      ${title}
+    </label>
+  `;
+  }
 
   if (heraldHud_dialogDiv) {
     heraldHud_dialogDiv.innerHTML = `
@@ -1700,34 +1747,110 @@ async function heraldHud_renderItemInventory() {
       
         </div>
       </div>
-      <div class="heraldHud-filterButtonInventoryContainer">
-        <div class="heraldHud-filterButtonInventory" data-filter="action">Action</div>
-        <div class="heraldHud-filterButtonInventory" data-filter="bonus">Bonus Action</div>
-        <div class="heraldHud-filterButtonInventory" data-filter="special">Special</div>
-        <div class="heraldHud-filterButtonInventory" data-filter="reaction">Reaction</div>
+      <div class="heraldHud-inventoryBottomContainer">
+        <div class="heraldHud-inventorySearchContainer">
+          <input type="text" id="heraldHud-inventorySearchInput" class="heraldHud-inventorySearchInput" placeholder="Search Item..." />
+        </div>
+        <div class="heraldHud-dialogFilterContainer">
+          <div id="heraldHud-dialogFilterButton" class="heraldHud-dialogFilterButton">
+            <i class="fa-solid fa-filter"></i>
+          </div>
+          
+        </div>
+      
+      </div>
+      <div id="heraldHud-itemFilterMenuContainer" class="heraldHud-itemFilterMenuContainer" style="display:none;">
+        <div class="heraldHud-itemFilterMenu">
+          ${listFilter}
+        </div>
       </div>
     </div>`;
 
-    document.querySelectorAll(".heraldHud-filterButtonInventory").forEach((button) => {
-      button.addEventListener("click", () => {
-        button.classList.toggle("active");
-        const filterType = button.dataset.filter;
-      });
+    let inventorySearchInput = document.getElementById(
+      "heraldHud-inventorySearchInput"
+    );
+    let inputSearchTimeOut;
+    inventorySearchInput.addEventListener("input", () => {
+      clearTimeout(inputSearchTimeOut);
+
+      inputSearchTimeOut = setTimeout(async () => {
+        await heraldHud_getDataInventory();
+      }, 500);
     });
+
+    let filterButton = document.getElementById("heraldHud-dialogFilterButton");
+    filterButton.addEventListener("click", async () => {
+      const filterMenu = document.getElementById(
+        "heraldHud-itemFilterMenuContainer"
+      );
+      if (filterMenu) {
+        filterMenu.style.display =
+          filterMenu.style.display === "none" || !filterMenu.style.display
+            ? "block"
+            : "none";
+      }
+    });
+    let filterCheckboxTimeout;
+    document
+      .querySelectorAll(".heraldHud-itemFilterCheckbox")
+      .forEach((checkbox) => {
+        checkbox.addEventListener("change", async (event) => {
+          const name = event.target.dataset.name;
+          const checked = event.target.checked;
+
+          if (checked) {
+            if (!heraldHud_arrFilterItem.includes(name)) {
+              heraldHud_arrFilterItem.push(name);
+            }
+          } else {
+            heraldHud_arrFilterItem = heraldHud_arrFilterItem.filter(
+              (item) => item !== name
+            );
+          }
+          clearTimeout(filterCheckboxTimeout);
+          filterCheckboxTimeout = setTimeout(async () => {
+            await heraldHud_getDataInventory();
+          }, 500);
+        });
+      });
   }
   await heraldHud_getDataInventory();
 }
 
 async function heraldHud_getDataInventory() {
   let actor = heraldHud_actorSelected;
+
   let heraldHud_listWeaponDiv = document.getElementById(
     "heraldHud-dialogListWeapon"
   );
   let listWeapons = ``;
 
+  let inventorySearchInput = document.getElementById(
+    "heraldHud-inventorySearchInput"
+  );
+  let valueSearch = "";
+  if (inventorySearchInput) {
+    valueSearch = inventorySearchInput.value.toLowerCase();
+  }
+
   let weaponsItem = actor.items.filter((item) => item.type === "weapon");
+  let filteredWeapon = [];
+  if (valueSearch) {
+    filteredWeapon = weaponsItem.filter((item) =>
+      item.name.toLowerCase().includes(valueSearch)
+    );
+  } else {
+    filteredWeapon = weaponsItem;
+  }
+
   let favoritesActor = actor.system?.favorites || [];
-  weaponsItem.forEach((item) => {
+  filteredWeapon.forEach((item) => {
+    if (
+      heraldHud_arrFilterItem.length > 0 &&
+      !heraldHud_arrFilterItem.includes(item.system.activation?.type)
+    ) {
+      return;
+    }
     let rawItemId = `.Item.${item.id}`;
 
     let isFavorited = favoritesActor.some(
@@ -2006,7 +2129,22 @@ async function heraldHud_getDataInventory() {
   let listTools = ``;
   let toolsItem = actor.items.filter((item) => item.type === "tool");
 
-  toolsItem.forEach((item) => {
+  let filteredTool = [];
+  if (valueSearch) {
+    filteredTool = toolsItem.filter((item) =>
+      item.name.toLowerCase().includes(valueSearch)
+    );
+  } else {
+    filteredTool = toolsItem;
+  }
+
+  filteredTool.forEach((item) => {
+    if (
+      heraldHud_arrFilterItem.length > 0 &&
+      !heraldHud_arrFilterItem.includes(item.system.activation?.type)
+    ) {
+      return;
+    }
     let rawItemId = `.Item.${item.id}`;
 
     let isFavorited = favoritesActor.some(
@@ -2156,7 +2294,22 @@ async function heraldHud_getDataInventory() {
     (item) => item.type === "consumable"
   );
 
-  consumablesItem.forEach((item) => {
+  let filteredConsumable = [];
+  if (valueSearch) {
+    filteredConsumable = consumablesItem.filter((item) =>
+      item.name.toLowerCase().includes(valueSearch)
+    );
+  } else {
+    filteredConsumable = consumablesItem;
+  }
+
+  filteredConsumable.forEach((item) => {
+    if (
+      heraldHud_arrFilterItem.length > 0 &&
+      !heraldHud_arrFilterItem.includes(item.system.activation?.type)
+    ) {
+      return;
+    }
     let htmlDescription = ``;
     if (item.system?.identified === false) {
       htmlDescription = item.system.unidentified.description;
@@ -2447,6 +2600,23 @@ async function heraldHud_renderItemFeatures() {
   let actor = heraldHud_actorSelected;
   let heraldHud_dialogDiv = document.getElementById("heraldHud-dialog");
 
+  let arrFilter = ["action", "bonus", "special", "reaction"];
+
+  let listFilter = ``;
+  for (let filter of arrFilter) {
+    const isChecked = heraldHud_arrFilterItem.includes(filter) ? "checked" : "";
+    let title = filter.charAt(0).toUpperCase() + filter.slice(1).toLowerCase();
+
+    if (title === "Bonus") {
+      title = "Bonus Action";
+    }
+    listFilter += `
+    <label class="heraldHud-itemFilter">
+      <input class="heraldHud-itemFilterCheckbox" type="checkbox" value="${filter}" data-name="${filter}" ${isChecked}/>
+      ${title}
+    </label>
+  `;
+  }
   if (heraldHud_dialogDiv) {
     heraldHud_dialogDiv.innerHTML = `
     <div id="heraldHud-dialogItemFeatures" class="heraldHud-dialogItemFeatures">
@@ -2464,7 +2634,71 @@ async function heraldHud_renderItemFeatures() {
       
         </div>
       </div>
+      <div class="heraldHud-featuresBottomContainer">
+        <div class="heraldHud-featuresSearchContainer">
+          <input type="text" id="heraldHud-featuresSearchInput" class="heraldHud-featuresSearchInput" placeholder="Search Feature..." />
+        </div>
+        <div class="heraldHud-dialogFilterContainer">
+          <div id="heraldHud-dialogFilterButton" class="heraldHud-dialogFilterButton">
+            <i class="fa-solid fa-filter"></i>
+          </div>
+          
+        </div>
+      </div>
+      <div id="heraldHud-itemFilterMenuContainer" class="heraldHud-itemFilterMenuContainer" style="display:none;">
+        <div class="heraldHud-itemFilterMenu">
+          ${listFilter}
+        </div>
+      </div>
     </div>`;
+
+    let featuresSearchInput = document.getElementById(
+      "heraldHud-featuresSearchInput"
+    );
+    let inputSearchTimeOut;
+    featuresSearchInput.addEventListener("input", () => {
+      clearTimeout(inputSearchTimeOut);
+
+      inputSearchTimeOut = setTimeout(async () => {
+        await heraldHud_getDataFeatures();
+      }, 500);
+    });
+
+    let filterButton = document.getElementById("heraldHud-dialogFilterButton");
+    filterButton.addEventListener("click", async () => {
+      const filterMenu = document.getElementById(
+        "heraldHud-itemFilterMenuContainer"
+      );
+      if (filterMenu) {
+        filterMenu.style.display =
+          filterMenu.style.display === "none" || !filterMenu.style.display
+            ? "block"
+            : "none";
+      }
+    });
+    let filterCheckboxTimeout;
+    document
+      .querySelectorAll(".heraldHud-itemFilterCheckbox")
+      .forEach((checkbox) => {
+        checkbox.addEventListener("change", async (event) => {
+          const name = event.target.dataset.name;
+          const checked = event.target.checked;
+
+          if (checked) {
+            if (!heraldHud_arrFilterItem.includes(name)) {
+              heraldHud_arrFilterItem.push(name);
+            }
+          } else {
+            heraldHud_arrFilterItem = heraldHud_arrFilterItem.filter(
+              (item) => item !== name
+            );
+          }
+          clearTimeout(filterCheckboxTimeout);
+          filterCheckboxTimeout = setTimeout(async () => {
+            await heraldHud_getDataFeatures();
+          }, 500);
+        });
+      });
 
     let dialogItemFeatures = document.getElementById(
       "heraldHud-dialogItemFeatures"
@@ -2512,10 +2746,34 @@ async function heraldHud_getDataFeatures() {
   );
   let featuresItem = actor.items.filter((item) => item.type === "feat");
 
+   let featuresSearchInput = document.getElementById(
+    "heraldHud-featuresSearchInput"
+  );
+  let valueSearch = "";
+  if (featuresSearchInput) {
+    valueSearch = featuresSearchInput.value.toLowerCase();
+  }
+
+  let filteredFeatures = [];
+  if (valueSearch) {
+    filteredFeatures = featuresItem.filter((item) =>
+      item.name.toLowerCase().includes(valueSearch)
+    );
+  } else {
+    filteredFeatures = featuresItem;
+  }
+
   let listFeaturesActive = ``;
   let listFeaturesPassive = ``;
   let favoritesActor = actor.system?.favorites || [];
-  featuresItem.forEach((item) => {
+
+  filteredFeatures.forEach((item) => {
+    if (
+      heraldHud_arrFilterItem.length > 0 &&
+      !heraldHud_arrFilterItem.includes(item.system.activation?.type)
+    ) {
+      return;
+    }
     let htmlDescription = item.system.description.value;
     let rawItemId = `.Item.${item.id}`;
     let isFavorited = favoritesActor.some(
@@ -2747,6 +3005,24 @@ async function heraldHud_renderContainerSpells() {
   let heraldHud_dialogDiv = document.getElementById("heraldHud-dialog");
   let heraldHud_dialog2Div = document.getElementById("heraldHud-dialog2");
 
+  let arrFilter = ["action", "bonus", "special", "reaction"];
+
+  let listFilter = ``;
+  for (let filter of arrFilter) {
+    const isChecked = heraldHud_arrFilterItem.includes(filter) ? "checked" : "";
+    let title = filter.charAt(0).toUpperCase() + filter.slice(1).toLowerCase();
+
+    if (title === "Bonus") {
+      title = "Bonus Action";
+    }
+    listFilter += `
+    <label class="heraldHud-itemFilter">
+      <input class="heraldHud-itemFilterCheckbox" type="checkbox" value="${filter}" data-name="${filter}" ${isChecked}/>
+      ${title}
+    </label>
+  `;
+  }
+
   if (heraldHud_dialogDiv) {
     heraldHud_dialogDiv.innerHTML = `
     <div id="heraldHud-dialogSpellsContainer" class="heraldHud-dialogSpellsContainer">
@@ -2756,10 +3032,20 @@ async function heraldHud_renderContainerSpells() {
       
         </div>
       </div>
-      <div id="heraldHud-spellsSearchContainer" class="heraldHud-spellsSearchContainer">
+      <div id="heraldHud-spellsBottomContainer" class="heraldHud-spellsBottomContainer">
           <div class="heraldHud-spellsSearchView">
               <input type="text" id="heraldHud-spellsSearchValue" class="heraldHud-spellsSearchValue" placeholder="Search Spells">
           </div>
+          <div class="heraldHud-dialogFilterContainer">
+            <div id="heraldHud-dialogFilterButton" class="heraldHud-dialogFilterButton">
+              <i class="fa-solid fa-filter"></i>
+            </div>
+          </div>
+      </div>
+      <div id="heraldHud-itemFilterMenuContainer" class="heraldHud-itemFilterMenuContainer" style="display:none;">
+        <div class="heraldHud-itemFilterMenu">
+          ${listFilter}
+        </div>
       </div>
     </div>`;
 
@@ -2772,9 +3058,45 @@ async function heraldHud_renderContainerSpells() {
 
         skillsSearchTimeout = setTimeout(() => {
           heraldHud_getDataSpellsList();
-        }, 100);
+        }, 500);
       });
     }
+
+    let filterButton = document.getElementById("heraldHud-dialogFilterButton");
+    filterButton.addEventListener("click", async () => {
+      const filterMenu = document.getElementById(
+        "heraldHud-itemFilterMenuContainer"
+      );
+      if (filterMenu) {
+        filterMenu.style.display =
+          filterMenu.style.display === "none" || !filterMenu.style.display
+            ? "block"
+            : "none";
+      }
+    });
+    let filterCheckboxTimeout;
+    document
+      .querySelectorAll(".heraldHud-itemFilterCheckbox")
+      .forEach((checkbox) => {
+        checkbox.addEventListener("change", async (event) => {
+          const name = event.target.dataset.name;
+          const checked = event.target.checked;
+
+          if (checked) {
+            if (!heraldHud_arrFilterItem.includes(name)) {
+              heraldHud_arrFilterItem.push(name);
+            }
+          } else {
+            heraldHud_arrFilterItem = heraldHud_arrFilterItem.filter(
+              (item) => item !== name
+            );
+          }
+          clearTimeout(filterCheckboxTimeout);
+          filterCheckboxTimeout = setTimeout(async () => {
+            await heraldHud_getDataSpellsList();
+          }, 500);
+        });
+      });
   }
   await heraldHud_getDataSpellsList();
 
@@ -2843,6 +3165,12 @@ async function heraldHud_getDataSpellsList() {
   };
 
   spellsData.forEach((item) => {
+    if (
+      heraldHud_arrFilterItem.length > 0 &&
+      !heraldHud_arrFilterItem.includes(item.system.activation?.type)
+    ) {
+      return;
+    }
     let level = item.system.level || 0;
     let prepMode = item.system.preparation.mode;
 
@@ -3162,12 +3490,13 @@ async function heraldHud_getDataSpellsSlot() {
 
       let slotValue = actor.system?.spells?.[`spell${level}`]?.value || 0;
       let slotMax = actor.system?.spells?.[`spell${level}`]?.max || 0;
-      let spellSlotDisplay = ` (${slotValue}/${slotMax})`;
+      let slotSpellValue = ` ${slotValue}/${slotMax}`;
+      let spellLevelSlot = ` (${slotValue}/${slotMax})`;
       let spellSlotElement = document.querySelector(
         `.heraldHud-spellLevelSlot[data-level="${level}"]`
       );
       if (spellSlotElement) {
-        spellSlotElement.innerText = spellSlotDisplay;
+        spellSlotElement.innerText = spellLevelSlot;
       }
       spellSlotsHTML += `
         <div class="heraldHud-slotSpellContainer">
@@ -3175,7 +3504,7 @@ async function heraldHud_getDataSpellsSlot() {
           <div class="heraldHud-slotSpellItem">
             <div class="heraldHud-slotSpellTop"></div>
             <div class="heraldHud-slotSpellMiddle">
-              <div class="heraldHud-slotSpellValue">${spellSlotDisplay}</div>
+              <div class="heraldHud-slotSpellValue">${slotSpellValue}</div>
             </div>
             <div class="heraldHud-slotSpellBottom"></div>
           </div>
@@ -3705,6 +4034,7 @@ async function heraldHud_openSettingHudDialog() {
       }>${label}</option>`;
     })
     .join("");
+
   let dialogContent = `
     <div style="display: flex; flex-direction: column; gap: 10px; padding-top:10px;padding-bottom:5px;">
       <div id="heraldHud-settingKofiSupportContainer" class="heraldHud-settingKofiSupportContainer" style="cursor:pointer;">
@@ -3798,6 +4128,15 @@ async function heraldHud_openSettingHudDialog() {
             }>
             <label for="heraldHud-enableCombineFeature">Enable Combine Feature</label>
           </div>
+          
+            <div style="display: flex; align-items: center; gap: 10px;">
+            <input type="checkbox" id="heraldHud-overwriteWeaponMastery" ${
+              game.settings.get("herald-hud", "overwriteWeaponMastery")
+                ? "checked"
+                : ""
+            }>
+            <label for="heraldHud-overwriteWeaponMastery">Show Weapon Mastery</label>
+          </div>
           <div style="display: flex;align-items: center;color:white;  justify-content: space-between; width: 100%;">
             <label for="heraldHud-hudFrameSelect"style="flex: 1; text-align: left;">HUD Bar Frame Style:</label>
             <select id="heraldHud-hudFrameSelect" style="flex: 1;color: white !important;">
@@ -3849,6 +4188,15 @@ async function heraldHud_openSettingHudDialog() {
             <color-picker id="heraldHud-informationButtonColorPicker" name="heraldHud-informationButtonColorPicker" value="${
               game.settings.get("herald-hud", "informationButtonColor") ||
               "#FFFFFF"
+            }" style="flex: 1;">
+              <input type="text"  >
+              <input type="color">
+            </color-picker>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+            <label for="heraldHud-speedIconColorPicker" style="flex: 1; text-align: left;">Speed Icon Color:</label>
+            <color-picker id="heraldHud-speedIconColorPicker" name="heraldHud-speedIconColorPicker" value="${
+              game.settings.get("herald-hud", "speedIconColor") || "#1ad1ff"
             }" style="flex: 1;">
               <input type="text"  >
               <input type="color">
@@ -3906,6 +4254,13 @@ async function heraldHud_openSettingHudDialog() {
             "#heraldHud-informationButtonColorPicker"
           )[0];
 
+          let overwriteWeaponMastery = html.find(
+            "#heraldHud-overwriteWeaponMastery"
+          )[0];
+          let speedIconColorPicker = html.find(
+            "#heraldHud-speedIconColorPicker"
+          )[0];
+
           let selectedPlayerCharacter = playerCharacterSelect.value;
           let selectedPlayerColor = playerColorPicker.value;
 
@@ -3936,6 +4291,9 @@ async function heraldHud_openSettingHudDialog() {
 
           heraldHud_settingButtonColor = settingButtonColorPicker.value;
           heraldHud_informationButtonColor = informationButtonColorPicker.value;
+
+          heraldHud_overwriteWeaponeMastery = overwriteWeaponMastery.checked;
+          heraldHud_speedIconColor = speedIconColorPicker.value;
 
           await game.settings.set(
             "herald-hud",
@@ -4010,14 +4368,25 @@ async function heraldHud_openSettingHudDialog() {
             heraldHud_informationButtonColor
           );
 
+          await game.settings.set(
+            "herald-hud",
+            "speedIconColor",
+            heraldHud_speedIconColor
+          );
+          await game.settings.set(
+            "herald-hud",
+            "overwriteWeaponMastery",
+            heraldHud_overwriteWeaponeMastery
+          );
+
           heraldHud_settingHudToBottom();
           heraldHud_renderChargeTracker();
           heraldHud_renderActorInfo();
           heraldHud_renderOverlayHudbarFrame();
           heraldHud_renderBgBehindDialog();
           heraldHud_viewHudbarWithoutSpeed();
-          await heraldHud_changeScaleHud();
-          await heraldHud_changeColorInHud();
+          await heraldHud_renderWeaponMasteryButton();
+          await heraldHud_updateSettingView();
         },
       },
       clearFavorites: {
@@ -4120,7 +4489,14 @@ async function heraldHud_changeUserConfiguration(characterId, color) {
   await heraldHud_renderHeraldHud();
 }
 
-async function heraldHud_changeColorInHud() {
+async function heraldHud_updateSettingView() {
+  let speedIconContainer = document.getElementById(
+    "heraldHud-speedIconContainer"
+  );
+  if (speedIconContainer) {
+    speedIconContainer.style.color = heraldHud_speedIconColor;
+  }
+
   let settingButton = document.getElementById("heraldHud-settingButton");
   let informationButton = document.getElementById("heraldHud-infoButton");
   if (settingButton) {
@@ -4129,9 +4505,6 @@ async function heraldHud_changeColorInHud() {
   if (informationButton) {
     informationButton.style.backgroundColor = heraldHud_informationButtonColor;
   }
-}
-
-async function heraldHud_changeScaleHud() {
   let heraldHud = document.getElementById("heraldHud");
   if (heraldHud) {
     heraldHud.style.scale = heraldHud_heraldHudScale / 100;
@@ -4810,12 +5183,12 @@ async function heraldHud_settingHudToBottom() {
 
   if (heraldHud_dockHudToBottom) {
     if (heraldHud) {
-      heraldHud.style.bottom = 0;
+      heraldHud.style.bottom = `1%`;
     }
-    dialog.style.bottom = "6%";
+    dialog.style.bottom = "7%";
     if (dialog) {
     }
-    dialog2.style.bottom = "6%";
+    dialog2.style.bottom = "7%";
     if (dialog2) {
     }
   } else {
