@@ -1051,7 +1051,6 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
 async function heraldHud_pageNumberChange(type, pageId, pageNumber, journalId) {
   const journal = game.journal.get(journalId);
   if (!journal) {
-    console.log("Journal tidak ditemukan");
     return;
   }
   const pages = journal.pages;
@@ -1156,12 +1155,9 @@ async function heraldHud_gmCreatePersonalNotesFolder(user) {
       (folder.name == user.name && folder.folder.name == "Personal Notes") ||
       (folder.name == user.name && folder.folder.id == personalNotesFolder.id)
     ) {
-      console.log(folder.folder.name);
-      console.log(folder.folder.id);
       playerFolder = folder;
     }
   }
-    console.log(playerFolder);
   if (!heraldHudFolder) {
     heraldHudFolder = await Folder.create({
       name: "Herald Hud",
@@ -1838,7 +1834,6 @@ async function heraldHud_partyJournalPageNumberChange(
 ) {
   const journal = game.journal.get(journalId);
   if (!journal) {
-    console.log("Journal tidak ditemukan");
     return;
   }
   const pages = journal.pages;

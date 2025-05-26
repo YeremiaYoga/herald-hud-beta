@@ -215,7 +215,6 @@ async function heraldHud_renderHtml() {
 }
 
 Hooks.on("canvasReady", async (canvas) => {
-  console.log("pindah scene");
   await heraldHud_renderViewListNpc();
 });
 
@@ -266,7 +265,6 @@ async function heraldHud_renderOverlayHudbarFrame() {
 
 async function heraldHud_renderBgBehindDialog() {
   let imageName = heraldHud_bgBehindDialogImage;
-  console.log(imageName);
   const dialog = document.querySelector(".heraldHud-dialog");
 
   if (dialog) {
@@ -1128,7 +1126,6 @@ async function heraldHud_updateEffectActor() {
 let heraldHud_effectDialog = false;
 async function heraldHud_settingEffect(effectId, actorUuid) {
   if (heraldHud_effectDialog) {
-    console.log("Dialog already open, preventing duplicate.");
     return;
   }
 
@@ -1208,7 +1205,6 @@ async function heraldHud_settingEffect(effectId, actorUuid) {
     default: "cancel",
     close: () => {
       heraldHud_effectDialog = false;
-      console.log("Dialog closed");
     },
   });
 
@@ -1306,7 +1302,6 @@ async function heraldHud_updateItemFavoriteActor() {
   let newFavorites = [];
 
   for (let favorite of favoritesActor) {
-    console.log(favorite);
     let rawItemId = favorite.id.split(".Item.")[1];
 
     if (rawItemId.includes(".Activity.")) {
@@ -1320,7 +1315,6 @@ async function heraldHud_updateItemFavoriteActor() {
     }
 
     newFavorites.push(favorite);
-    console.log(newFavorites);
     listFavorites += `
     <div class="heraldHud-favoriteItem" data-item-id="${item.id}" data-name="${item.name}">
       <img src="${item.img}" alt="${item.name}" class="heraldHud-favoriteItemImage">
@@ -2746,7 +2740,7 @@ async function heraldHud_getDataFeatures() {
   );
   let featuresItem = actor.items.filter((item) => item.type === "feat");
 
-   let featuresSearchInput = document.getElementById(
+  let featuresSearchInput = document.getElementById(
     "heraldHud-featuresSearchInput"
   );
   let valueSearch = "";
@@ -5712,13 +5706,11 @@ async function heraldHud_renderViewListNpc() {
 
 async function heraldHud_npcInitiativeEndturn() {
   if (!game.combat || !game.combat.started) {
-    console.log("Tidak ada combat aktif.");
     return;
   }
 
   let currentCombatant = game.combat.combatant;
   if (!currentCombatant) {
-    console.log("Tidak ada combatant yang sedang beraksi.");
     return;
   }
 
@@ -5756,11 +5748,9 @@ async function heraldHud_getDataListNpc() {
     return;
   }
   for (let id of heraldHud_npcPlayerSelected) {
-    console.log(id);
     let tokenDocument = await fromUuid(id.tokenId);
     let token = tokenDocument.object;
     let npc = await fromUuid(`Actor.${tokenDocument.actorId}`);
-    console.log(npc);
     const hp = npc.system.attributes.hp.value;
     const maxHp = npc.system.attributes.hp.max;
     let tempHp = npc.system.attributes.hp.temp || 0;
