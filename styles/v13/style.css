@@ -1,0 +1,3913 @@
+.heraldHud {
+    position: fixed;
+    bottom: 8%;
+    left: 35%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+}
+
+.heraldHud-container {
+    position: relative;
+}
+
+.heraldHud-topContainer {
+    position: absolute;
+    bottom: 90%;
+    left: 90%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 5px;
+    z-index: 15;
+    width: 800px;
+}
+
+.heraldHud-listEffectContainer {
+    position: relative;
+    display: flex;
+    justify-content: flex-start;
+    gap: 5px;
+    max-width: calc(10 * (25px + 5px));
+    flex-wrap: wrap-reverse;
+    align-self: flex-end;
+
+}
+
+.heraldHud-effectContainer {
+    position: relative;
+    width: 25px;
+    height: 25px;
+    background-color: gray;
+    display: inline-block;
+}
+
+.heraldHud-effectTooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    width: 200px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 5px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+    font-size: 10px;
+    z-index: 1000;
+    display: none;
+}
+
+
+.heraldHud-effectContainer:hover .heraldHud-effectTooltip {
+    display: block;
+}
+
+
+
+.heraldHud-detailEffectBottom {
+    display: flex;
+    gap: 5px;
+}
+
+.heraldHud-detailEffectType {
+    padding: 4px;
+    display: inline-block;
+    background-color: rgba(0, 140, 255, 0.5);
+    border-radius: 4px;
+}
+
+.heraldHud-effectContainer:hover .heraldHud-effectTooltip {
+    display: block;
+    opacity: 1;
+}
+
+.heraldHud-stackEffect {
+    position: absolute;
+    font-size: 10px;
+    color: white;
+    text-shadow: 2px 2px 4px black;
+    padding: 0;
+    bottom: 2px;
+    right: 2px;
+}
+
+.heraldHud-detailEffectDuration {
+    padding: 4px;
+    display: inline-block;
+    background-color: rgba(255, 51, 0, 0.5);
+    border-radius: 4px;
+}
+
+.heraldHud-detailEffectDisable {
+    padding: 4px;
+    display: inline-block;
+    background-color: rgb(179, 0, 0);
+    border-radius: 4px;
+}
+
+
+.heraldHud-effectItem {
+    position: relative;
+    display: inline-block;
+}
+
+.heraldHud-playerEffect {
+    border: 1px solid white;
+    width: 25px;
+    height: 25px;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+.heraldHud-addSummonContainer {
+    cursor: pointer;
+    margin-left: 5px;
+}
+
+.heraldHud-addSummonerButton {
+    width: 35px;
+    height: 35px;
+    align-items: center;
+    border: 2px dashed white;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    -ms-border-radius: 50%;
+    -o-border-radius: 50%;
+    margin-bottom: 15px;
+}
+
+.heraldHud-middleContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.heraldHud-chargeTrackerContainer {
+    position: absolute;
+    left: -60%;
+    top: 58%;
+    transform: translateY(-50%);
+    width: 80px;
+    height: 160px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 17;
+}
+
+.heraldHud-chargeItem {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid black;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+}
+
+.heraldHud-overlayChargeContainer {
+    border-radius: 50%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    -ms-border-radius: 50%;
+    -o-border-radius: 50%;
+}
+
+.heraldHud-overlayChargeValue {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: red;
+    opacity: 0.5;
+    z-index: 1;
+
+}
+
+.heraldHud-chargeImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.heraldHud-chargeValue {
+    position: absolute;
+    bottom: 0;
+    font-size: 8px;
+    font-weight: bold;
+    color: white;
+    padding: 1px 3px;
+    border-radius: 3px;
+    text-shadow: 1px 1px 2px black, 0 0 3px black;
+    z-index: 19;
+}
+
+.heraldHud-chargeFavoriteIcon {
+    position: absolute;
+    font-size: 12px;
+    bottom: -30%;
+    right: -15%;
+    color: gold;
+    text-shadow: 1px 1px 2px black;
+}
+
+.heraldHud-chargeItem:nth-child(1) {
+    top: 80%;
+    right: 20%;
+    transform: translateX(-50%);
+}
+
+.heraldHud-chargeItem:nth-child(2) {
+    top: 65%;
+    right: 50%;
+    transform: translateX(-50%);
+}
+
+.heraldHud-chargeItem:nth-child(3) {
+    top: 45%;
+    right: 65%;
+    transform: translateX(-50%);
+}
+
+.heraldHud-chargeItem:nth-child(4) {
+    top: 25%;
+    right: 65%;
+    transform: translateX(-50%);
+}
+
+.heraldHud-chargeItem:nth-child(5) {
+    top: 5%;
+    right: 50%;
+    transform: translateX(-50%);
+}
+
+.heraldHud-chargeItem:nth-child(6) {
+    top: -10%;
+    right: 20%;
+    transform: translateX(-50%);
+}
+
+.heraldHud-chargeTrackerTooltip {
+    position: absolute;
+    bottom: 10%;
+    right: 120%;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 8px;
+    border-radius: 5px;
+    font-size: 10px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    pointer-events: none;
+    z-index: 19;
+}
+
+.heraldHud-chargeItem:hover .heraldHud-chargeTrackerTooltip {
+    opacity: 1;
+}
+
+
+
+
+
+.heraldHud-barContainer {
+    position: absolute;
+    left: 40%;
+    transform: translateX(-50%);
+    z-index: 6;
+    -webkit-transform: translateX(-50%);
+    -moz-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    -o-transform: translateX(-50%);
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
+.heraldHud-actorHpSvg {
+    transform: rotate(110deg);
+    z-index: 6;
+    -webkit-transform: rotate(110deg);
+    -moz-transform: rotate(110deg);
+    -ms-transform: rotate(110deg);
+    -o-transform: rotate(110deg);
+}
+
+.heraldHud-actorHpBackground {
+    fill: none;
+    stroke: rgb(46, 46, 46);
+    stroke-width: 10;
+
+}
+
+.heraldHud-actorHpBarDelay {
+    fill: none;
+    stroke: rgb(124, 124, 124);
+    stroke-width: 10;
+    transition: stroke-dashoffset 0.5s ease;
+}
+
+.heraldHud-actorHpBar {
+    fill: none;
+    stroke-width: 10;
+    transition: stroke-dashoffset 0.5s ease;
+}
+
+.heraldHud-actorTempHpSvg {
+    transform: rotate(110deg);
+}
+
+.heraldHud-tempHpBarLeft {
+    position: absolute;
+    top: -8%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 11;
+    -webkit-transform: translateX(-50%);
+    -moz-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    -o-transform: translateX(-50%);
+}
+
+.heraldHud-tempHpLeft {
+    fill: none;
+    stroke-width: 3;
+    pointer-events: none;
+    z-index: 6;
+    transition: stroke-dashoffset 0.5s ease;
+}
+
+.heraldHud-tempHpBarRight {
+    position: absolute;
+    top: 7%;
+    left: 49%;
+    transform: translateX(-50%);
+    z-index: 11;
+    -webkit-transform: translateX(-50%);
+    -moz-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    -o-transform: translateX(-50%);
+}
+
+.heraldHud-tempHpRight {
+    fill: none;
+    stroke-width: 3;
+    pointer-events: none;
+    z-index: 6;
+    transition: stroke-dashoffset 0.5s ease;
+}
+
+
+.heraldHud-imageValueDiv {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-color: #363636;
+    border: 2px solid #d4af37;
+    z-index: 8;
+    cursor: pointer;
+}
+
+.heraldHud-imageView {
+    width: 99%;
+    height: 99%;
+    border: none;
+    object-fit: cover;
+    object-position: center;
+    z-index: 8;
+    border-radius: 50%;
+}
+
+
+.heraldHud-hudContainer {
+    position: absolute;
+    display: flex;
+    width: 450px;
+    height: 75px;
+    /* border: 3px solid black; */
+    top: 20%;
+    left: 80%;
+    border-radius: 0 20% 20% 0;
+    background-color: rgb(0, 0, 0, 0.7);
+}
+
+#heraldHud-hudOverlayImageContainer {
+    position: absolute;
+    top: -5%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 460px;
+    height: auto;
+    z-index: 7;
+    pointer-events: none;
+    border: none;
+
+}
+
+.heraldHud-hudOverlayImage {
+    width: 100%;
+    height: auto;
+    opacity: 0.9;
+    border: none;
+}
+
+
+.heraldHud-hudBoxleft,
+.heraldHud-hudBoxMiddle,
+.heraldHud-hudBoxRight {
+    flex: 1;
+    height: 100%;
+    z-index: 19;
+}
+
+.heraldHud-hudBoxleft {
+
+    justify-content: center;
+}
+
+.heraldHud-walkSpeedContainer {
+    text-align: center;
+    color: white;
+    margin-top: 5px;
+}
+
+.heraldHud-walkSpeedName {
+    font-size: 14px;
+
+}
+
+.heraldHud-walkSpeedValue {
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 2px;
+}
+
+.heraldHud-walkSpeedTooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 6px;
+    border-radius: 5px;
+    font-size: 10px;
+    min-width: 100px;
+    max-width: 200px;
+    white-space: nowrap;
+    text-align: center;
+    left: 17%;
+    bottom: 65%;
+    transform: translateX(-50%);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+    pointer-events: none;
+    z-index: 15;
+}
+
+.heraldHud-walkSpeedValue:hover+.heraldHud-walkSpeedTooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+.heraldHud-speedIconContainer {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 3px;
+}
+
+.heraldHud-burrowSpeedContainer {}
+
+.heraldHud-burrowSpeedWrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.heraldHud-burrowSpeedIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+}
+
+
+.heraldHud-burrowSpeedIcon i {
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    opacity: 0.5;
+}
+
+.heraldHud-burrowSpeedValue {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px black;
+}
+
+
+.heraldHud-climbSpeedWrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.heraldHud-climbSpeedIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+}
+
+.heraldHud-climbSpeedIcon i {
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    opacity: 0.5;
+}
+
+.heraldHud-climbSpeedValue {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px black;
+}
+
+.heraldHud-flySpeedWrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.heraldHud-flySpeedIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+}
+
+.heraldHud-flySpeedIcon i {
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    opacity: 0.5;
+}
+
+.heraldHud-flySpeedValue {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px black;
+}
+
+.heraldHud-swimSpeedWrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.heraldHud-swimSpeedIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+}
+
+.heraldHud-swimSpeedIcon i {
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.5;
+}
+
+.heraldHud-swimSpeedValue {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px black;
+}
+
+.heraldHud-speedTooltip {
+    visibility: hidden;
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 12px;
+    bottom: 100%;
+    left: 100%;
+    transform: translateX(-50%);
+    z-index: 14;
+    white-space: nowrap;
+}
+
+.heraldHud-burrowSpeedWrapper:hover .heraldHud-speedTooltip,
+.heraldHud-climbSpeedWrapper:hover .heraldHud-speedTooltip,
+.heraldHud-flySpeedWrapper:hover .heraldHud-speedTooltip,
+.heraldHud-swimSpeedWrapper:hover .heraldHud-speedTooltip {
+    visibility: visible;
+}
+
+
+
+.heraldHud-hudBoxMiddle {
+    position: relative;
+}
+
+
+.heraldHud-favoritesContainer {}
+
+.heraldHud-favoritesListItem {
+    display: grid;
+    grid-template-columns: repeat(5, 25px);
+    grid-template-rows: repeat(2, 25px);
+    gap: 3px;
+    width: max-content;
+    position: absolute;
+    top: 50%;
+    left: 45%;
+    transform: translate(-50%, -50%);
+    max-height: 90%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+
+}
+
+.heraldHud-favoriteItem {
+    width: 25px;
+    height: 25px;
+    position: relative;
+    cursor: pointer;
+}
+
+.heraldHud-favoriteItemImage {
+    width: 100%;
+    height: 100%;
+    border-radius: 3px;
+    transition: transform 0.2s ease-in-out;
+}
+
+.heraldHud-favoriteItem:hover .heraldHud-favoriteItemImage {
+    transform: scale(1.2);
+}
+
+.heraldHud-favoriteItemTooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 6px;
+    border-radius: 5px;
+    font-size: 10px;
+    width: 150px;
+    white-space: normal;
+    word-wrap: break-word;
+    text-align: center;
+    left: 50%;
+    bottom: 110%;
+    transform: translateX(-50%);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+    pointer-events: none;
+    z-index: 15;
+}
+
+.heraldHud-favoriteTooltipTop {
+    display: flex;
+    justify-content: center;
+
+}
+
+.heraldHud-favoriteTooltipNameItem {
+    padding-left: 3px;
+    padding-right: 3px;
+}
+
+.heraldHud-favoriteTooltipMiddle {
+    display: block;
+    margin-top: 3px;
+    font-size: 9px;
+    text-align: center;
+    color: rgb(155, 155, 155);
+}
+
+
+.heraldHud-hudBoxRight {
+    display: flex;
+    align-items: center;
+    position: relative;
+    height: 100%;
+    gap: 10px;
+}
+
+.heraldHud-consumableItemContainer {}
+
+.heraldHud-listConsumableItem {
+    display: grid;
+    grid-template-columns: repeat(2, 25px);
+    grid-template-rows: repeat(2, 25px);
+    gap: 3px;
+    width: max-content;
+    position: absolute;
+    top: 50%;
+    left: 25%;
+    transform: translate(-50%, -50%);
+    max-height: 90%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+
+}
+
+.heraldHud-consumableItem {
+    width: 25px;
+    height: 25px;
+    position: relative;
+    cursor: pointer;
+}
+
+.heraldHud-consumableItemWrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.heraldHud-consumableItemImage {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.heraldHud-consumableItemQty {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    color: white;
+    font-size: 10px;
+    padding: 2px 2px;
+    border-radius: 4px;
+}
+
+.heraldHud-consumableItem:hover .heraldHud-consumableItemImage {
+    transform: scale(1.2);
+}
+
+.heraldHud-consumableItemTooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 6px;
+    border-radius: 5px;
+    font-size: 10px;
+    width: 150px;
+    white-space: normal;
+    word-wrap: break-word;
+    text-align: center;
+    left: 50%;
+    bottom: 110%;
+    transform: translateX(-50%);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+    pointer-events: none;
+    z-index: 15;
+}
+
+.heraldHud-consumableTooltipTop {
+    display: flex;
+    gap: 3px;
+    justify-content: center;
+}
+
+.heraldHud-consumableTooltipMiddle {
+    display: block;
+    margin-top: 3px;
+
+}
+
+
+.heraldHud-restShortcutContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    left: 50%;
+    position: absolute;
+}
+
+.heraldHud-equipmentShortcutContainer {
+    left: 70%;
+    position: absolute;
+    /* display: none; */
+}
+
+.heraldHud-shortRestButton,
+.heraldHud-longRestButton,
+.heraldHud-equipmentButton {
+    width: 25px;
+    height: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 5px;
+    background-color: #444;
+    color: white;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.2s ease-in-out;
+}
+
+.heraldHud-shortRestButton>i,
+.heraldHud-longRestButton>i,
+.heraldHud-equipmentButton>i {
+    font-size: 16px;
+}
+
+.heraldHud-shortRestTooltip,
+.heraldHud-longRestTooltip {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-size: 10px;
+    bottom: 110%;
+    left: 40%;
+    transform: translateX(-50%);
+    z-index: 14;
+    white-space: nowrap;
+}
+
+.heraldHud-shortRestButton:hover+.heraldHud-shortRestTooltip,
+.heraldHud-longRestButton:hover+.heraldHud-longRestTooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+.heraldHud-shortRestButton:hover,
+.heraldHud-longRestButton:hover,
+.heraldHud-equipmentButton:hover {
+    transform: scale(1.2);
+}
+
+.heraldHud-equipmentTooltip {
+    position: absolute;
+    bottom: 190%;
+    left: -90%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+    pointer-events: none;
+    z-index: 18;
+}
+
+.heraldHud-equipmentContainer:hover .heraldHud-equipmentTooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+
+.heraldHud-endturnShortcutContainer {
+    position: absolute;
+    left: 95%;
+    top: -40%;
+}
+
+.heraldHud-endturnButton {
+    width: 35px;
+    height: 35px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 5px;
+    background-color: rgb(0, 0, 0, 0.7);
+    border: 2px solid black;
+    color: white;
+    cursor: pointer;
+    position: relative;
+    text-align: center;
+    font-size: 11px;
+}
+
+
+/* bottom container */
+.heraldHud-bottomContainer {
+    position: absolute;
+    width: 500px;
+    display: flex;
+    left: 25%;
+    z-index: 20;
+}
+
+.heraldHud-barValueContainer {
+    position: absolute;
+    margin-top: 6px;
+    color: white;
+    font-size: 14px;
+}
+
+.heraldHud-hpValueContainer {
+    display: flex;
+    align-items: center;
+}
+
+.heraldHud-hpValue {
+    width: 30px;
+
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.heraldHud-hpValueInput {
+    background: none !important;
+    border: none !important;
+    outline: none !important;
+    color: white !important;
+    font-size: 14px;
+    text-align: center;
+    width: 100%;
+    appearance: none;
+}
+
+.heraldHud-tempHpMaxValue {
+    margin-left: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    pointer-events: none;
+}
+
+.heraldHud-tempHpValue {
+    width: 30px;
+    height: 10px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgb(0, 204, 255);
+}
+
+.heraldHud-tempHpValueInput {
+    background: none !important;
+    border: none !important;
+    outline: none !important;
+    color: rgb(0, 204, 255) !important;
+    font-size: 14px;
+    text-align: center;
+    width: 100%;
+    appearance: none;
+
+}
+
+.heraldHud-settingHudContainer {
+    position: absolute;
+    left: -8%;
+    z-index: 16;
+    bottom: 30%;
+    cursor: pointer;
+}
+
+.heraldHud-settingButton {
+    font-size: 22px;
+}
+
+.heraldHud-settingTooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+    pointer-events: none;
+}
+
+.heraldHud-settingContainer:hover .heraldHud-settingTooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+.heraldHud-settingKofiSupportContainer {
+    display: flex;
+    justify-content: flex-end;
+    position: relative;
+
+}
+
+.heraldHud-settingKofiSupportTooltip {
+
+    visibility: hidden;
+    width: 140px;
+    background-color: black;
+    color: white;
+    text-align: center;
+    border-radius: 5px;
+    padding: 6px 8px;
+    position: absolute;
+    right: 150px;
+    top: -10px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 12px;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.heraldHud-settingKofiSupportContainer img:hover+.heraldHud-settingKofiSupportTooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+
+.heraldHud-actorInfoContainer {
+    position: absolute;
+    left: -4%;
+    z-index: 16;
+    bottom: 40%;
+    cursor: pointer;
+}
+
+.heraldHud-infoContainer {
+    color: gray;
+    font-size: 12px;
+
+}
+
+.heraldHud-infoButton {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.heraldHud-infoButtonTooltip {
+    position: absolute;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+    pointer-events: none;
+}
+
+.heraldHud-infoContainer:hover .heraldHud-infoButtonTooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+.heraldHud-dialogActorInformation {
+    color: white;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 100%;
+}
+
+.heraldHud-informationContainer {
+    padding-bottom: 10px;
+}
+
+.heraldHud-informationList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.heraldHud-infoBadge {
+    display: inline-block;
+    background: rgba(0, 4, 24, 0.8);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    border: 2px solid black;
+    text-align: center;
+    white-space: nowrap;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -ms-border-radius: 10px;
+    -o-border-radius: 10px;
+}
+
+.heraldHud-noInfo {
+    font-size: 14px;
+    color: #bbb;
+    text-align: center;
+    padding: 10px;
+}
+
+
+.heraldHud-actionContainer {
+    position: absolute;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    left: 18%;
+}
+
+.heraldHud-actionContainer div {
+    cursor: pointer;
+}
+
+.heraldHud-preparedSpellsActionContainer {
+    position: absolute;
+    left: 86%;
+    z-index: 16;
+    cursor: pointer;
+}
+
+
+.heraldHud-preparedSpellsWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+
+}
+
+.heraldHud-preparedSpellsButton {
+    width: 23px;
+    height: 23px;
+    background: rgb(0, 0, 0);
+    transform: rotate(45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+
+}
+
+.heraldHud-preparedSpellsImage {
+    border: none;
+    width: 35px;
+    height: 35px;
+    position: absolute;
+}
+
+
+.heraldHud-preparedSpellsTooltip {
+    position: absolute;
+    bottom: -100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+    pointer-events: none;
+}
+
+.heraldHud-preparedSpellsContainer:hover .heraldHud-preparedSpellsTooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+
+
+.heraldHud-acContainer {
+    position: absolute;
+    top: -30px;
+    left: 7%;
+    z-index: 14;
+}
+
+.heraldHud-acIconWrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.heraldHud-acIcon {
+    display: block;
+    width: 35px;
+    height: 35px;
+    border: none;
+}
+
+.heraldHud-acValue {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px black;
+}
+
+.heraldHud-acTooltip {
+    visibility: hidden;
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 12px;
+    bottom: 100%;
+    left: 100%;
+    transform: translateX(-50%);
+    z-index: 14;
+    white-space: nowrap;
+}
+
+.heraldHud-acContainer:hover .heraldHud-acTooltip {
+    visibility: visible;
+}
+
+.heraldHud-tempShieldContainer {
+    position: absolute;
+    top: 3px;
+    left: -4%;
+    z-index: 15;
+    width: 25px;
+}
+
+
+.heraldHud-tempShieldImage {
+    width: 25px;
+    border: none;
+}
+
+.heraldHud-actionMenuContainer {
+    background-color: rgb(0, 0, 0, 0.7);
+    border: 2px solid black;
+    color: white;
+    padding: 5px 7px 5px 7px;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+
+
+
+.heraldHud-initiativeIconWrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.heraldHud-initiativeIcon {
+    display: block;
+    width: 35px;
+    height: auto;
+    border: none;
+}
+
+.heraldHud-initiativeValue {
+    color: white;
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px black;
+    z-index: 14;
+}
+
+.heraldHud-initiativeTooltip {
+    visibility: hidden;
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 12px;
+    bottom: 100%;
+    left: 100%;
+    transform: translateX(-50%);
+    z-index: 14;
+    white-space: nowrap;
+}
+
+.heraldHud-initiativeContainer:hover .heraldHud-initiativeTooltip {
+    visibility: visible;
+}
+
+.heraldHud-shortcutButtonContainer {
+    position: absolute;
+    bottom: 70%;
+    right: -4%;
+    z-index: 18;
+    cursor: pointer;
+}
+
+.heraldHud-shortcutButtonView {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    overflow: hidden;
+    border: none;
+}
+
+.heraldHud-shortcutButtonBackground {
+    position: absolute;
+    top: 0;
+    width: 85%;
+    height: 100%;
+    z-index: 0;
+    border: none;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+
+.heraldHud-shortcutButtonImg {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    position: absolute;
+    overflow: hidden;
+    border: none;
+}
+
+.heraldHud-shortcutButtonText {
+    position: absolute;
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    z-index: 2;
+    text-align: center;
+}
+
+.heraldHud-shortcutButtonTooltip {
+    position: absolute;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+    z-index: 50;
+}
+
+/* Perbaikan Hover */
+.heraldHud-shortcutButtonContainer:hover .heraldHud-shortcutButtonTooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+
+
+/* Herald Hud Dialog */
+
+.heraldHud-dialogContainer {}
+
+
+.heraldHud-dialogDiv {}
+
+.heraldHud-dialog {
+    position: fixed;
+    bottom: 14%;
+    transform: translateX(-50%);
+    border-radius: 10px;
+    z-index: 16;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+
+
+
+.heraldHud-dialog2 {
+    display: none;
+    position: fixed;
+    bottom: 14%;
+    transform: translateX(-50%);
+
+    border-radius: 10px;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 16;
+    padding: 5px;
+}
+
+.heraldHud-dialog.inventory {
+    left: 40%;
+    width: 300px;
+    height: 350px;
+}
+
+.heraldHud-dialog.loot {
+    left: 45%;
+    width: 300px;
+    height: 350px;
+}
+
+.heraldHud-dialog.features {
+    left: 50%;
+    width: 400px;
+    height: 300px;
+}
+
+.heraldHud-dialog.spells {
+    left: 60%;
+    width: 300px;
+    height: 350px;
+}
+
+.heraldHud-dialog2.spells {
+    left: 46.5%;
+    width: 200px;
+    height: 150px;
+}
+
+.heraldHud-dialog.status {
+    left: 55%;
+    width: 300px;
+    height: 350px;
+}
+
+.heraldHud-dialog.spellsPrep {
+    left: 60%;
+    width: 400px;
+    height: 300px;
+}
+
+.heraldHud-dialog.information {
+    left: 52%;
+    width: 400px;
+    height: 300px;
+}
+
+.heraldHud-dialog.equipment {
+    left: 48%;
+    width: 300px;
+    height: 350px;
+}
+
+.heraldHud-dialog.menu {
+    left: 65%;
+    width: 200px;
+    height: 250px;
+}
+
+
+/* Inventory */
+.heraldHud-dialogItemInventory {
+    width: 100%;
+    max-height: 100%;
+    color: white;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+}
+
+
+
+
+.heraldHud-dialogWeaponItem {
+    display: flex;
+    gap: 10px;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 12px;
+    z-index: 16;
+}
+
+.heraldHud-dialogWeaponItem:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transition: background-color 0.2s ease-in-out;
+    border-radius: 5px;
+}
+
+
+
+.heraldHud-dialogWeaponImageContainer {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+
+.heraldHud-dialogWeaponImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+
+.heraldHud-weaponRight {
+    display: flex;
+    margin-left: auto;
+    gap: 10px;
+}
+
+.heraldHud-weaponEquipButton,
+.heraldHud-weaponFavoriteButton {
+    font-size: 20px;
+    cursor: pointer;
+    transition: color 0.3s ease-in-out;
+}
+
+.heraldHud-weaponEquipButton {
+    color: gray;
+}
+
+.heraldHud-weaponEquipButton.equipped {
+    color: rgb(196, 150, 0);
+}
+
+.heraldHud-weaponFavoriteButton {
+    color: gray;
+}
+
+.heraldHud-weaponFavoriteButton.favorited {
+    color: gold;
+}
+
+.heraldHud-weaponCategory {
+    font-size: 10px;
+    color: rgb(200, 200, 200);
+    display: flex;
+    gap: 2px;
+}
+
+.heraldHud-weaponsActiveType,
+.heraldHud-weaponsUsesValue {
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.heraldHud-weaponProperti {
+    font-size: 10px;
+    color: rgb(200, 200, 200);
+}
+
+
+.heraldHud-dialogWeaponTooltip {
+    display: none;
+    width: 300px;
+    position: absolute;
+    bottom: -4%;
+    left: 155%;
+    transform: translateX(-50%) translateY(-10px);
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 5px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+    font-size: 12px;
+    z-index: 1000;
+    text-align: justify;
+    white-space: normal;
+}
+
+.heraldHud-dialogWeaponContainer:hover .heraldHud-dialogWeaponTooltip {
+    display: block;
+}
+
+.heraldHud-weaponTooltipTop {
+    font-size: 16px;
+}
+
+.heraldHud-weaponTooltipBottom {
+    font-size: 12px;
+    color: rgb(200, 200, 200);
+}
+
+.heraldHud-dialogToolItem {
+    display: flex;
+    gap: 10px;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 12px;
+}
+
+.heraldHud-dialogToolItem:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    transition: background-color 0.2s ease-in-out;
+    border-radius: 5px;
+}
+
+.heraldHud-dialogToolImage {
+    width: 30px;
+    height: 30px;
+}
+
+.heraldHud-toolCategory {
+    font-size: 10px;
+    color: rgb(200, 200, 200);
+}
+
+.heraldHud-toolRight {
+    display: flex;
+    margin-left: auto;
+    gap: 10px;
+}
+
+.heraldHud-toolEquipButton,
+.heraldHud-toolFavoriteButton {
+    font-size: 20px;
+    cursor: pointer;
+    transition: color 0.3s ease-in-out;
+}
+
+.heraldHud-toolEquipButton {
+    color: gray;
+}
+
+.heraldHud-toolEquipButton.equipped {
+    color: rgb(196, 150, 0);
+}
+
+.heraldHud-toolFavoriteButton {
+    color: gray;
+}
+
+.heraldHud-toolFavoriteButton.favorited {
+    color: gold;
+}
+
+.heraldHud-dialogToolTooltip {
+    display: none;
+    width: 300px;
+    position: absolute;
+    bottom: -4%;
+    left: 155%;
+    transform: translateX(-50%) translateY(-10px);
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 5px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+    font-size: 12px;
+    z-index: 1000;
+    text-align: justify;
+    white-space: normal;
+}
+
+.heraldHud-dialogToolContainer:hover .heraldHud-dialogToolTooltip {
+    display: block;
+}
+
+.heraldHud-toolTooltipTop {
+    font-size: 16px;
+}
+
+.heraldHud-dialogListConsumbleContainer {
+    padding-bottom: 50px;
+}
+
+.heraldHud-dialogConsumableItem {
+    display: flex;
+    gap: 10px;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 12px;
+    align-items: center;
+}
+
+.heraldHud-dialogConsumableImage {
+    width: 30px;
+    height: 30px;
+}
+
+.heraldHud-consumableCategory {
+    font-size: 10px;
+    color: rgb(200, 200, 200);
+    display: flex;
+    gap: 2px;
+}
+
+.heraldHud-consumableProperti {
+    font-size: 10px;
+    color: rgb(200, 200, 200);
+}
+
+.heraldHud-consumableRight {
+    display: flex;
+    margin-left: auto;
+}
+
+.heraldHud-dialogConsumableTooltip {
+    display: none;
+    width: 300px;
+    position: absolute;
+    bottom: -4%;
+    left: 155%;
+    transform: translateX(-50%) translateY(-10px);
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 5px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+    font-size: 12px;
+    z-index: 1000;
+    text-align: justify;
+    white-space: normal;
+}
+
+.heraldHud-dialogConsumableContainer:hover .heraldHud-dialogConsumableTooltip {
+    display: block;
+}
+
+.heraldHud-dialogConsumableItem:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    transition: background-color 0.2s ease-in-out;
+    border-radius: 5px;
+}
+
+.heraldHud-inventoryBottomContainer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 10px;
+    z-index: 14;
+    display: flex;
+    background-color: black;
+    gap: 10px;
+}
+
+.heraldHud-inventorySearchContainer {
+    width: 100%;
+}
+
+.heraldHud-inventorySearchInput {
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 14px;
+    border: 2px solid gold !important;
+    border-radius: 4px;
+    color: white !important;
+    background-color: #222;
+}
+
+.heraldHud-inventorySearchInput::placeholder {
+    color: white !important;
+    opacity: 1;
+}
+
+
+
+/* Loots */
+
+.heraldHud-dialogItemLoots {
+    width: 100%;
+    max-height: 100%;
+    color: white;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+}
+
+.heraldHud-dialogLootsItem {
+    display: flex;
+    gap: 10px;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 12px;
+    align-items: center;
+}
+
+.heraldHud-dialogLootsImage {
+    width: 30px;
+    height: 30px;
+}
+
+.heraldHud-lootsCategory {
+    font-size: 10px;
+    color: rgb(200, 200, 200);
+    display: flex;
+    gap: 2px;
+}
+
+.heraldHud-valueCurrencyContainer {
+    position: relative;
+    display: inline-block;
+}
+
+.heraldHud-valueCurrencyTooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px;
+    border-radius: 4px;
+    font-size: 10px;
+    white-space: nowrap;
+    text-align: center;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+    pointer-events: none;
+    z-index: 15;
+}
+
+.heraldHud-valueCurrencyContainer:hover .heraldHud-valueCurrencyTooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+
+.heraldHud-lootsRight {
+    display: flex;
+    margin-left: auto;
+}
+
+.heraldHud-dialogLootsItem:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    transition: background-color 0.2s ease-in-out;
+    border-radius: 5px;
+}
+
+.heraldHud-dialogCurrencyContainer {
+    padding-top: 25%;
+}
+
+.heraldHud-currencyContainer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 15%;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.heraldHud-currencyContainer>div {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.heraldHud-currencyContainer input {
+    width: 40px;
+    text-align: center;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: transparent;
+    color: white;
+}
+
+
+.heraldHud-currencyIconContainer img {
+    width: 15px;
+    height: 15px;
+    position: absolute;
+    top: -15%;
+    left: -15%;
+    border: none;
+}
+
+
+.heraldHud-currencyTooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px;
+    border-radius: 4px;
+    font-size: 10px;
+    white-space: nowrap;
+    text-align: center;
+    bottom: 120%;
+    left: 30%;
+    transform: translateX(-50%);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+    pointer-events: none;
+    z-index: 15;
+}
+
+.heraldHud-currencyIconContainer:hover .heraldHud-currencyTooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+
+
+
+
+
+/* Features */
+
+.heraldHud-dialogItemFeatures {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    color: white
+}
+
+.heraldHud-dialogFeaturesActiveContainer,
+.heraldHud-dialogFeaturesPassiveContainer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.heraldHud-dialogFeaturesPassiveContainer {
+    padding-bottom: 50px;
+}
+
+.heraldHud-dialogListFeaturesActive,
+.heraldHud-dialogListFeaturesPassive {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.heraldHud-dialogFeaturesItem {
+    display: flex;
+    cursor: pointer;
+    font-size: 10px;
+    z-index: 16;
+}
+
+
+.heraldHud-dialogFeaturesImageContainer {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+
+.heraldHud-dialogFeaturesImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+
+.heraldHud-featuresFavoriteButton {
+    font-size: 13px;
+    padding: 2px;
+    cursor: pointer;
+    transition: color 0.3s ease-in-out;
+}
+
+.heraldHud-featuresFavoriteButton {
+    color: gray;
+}
+
+.heraldHud-featuresFavoriteButton.favorited {
+    color: gold;
+}
+
+
+.heraldHud-dialogFeaturesMiddle {
+    padding: 2px;
+}
+
+.heraldHud-dialogFeaturesCategory {
+    font-size: 10px;
+    color: rgb(200, 200, 200);
+    display: flex;
+    gap: 2px;
+}
+
+.heraldHud-featuresActiveType,
+.heraldHud-featuresUsesValue {
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.heraldHud-dialogFeaturesProperti {
+    font-size: 10px;
+    color: rgb(200, 200, 200);
+}
+
+.heraldHud-dialogFeaturesTooltip {
+    display: none;
+    width: 350px;
+    position: absolute;
+    bottom: -5%;
+    left: 150%;
+    transform: translateX(-50%) translateY(-10px);
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 5px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+    font-size: 12px;
+    z-index: 1000;
+    text-align: justify;
+    white-space: normal;
+}
+
+.heraldHud-featuresTooltipTop {
+    font-size: 16px;
+}
+
+.heraldHud-featuresTooltipBottom {
+    font-size: 12px;
+    color: rgb(200, 200, 200);
+}
+
+.heraldHud-dialogFeaturesContainer:hover .heraldHud-dialogFeaturesTooltip {
+    display: block;
+}
+
+
+.heraldHud-featuresBottomContainer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 10px;
+    z-index: 14;
+    display: flex;
+    background-color: black;
+    gap: 10px;
+}
+
+.heraldHud-featuresSearchContainer {
+    width: 100%;
+}
+
+.heraldHud-featuresSearchInput {
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 14px;
+    border: 2px solid gold !important;
+    border-radius: 4px;
+    color: white !important;
+    background-color: #222;
+}
+
+.heraldHud-featuresSearchInput::placeholder {
+    color: white !important;
+    opacity: 1;
+}
+
+/* Spells */
+.heraldHud-dialogSpellsContainer {
+    width: 100%;
+    max-height: 100%;
+    color: white;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    padding-bottom: 50px;
+}
+
+.heraldHud-spellCategoryDiv {
+    display: flex;
+    gap: 2px;
+    flex-wrap: wrap;
+}
+
+.heraldHud-spellLevelTitle {}
+
+.heraldHud-spellsItem {
+    display: flex;
+    gap: 10px;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 12px;
+    z-index: 16;
+}
+
+.heraldHud-spellsItem:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transition: background-color 0.2s ease-in-out;
+    border-radius: 5px;
+}
+
+.heraldHud-spellsImageContainer {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+
+.heraldHud-spellsImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.heraldHud-spellSchoolContainer {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    padding: 3px;
+}
+
+.heraldHud-spellSchoolIcon {
+    width: 15px;
+    height: 15px;
+    border: none;
+}
+
+.heraldHud-spellsSchoolTooltip {
+    visibility: hidden;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    text-align: center;
+    padding: 5px 10px;
+    border-radius: 5px;
+    position: absolute;
+    bottom: 100%;
+    right: 15%;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 12px;
+}
+
+.heraldHud-spellSchoolContainer:hover .heraldHud-spellsSchoolTooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+
+.heraldHud-spellsMiddleTop {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.heraldHud-spellsComponent {
+    display: flex;
+    align-items: center;
+    color: grey;
+    font-size: 12px;
+}
+
+.heraldHud-spellComponentContainer {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.heraldHud-spellsComponentTooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 6px 8px;
+    border-radius: 5px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.heraldHud-spellComponentContainer:hover .heraldHud-spellsComponentTooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-5px);
+}
+
+.heraldHud-spellComponentIcon {
+    width: 13px;
+    height: 13px;
+    border: none;
+}
+
+.heraldHud-spellsRightContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    gap: 2px;
+}
+
+
+.heraldHud-spellFavoriteButton {
+    font-size: 20px;
+    cursor: pointer;
+    transition: color 0.3s ease-in-out;
+}
+
+.heraldHud-spellFavoriteButton {
+    color: gray;
+}
+
+.heraldHud-spellFavoriteButton.favorited {
+    color: gold;
+}
+
+.heraldHud-spellsMiddleMid {
+    font-size: 10px;
+    color: rgb(200, 200, 200);
+    display: flex;
+    gap: 2px;
+}
+
+.heraldHud-spellsMiddleBot {
+    font-size: 10px;
+    color: rgb(200, 200, 200);
+    display: flex;
+}
+
+.heraldHud-dialogSpellsTooltip {
+    display: none;
+    width: 300px;
+    position: absolute;
+    bottom: 42%;
+    right: 52%;
+    transform: translateX(-50%) translateY(-10px);
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 5px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+    font-size: 12px;
+    z-index: 1000;
+    white-space: normal;
+}
+
+.heraldHud-spellsContainer:hover .heraldHud-dialogSpellsTooltip {
+    display: block;
+}
+
+.heraldHud-spellsTooltipBottom {
+    font-size: 12px;
+    color: rgb(200, 200, 200);
+    display: flex;
+    align-items: center;
+}
+
+.heraldHud-spellsBottomContainer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 10px;
+    z-index: 14;
+    display: flex;
+    background-color: black;
+    gap: 10px;
+}
+
+.heraldHud-spellsSearchView {
+    width: 100%;
+}
+
+.heraldHud-spellsSearchValue {
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 14px;
+    border: 2px solid gold !important;
+    border-radius: 4px;
+    color: white !important;
+    background-color: #222;
+}
+
+.heraldHud-spellsSearchValue::placeholder {
+    color: white !important;
+    opacity: 1;
+}
+
+.heraldHud-dialogSpellsSlotContainer {
+    display: flex;
+    width: 100%;
+    height: 100px;
+}
+
+.heraldHud-spellsSlotLeftContainer {
+    width: 25%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+}
+
+
+
+.heraldHud-spellsPactMagicContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+}
+
+.heraldHud-slotPactMagicContainer {
+    position: absolute;
+    left: 5%;
+    bottom: 6%;
+    margin-left: 5px;
+}
+
+.heraldHud-slotPactMagicTitle {
+    font-size: 8px;
+    color: white;
+    width: 30px;
+}
+
+.heraldHud-slotPactMagicItem {
+    border: 2px solid gold;
+    width: 30px;
+    height: 30px;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+
+.heraldHud-slotPactMagicValue {
+    font-size: 12px;
+}
+
+.heraldHud-spellsSlotRightContainer {
+    width: 75%;
+    display: flex;
+    justify-content: center;
+
+}
+
+.heraldHud-spellSlotsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    justify-items: center;
+    align-items: center;
+    width: 100%;
+    gap: 2px;
+    margin-left: 5px;
+}
+
+.heraldHud-slotSpellTitle {
+    font-size: 10px;
+    color: white;
+    text-align: center;
+}
+
+.heraldHud-slotSpellItem {
+    border: 2px solid gold;
+    width: 30px;
+    height: 30px;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.heraldHud-slotSpellValue {
+    font-size: 12px;
+}
+
+
+/* Stats */
+.heraldHud-dialogStatsContainer {
+
+    height: 100%;
+    width: 100%;
+    color: white;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.heraldHud-statsAbilitiesContainer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.heraldHud-statsSkillsContainer {
+    flex: 1;
+}
+
+
+.heraldHud-statsAbilitiesTitle,
+.heraldHud-statsSkillsTitle {
+    text-align: center;
+    padding: 5px;
+    color: goldenrod;
+}
+
+.heraldHud-statsListAbilities {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    align-self: center;
+}
+
+.heraldHud-abilitiesItem {
+    border: 2px solid goldenrod;
+    border-radius: 5px;
+    width: 65px;
+    height: 65px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    text-align: center;
+    box-sizing: border-box;
+    overflow: hidden;
+
+
+}
+
+.heraldHud-abilitiesItemTop {
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.heraldHud-abilitiesName {
+    font-size: 12px;
+    padding: 2px;
+}
+
+.heraldHud-abilitiesValue {
+    font-size: 9px;
+    color: rgb(175, 175, 175);
+}
+
+.heraldHud-abilitiesItemMiddle {
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.heraldHud-abilitiesItemBot {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+}
+
+.heraldHud-abilitiesSaveButton {
+    font-size: 12px;
+    color: white;
+    width: 100%;
+    background-color: goldenrod;
+    text-align: center;
+    cursor: pointer;
+}
+
+
+
+
+
+
+.heraldHud-statsListSkills {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    max-height: 200px;
+    padding-right: 5px;
+    margin-bottom: 70px;
+}
+
+.heraldHud-skillItem {
+    padding: 2px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.heraldHud-skillItem:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+
+.heraldHud-skillValueData {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-wrap: nowrap;
+    font-size: 10px;
+    color: #8f8f8f;
+    justify-content: center;
+}
+
+.heraldHud-skillProficientWrapper {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.heraldHud-skillProficientWrapper .heraldHud-skillProficientTooltip {
+    visibility: hidden;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    text-align: center;
+    padding: 5px;
+    border-radius: 5px;
+
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    /* Posisikan tooltip di atas ikon */
+    left: 50%;
+    transform: translateX(-50%);
+
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.heraldHud-skillProficientWrapper:hover .heraldHud-skillProficientTooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+
+.heraldHud-statsSkillsSearchContainer {}
+
+.heraldHud-statsSkillsSearchView {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 15%;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.heraldHud-statsSkillsSearchValue {
+    color: white !important;
+
+    outline: 2px solid gold;
+}
+
+.heraldHud-statsSkillsSearchValue::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Spells Prepared */
+.heraldHud-dialogSpellsPrepContainer {
+    max-height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+
+}
+
+
+.heraldHud-spellsPrepContainerDiv {
+    font-size: 12px;
+    color: white;
+}
+
+.heraldHud-spellsPrepTitle {
+    padding: 2px;
+    padding-bottom: 5px;
+}
+
+.heraldHud-spellsPrepSearchContainer {
+    padding: 5px;
+}
+
+
+.heraldHud-spellsPrepSearch {
+    color: white !important;
+
+    outline: 2px solid gold;
+}
+
+
+.heraldHud-spellsPrepSearch::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+
+
+
+.heraldHud-spellsCategory {
+    padding: 5px;
+}
+
+.heraldHud-spellsCategoryList {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+    font-size: 12px;
+}
+
+.heraldHud-spellsPrepItem {
+    display: flex;
+    font-size: 10px;
+    gap: 2px;
+}
+
+.heraldHud-spellsPrepUnderImage {
+    display: flex;
+    gap: 2px;
+    margin-top: 2px;
+    align-items: center;
+}
+
+.heraldHud-spellsPrepButton {
+    cursor: pointer;
+    font-size: 13px;
+    color: gray;
+}
+
+.heraldHud-spellsPrepButton {
+
+    color: gray;
+}
+
+.heraldHud-spellsPrepButton.prepared {
+
+    color: rgb(243, 187, 34);
+}
+
+.heraldHud-spellPrepSchoolContainer {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    padding: 3px;
+}
+
+.heraldHud-spellPrepSchoolIcon {
+    width: 12px;
+    height: 12px;
+    border: none;
+}
+
+.heraldHud-spellsPrepSchoolTooltip {
+    visibility: hidden;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    text-align: center;
+    padding: 5px 10px;
+    border-radius: 5px;
+    position: absolute;
+    bottom: 100%;
+    left: 0%;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 16;
+    font-size: 12px;
+}
+
+.heraldHud-spellPrepSchoolContainer:hover .heraldHud-spellsPrepSchoolTooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+.heraldHud-spellsPrepMiddleTop {
+    display: flex;
+    gap: 2px;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+
+
+.heraldHud-spellsPrepComponent {
+    font-size: 10px;
+    color: gray;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.heraldHud-spellsPrepMiddleMid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    font-size: 10px;
+    color: gray;
+}
+
+.heraldHud-spellsPrepMiddleBot {
+    font-size: 10px;
+    color: gray;
+}
+
+
+/* EQUIPMENT */
+
+.heraldHud-dialogEquipmentContainer {
+    width: 100%;
+    max-height: 100%;
+    color: white;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+}
+
+.heraldHud-equipmentCategoryDiv {
+    gap: 2px;
+    flex-wrap: wrap;
+}
+
+.heraldHud-equipmentItem {
+    display: flex;
+    gap: 10px;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 12px;
+    z-index: 16;
+}
+
+.heraldHud-equipmentItem:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transition: background-color 0.2s ease-in-out;
+    border-radius: 5px;
+}
+
+.heraldHud-equipmentImageContainer {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+
+.heraldHud-equipmentImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+
+
+.heraldHud-equipmentMiddleTop {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.heraldHud-equipmentMiddleMid {
+    font-size: 10px;
+    color: rgb(200, 200, 200);
+    display: flex;
+    gap: 2px;
+}
+
+.heraldHud-equipmentMiddleBot {
+    font-size: 10px;
+    color: rgb(200, 200, 200);
+    display: flex;
+}
+
+.heraldHud-equipmentRightContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    gap: 10px;
+}
+
+.heraldHud-equipmentEquipButton,
+.heraldHud-equipmentFavoriteButton {
+    font-size: 20px;
+    cursor: pointer;
+    transition: color 0.3s ease-in-out;
+}
+
+.heraldHud-equipmentEquipButton {
+    color: gray;
+}
+
+.heraldHud-equipmentEquipButton.equipped {
+    color: rgb(196, 150, 0);
+}
+
+.heraldHud-equipmentFavoriteButton {
+    color: gray;
+}
+
+.heraldHud-equipmentFavoriteButton.favorited {
+    color: gold;
+}
+
+
+.heraldHud-dialogEquipmentTooltip {
+    display: none;
+    width: 300px;
+    position: absolute;
+    bottom: -4%;
+    left: -60%;
+    transform: translateX(-50%) translateY(-10px);
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 5px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+    font-size: 12px;
+    z-index: 1000;
+    text-align: justify;
+    white-space: normal;
+}
+
+.heraldHud-equipmentTooltipTop {
+    font-size: 16px;
+}
+
+.heraldHud-equipmentTooltipBottom {
+    font-size: 12px;
+    color: rgb(200, 200, 200);
+}
+
+.heraldHud-equipmentContainer:hover .heraldHud-dialogEquipmentTooltip {
+    display: block;
+}
+
+
+/* NPC */
+
+.heraldHud-dialogNpcContainer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px;
+    justify-content: space-between;
+    border-bottom: 1px solid #ccc;
+}
+
+.heraldHud-dialogNpcImageContainer {
+    position: relative;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #363636;
+    border: 2px solid #d4af37;
+    z-index: 8;
+    cursor: pointer;
+}
+
+.heraldHud-dialogNpcImageView {
+    width: 99%;
+    height: 99%;
+    border: none;
+    object-fit: cover;
+    object-position: center;
+    z-index: 8;
+    border-radius: 50%;
+}
+
+.heraldHud-dialogNpcCr {
+    font-size: 12px;
+    color: gray;
+}
+
+.heraldHud-dialogNpcMiddle {}
+
+.heraldHud-dialogNpcName {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.heraldHud-dialogNpcUuid {
+    font-size: 10px;
+    color: gray;
+}
+
+.heraldHud-dialogNpcLinkActorData {
+    font-size: 10px;
+}
+
+.heraldHud-dialogNpcHp {
+    font-size: 12px;
+}
+
+
+
+
+.heraldHud-dialogNpcRight {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.heraldHud-listNpcContainer {}
+
+.heraldHud-listNpcItem {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 25px;
+    height: 100%;
+    margin-top: -50px;
+    padding-right: 20px;
+}
+
+.heraldHud-npcContainer {
+    margin-top: auto;
+}
+
+.heraldHud-npcActionContainer {
+    display: none;
+}
+
+.heraldHud-npcActionButtonContainer {
+    position: absolute;
+    display: flex;
+    gap: 3px;
+    padding: 3px;
+    border-radius: 5px;
+    background-color: #363636;
+    z-index: 100;
+    top: -100%;
+    margin-left: -10px;
+}
+
+.heraldHud-npcActionButton {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.2s ease, background-color 0.3s ease;
+}
+
+.heraldHud-npcActionButton[data-type="actions"] {
+    background-color: #3498db;
+    /* Biru */
+}
+
+.heraldHud-npcActionButton[data-type="passive"] {
+    background-color: #2ecc71;
+    /* Hijau */
+}
+
+.heraldHud-npcActionButton[data-type="status"] {
+    background-color: #f1c40f;
+    /* Kuning */
+}
+
+.heraldHud-npcActionButton[data-type="remove"] {
+    background-color: #e74c3c;
+    /* Merah */
+}
+
+/* Efek Hover */
+.heraldHud-npcActionButton:hover {
+    /* transform: scale(1.1); */
+    opacity: 0.9;
+}
+
+.heraldHud-npcActionButtonTooltip {
+    visibility: hidden;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    text-align: center;
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 5px;
+    position: absolute;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+}
+
+/* Tooltip Muncul Saat Hover */
+.heraldHud-npcActionButton:hover .heraldHud-npcActionButtonTooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+
+.heraldHud-npcViewMiddle {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.heraldHud-npcBarContainer {
+    display: flex;
+    align-items: center;
+}
+
+.heraldHud-npcHpBarContainer {
+    position: absolute;
+    top: 10px;
+    left: 97%;
+    transform: translateX(-50%);
+    z-index: 6;
+    -webkit-transform: translateX(-50%);
+    -moz-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    -o-transform: translateX(-50%);
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
+.heraldHud-npcHpBarSvg {
+    transform: rotate(115deg);
+    z-index: 6;
+    -webkit-transform: rotate(115deg);
+    -moz-transform: rotate(115deg);
+    -ms-transform: rotate(115deg);
+    -o-transform: rotate(115deg);
+}
+
+.heraldHud-npHpBarBackground {
+    fill: none;
+    stroke: rgb(46, 46, 46);
+    stroke-width: 10;
+
+}
+
+.heraldHud-npcHpBarValueBar {
+    fill: none;
+    stroke: #389454;
+    stroke-width: 10;
+}
+
+
+.heraldHud-npcTempHpBarContainerLeft {
+    position: absolute;
+    top: 7px;
+    left: 95%;
+    transform: translateX(-50%);
+    z-index: 14;
+    -webkit-transform: translateX(-50%);
+    -moz-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    -o-transform: translateX(-50%);
+}
+
+.heraldHud-npcTempHpBarSvg {
+    transform: rotate(115deg);
+    -webkit-transform: rotate(115deg);
+    -moz-transform: rotate(115deg);
+    -ms-transform: rotate(115deg);
+    -o-transform: rotate(115deg);
+}
+
+.heraldHud-npcTempHpLeft {
+    fill: none;
+    stroke-width: 3;
+    pointer-events: none;
+    z-index: 6;
+    stroke: rgb(70, 196, 255);
+    /* transition: stroke-dashoffset 0.5s ease; */
+}
+
+.heraldHud-npcMidContainerMiddle {
+    z-index: 15;
+}
+
+.heraldHud-npcImageContainer {
+    position: relative;
+    left: 50%;
+    top: 15px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #363636;
+    border: 2px solid #d4af37;
+    z-index: 8;
+    cursor: pointer;
+}
+
+.heraldHud-npcImageView {
+    width: 99%;
+    height: 99%;
+    border: none;
+    object-fit: cover;
+    object-position: center;
+    z-index: 8;
+    border-radius: 50%;
+}
+
+.heraldHud-npcAcContainer {
+    position: absolute;
+    top: 25px;
+    right: -70%;
+    z-index: 14;
+}
+
+.heraldHud-npcAcIconWrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.heraldHud-npcAcIcon {
+    display: block;
+    width: 20px;
+    height: 20px;
+    border: none;
+}
+
+.heraldHud-npcAcValue {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 9px;
+    color: white;
+    text-shadow: 1px 1px 2px black;
+}
+
+.heraldHud-npcTempShieldContainer {
+    position: absolute;
+    top: 45px;
+    left: 85%;
+    z-index: 15;
+    width: 25px;
+}
+
+
+.heraldHud-npcTempShield {
+    width: 15px;
+    border: none;
+}
+
+
+
+.heraldHud-npcHpValueContainer {
+    position: absolute;
+    top: 70%;
+    color: white;
+    font-size: 10px;
+    margin-left: 15px;
+}
+
+.heraldHud-npcTempHpValue {
+    color: rgb(70, 196, 255);
+}
+
+
+
+.heraldHud-npcDialogContainer {}
+
+
+.heraldHud-npcDialogDiv {}
+
+.heraldHud-npcDialog {
+    display: none;
+    position: fixed;
+    left: 46%;
+    bottom: 27%;
+    transform: translateX(-50%);
+    border-radius: 10px;
+    z-index: 16;
+    padding: 10px;
+    border: 3px solid gold;
+    background-color: rgba(0, 0, 0, 0.8);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+
+.heraldHud-npcDialog.actions {
+    width: 350px;
+    height: 250px;
+
+}
+
+.heraldHud-npcDialog.passive {
+    width: 350px;
+    height: 250px;
+
+}
+
+.heraldHud-npcDialog.status {
+    width: 350px;
+    height: 250px;
+
+}
+
+.heraldHud-npcDialogCloseButtonContainer {
+    position: fixed;
+    left: 58%;
+    bottom: 49%;
+    z-index: 18;
+    cursor: pointer;
+}
+
+.heraldHud-npcDialogCloseButton {
+    width: 30px;
+    height: 30px;
+    color: white;
+    font-size: 20px;
+    background-color: rgb(99, 99, 99);
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    -ms-border-radius: 50%;
+    -o-border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+}
+
+/* NPC ACTIONS */
+.heraldHud-npcDialogActionsContainer {
+    width: 100%;
+    max-height: 100%;
+    color: white;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+}
+
+/* ACTION ITEM */
+.heraldHud-npcActionItem {
+    display: flex;
+    gap: 10px;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 12px;
+    z-index: 16;
+}
+
+.heraldHud-npcActionItem:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transition: background-color 0.2s ease-in-out;
+    border-radius: 5px;
+}
+
+.heraldHud-npcActionImageContainer {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+
+.heraldHud-npcActionImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.heraldHud-npcActionMiddleMid {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 10px;
+    color: rgb(200, 200, 200);
+}
+
+.heraldHud-npcActionCategory {}
+
+.heraldHud-npcActionProperti {
+    font-size: 10px;
+    color: rgb(200, 200, 200);
+}
+
+.heraldHud-npcActionRight {
+    display: flex;
+    margin-left: auto;
+    gap: 10px;
+}
+
+/* ACTION BONUS */
+
+
+/* ACTION REACTION */
+/* ACTION OTHER */
+
+/* NPC PASSIVE */
+.heraldHud-npcDialogPassiveContainer {
+    width: 100%;
+    max-height: 100%;
+    color: white;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+}
+
+.heraldHud-npcPassiveItem {
+    display: flex;
+    gap: 10px;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 12px;
+    z-index: 16;
+}
+
+.heraldHud-npcPassiveItem:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transition: background-color 0.2s ease-in-out;
+    border-radius: 5px;
+}
+
+.heraldHud-npcPassiveImageContainer {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+
+.heraldHud-npcPassiveImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.heraldHud-npcPassiveMiddleMid {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 10px;
+    color: rgb(200, 200, 200);
+}
+
+.heraldHud-npcPassiveCategory {}
+
+.heraldHud-npcPassiveProperti {
+    font-size: 10px;
+    color: rgb(200, 200, 200);
+}
+
+.heraldHud-npcPassiveRight {
+    display: flex;
+    margin-left: auto;
+    gap: 10px;
+}
+
+
+/* NPC STATS */
+.heraldHud-npcDialogStatsContainer {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    color: white;
+    overflow-y: auto;
+    justify-content: center;
+}
+
+.heraldHud-npcStatsAbilitiesContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.heraldHud-npcStatsAbilitiesTitle,
+.heraldHud-npcStatsSkillsTitle {
+    text-align: center;
+    padding: 5px;
+    color: goldenrod;
+}
+
+
+.heraldHud-npcStatsListAbilities {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    justify-content: center;
+    align-items: center;
+    align-self: center;
+}
+
+.heraldHud-npcAbilitiesItem {
+    border: 2px solid goldenrod;
+    border-radius: 5px;
+    width: 65px;
+    height: 65px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    text-align: center;
+    box-sizing: border-box;
+    overflow: hidden;
+
+
+}
+
+.heraldHud-npcAbilitiesItemTop {
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.heraldHud-npcAbilitiesName {
+    font-size: 12px;
+    padding: 2px;
+}
+
+.heraldHud-npcAbilitiesValue {
+    font-size: 9px;
+    color: rgb(175, 175, 175);
+}
+
+.heraldHud-npcAbilitiesItemMiddle {
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.heraldHud-npcAbilitiesItemBot {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+}
+
+.heraldHud-npcAbilitiesSaveButton {
+    font-size: 12px;
+    color: white;
+    width: 100%;
+    background-color: goldenrod;
+    text-align: center;
+    cursor: pointer;
+}
+
+.heraldHud-npcStatsListSkills {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    max-height: 200px;
+    padding-right: 5px;
+    padding-bottom: 100%;
+}
+
+.heraldHud-npcSkillItem {
+    padding: 2px;
+    border-radius: 5px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+}
+
+.heraldHud-npcSkillItemTop {
+    display: flex;
+    gap: 3px;
+}
+
+.heraldHud-npcSkillItem:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+
+.heraldHud-npcSkillValueData {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-wrap: nowrap;
+    font-size: 10px;
+    color: #8f8f8f;
+    justify-content: center;
+}
+
+
+.heraldHud-npcStatsSkillsSearchContainer {}
+
+.heraldHud-npcStatsSkillsSearchView {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 15%;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.heraldHud-npcStatsSkillsSearchValue {
+    color: white !important;
+
+    outline: 2px solid gold;
+}
+
+.heraldHud-npcStatsSkillsSearchValue::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+
+/* NPC TOOLTIP */
+
+.heraldHud-npcDataTooltipContainer {
+    position: absolute;
+    bottom: 150%;
+    color: white;
+}
+
+.heraldHud-npcDataTooltip {
+    width: 250px;
+    height: 150px;
+    background-color: rgb(0, 0, 0, 0.8);
+    padding: 10px;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+
+.heraldHud-npcTooltipMiddle {
+    display: flex;
+    gap: 10px;
+}
+
+.heraldHud-npcTooltipBottom {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 5px;
+}
+
+.heraldHud-npcTooltipBotLeft {
+    flex: 1;
+}
+
+.heraldHud-npcTooltipBotRight {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: flex-end;
+    text-align: right;
+    gap: 2px;
+    margin-right: 10px;
+}
+
+/* damage icon */
+.heraldHud-damageIcon {
+    border: none;
+    filter: invert(1);
+    vertical-align: middle;
+}
+
+.heraldHud-damageIconContainer {
+    position: relative;
+    display: inline-block;
+}
+
+.heraldHud-damageTooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    white-space: nowrap;
+    text-align: center;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out, transform 0.2s ease-in-out;
+    pointer-events: none;
+    z-index: 15;
+}
+
+.heraldHud-damageIconContainer:hover .heraldHud-damageTooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-2px);
+}
+
+
+
+/* INSPIRATION  */
+.heraldHud-inspirationLevelContainer {
+    position: absolute;
+    bottom: 55px;
+    right: -4%;
+}
+
+.heraldHud-inspirationLevelWrapper {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.heraldHud-inspirationLevelTooltip {
+    visibility: hidden;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    position: absolute;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    z-index: 99;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.heraldHud-inspirationLevelWrapper:hover .heraldHud-inspirationLevelTooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+.heraldHud-inspirationActorContainer {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    z-index: 18;
+    right: 75%;
+    top: 10px;
+}
+
+.heraldHud-inspirationActorImage {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border: none;
+}
+
+.heraldHud-levelActorContainer {
+    position: relative;
+    width: 40px;
+    height: 40px;
+}
+
+.heraldHud-levelImageIcon {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border: none;
+}
+
+.heraldHud-actorLevelValue {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+    pointer-events: none;
+    z-index: 19;
+}
+
+
+/* WEAPON MASTERY */
+
+.heraldHud-weaponMasteryContainer {
+    position: absolute;
+    left: 102%;
+    z-index: 16;
+    cursor: pointer;
+}
+
+.heraldHud-weaponMasteryWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+
+}
+
+.heraldHud-weaponMasteryButton {
+    width: 23px;
+    height: 23px;
+    background: rgb(0, 0, 0);
+    transform: rotate(45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+
+}
+
+
+.heraldHud-weaponMasteryTooltip {
+    position: absolute;
+    bottom: -100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+    pointer-events: none;
+}
+
+.heraldHud-weaponMasteryDiv:hover .heraldHud-weaponMasteryTooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+.heraldHud-weaponMasteryImage {
+    border: none;
+    width: 35px;
+    height: auto;
+    position: absolute;
+}
+
+
+
+
+/* SETTING */
+
+
+
+#heraldHud-playerColorPicker input[type="text"],
+#heraldHud-borderColorPicker input[type="text"],
+#heraldHud-shadowColorPicker input[type="text"],
+#heraldHud-settingButtonColorPicker input[type="text"],
+#heraldHud-informationButtonColorPicker input[type="text"],
+#heraldHud-speedIconColorPicker input[type="text"] {
+    color: white;
+}
+
+
+/* FILTER DIALOG */
+
+.heraldHud-dialogFilterContainer {
+    width: 30px;
+    height: 30px;
+    color: gold;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    cursor: pointer;
+}
+
+.heraldHud-itemFilterMenuContainer {
+    position: absolute;
+    bottom: 15%;
+    right: 0;
+    z-index: 14;
+}
+
+.heraldHud-itemFilterMenu {
+    background-color: rgba(82, 82, 82, 0.9);
+    width: 150px;
+    height: auto;
+    padding: 10px;
+    border-radius: 5px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.heraldHud-itemFilter {
+    padding: 2px;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+}
+
+.heraldHud-itemFilter:hover {
+    background-color: rgba(58, 58, 58, 0.9);
+}

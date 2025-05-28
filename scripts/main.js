@@ -1,28 +1,52 @@
 import * as herald_hud from "./heraldHud.js";
+import * as hud_13 from "./v13/heraldHud.js";
 
 Hooks.on("ready", () => {
   setTimeout(async () => {
-    await herald_hud.heraldHud_renderHtml();
-    await herald_hud.heraldHud_renderHeraldHud();
+    const isV13OrAbove = isNewerVersion(game.version, "12.999");
+    console.log("Versi Foundry VTT:", game.version);
+    if (isV13OrAbove) {
+      await hud_13.heraldHud_renderHtml();
+      await hud_13.heraldHud_renderHeraldHud();
+    } else {
+      await herald_hud.heraldHud_renderHtml();
+      await herald_hud.heraldHud_renderHeraldHud();
+    }
   }, 1000);
-  // Mengganti sheet default untuk JournalEntry
   JournalEntry.sheet = core.JournalTextTinyMCESheet;
 
-  // Mengganti sheet untuk setiap Journal Entry yang sudah ada
   for (let entry of game.journal.entries) {
-    // Memastikan entry sudah menggunakan sheet TinyMCE
     if (!(entry.sheet instanceof core.JournalTextTinyMCESheet)) {
       entry.sheet = new core.JournalTextTinyMCESheet(entry);
-      entry.render(true); // Render ulang entry setelah mengganti sheet
+      entry.render(true);
     }
   }
 });
 
 Hooks.once("init", () => {
+  const isV13OrAbove = isNewerVersion(game.version, "12.999");
+
+  const cssFiles = isV13OrAbove
+    ? [
+        "modules/herald-hud-beta/styles/v13/style.css",
+        "modules/herald-hud-beta/styles/v13/journaling.css",
+      ]
+    : [
+        "modules/herald-hud-beta/styles/style.css",
+        "modules/herald-hud-beta/styles/menuDetail.css",
+      ];
+
+  for (const cssFile of cssFiles) {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = cssFile;
+    document.head.appendChild(link);
+    console.log("Loaded CSS:", cssFile);
+  }
   game.settings.register("herald-hud", "spellsTrackerOff", {
     name: "Disable Spells Tracker",
     hint: "Turn off the spells tracker in the HUD.",
-    scope: "client", // Hanya berlaku untuk setiap user
+    scope: "client",
     config: true,
     type: Boolean,
     default: false,
@@ -120,7 +144,7 @@ Hooks.once("init", () => {
     default: "#ffffff",
   });
 
- game.settings.register("herald-hud", "enableCombineFeature", {
+  game.settings.register("herald-hud", "enableCombineFeature", {
     name: "Enable Combine Features",
     hint: "Enable Combine Features",
     scope: "client",
@@ -129,7 +153,7 @@ Hooks.once("init", () => {
     default: false,
   });
 
-    game.settings.register("herald-hud", "hudBgDialog", {
+  game.settings.register("herald-hud", "hudBgDialog", {
     name: "Hud Background Dialog",
     hint: "Hud Background Dialog",
     scope: "client",
@@ -138,7 +162,7 @@ Hooks.once("init", () => {
     default: "pattern",
   });
 
-    game.settings.register("herald-hud", "speedIconColor", {
+  game.settings.register("herald-hud", "speedIconColor", {
     name: "Speed Icon Color",
     hint: "Speed Icon Color",
     scope: "client",
@@ -147,7 +171,7 @@ Hooks.once("init", () => {
     default: "#1ad1ff",
   });
 
-   game.settings.register("herald-hud", "overwriteWeaponMastery", {
+  game.settings.register("herald-hud", "overwriteWeaponMastery", {
     name: "Overwrite Weapon Mastery",
     hint: "Overwrite Weapon Mastery",
     scope: "client",

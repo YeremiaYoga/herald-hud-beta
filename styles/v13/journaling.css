@@ -1,0 +1,936 @@
+.heraldHud-journalingContainer {
+  position: absolute;
+  left: 94%;
+  z-index: 16;
+  cursor: pointer;
+}
+
+.heraldHud-journalingWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+
+}
+
+.heraldHud-journalingButton {
+  width: 23px;
+  height: 23px;
+  background: rgb(0, 0, 0);
+  transform: rotate(45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+
+}
+
+
+.heraldHud-journalingTooltip {
+  position: absolute;
+  bottom: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+  pointer-events: none;
+}
+
+.heraldHud-journalingDivContainer:hover .heraldHud-journalingTooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+.heraldHud-journalingImage {
+  border: none;
+  width: 35px;
+  height: 35px;
+  position: absolute;
+}
+
+.heraldHud-journalingButton {}
+
+.heraldHud-journalingListItem {
+  gap: 5px;
+
+}
+
+.heraldHud-journalingItem {
+  align-items: center;
+  justify-content: space-between;
+  display: flex;
+  color: white;
+  padding: 5px;
+  background-color: rgb(0, 0, 0, 0.5);
+  border: 2px solid rgb(207, 207, 207);
+  border-radius: 5px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  position: relative;
+  height: 35px;
+}
+
+.heraldHud-journalingItem:hover {
+  background-color: rgba(75, 75, 75, 0.8);
+}
+
+.heraldHud-journalingName {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 18px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.heraldHud-menuIconContainer {
+  font-size: 20px;
+  margin-left: auto;
+  z-index: 17;
+}
+
+
+.heraldHud-dialog2.biography {
+  left: 43%;
+  width: 550px;
+  height: 350px;
+}
+
+.heraldHud-menuBiographyContainer {
+  padding: 5px;
+  overflow-y: auto;
+  height: 100%;
+  color: white;
+}
+
+.heraldHud-biographyTopContainer {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px 16px;
+}
+
+.heraldHud-topInputBiographyWrapper {
+  color: white;
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.heraldHud-topInputBiographyLabel {
+  padding-right: 2px;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 10px;
+}
+
+.heraldHud-topInputBiographyField {
+  color: white !important;
+  flex: 1;
+  padding: 2px 4px;
+  border: 1px solid #999;
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+.heraldHud-biographyMiddleContainer {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px 16px;
+}
+
+.heraldHud-middleInputBiographyWrapper {
+  margin-bottom: 5px;
+}
+
+.heraldHud-middleInputBiographyLabel {
+  display: block;
+  font-weight: bold;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.heraldHud-middleInputBiographyField {
+  width: 100%;
+  resize: vertical;
+  color: white !important;
+  border: 1px solid white !important;
+}
+
+.heraldHud-middleInputBiographyDivider {
+  border: none;
+  border-top: 1px solid #ccc;
+}
+
+.heraldHud-bottomInputBiographyWrapper {
+  margin-bottom: 1rem;
+}
+
+.heraldHud-bottomInputBiographyLabel {
+  display: block;
+  font-weight: bold;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.heraldHud-bottomInputBiographyField {
+  width: 100%;
+  resize: vertical;
+  color: white !important;
+  border: 1px solid white !important;
+  height: 100px;
+}
+
+.heraldHud-bottomInputBiographyDivider {
+  border: none;
+  border-top: 1px solid #ccc;
+}
+
+/* ---------------------------------------------
+   DIALOG PERSONAL NOTES
+--------------------------------------------- */
+
+.heraldHud-dialog2.personal_notes {
+  left: 48%;
+  width: 300px;
+  height: 350px;
+}
+
+.heraldHud-dialogListPersonalNotesContainer {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.heraldHud-listPersonalNotesMiddleContainer {
+  padding-bottom: 40px;
+
+}
+
+.heraldHud-personalNotesWrapperContainer {
+  color: white;
+
+  padding: 5px;
+  margin-bottom: 5px;
+  border: 2px solid gold;
+  border-radius: 5px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+}
+
+.heraldHud-personalNotesContainer {
+  display: flex;
+  align-items: center;
+}
+
+/* .heraldHud-personalNotesContainer:hover {
+  background-color: rgb(194, 194, 194, 0.3);
+} */
+
+
+
+.heraldHud-personalNotesName {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.heraldHud-personalNotesRightContainer {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.heraldHud-buttonAddPagePersonalNotesContainer {
+  cursor: pointer;
+}
+
+.heraldHud-buttonEditPersonalNotesContainer {
+  cursor: pointer;
+}
+
+.heraldHud-buttonDeletePersonalNotesContainer {
+  color: red;
+  cursor: pointer;
+}
+
+.heraldHud-listPersonalNotesBottomContainer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 10px;
+  z-index: 14;
+  display: flex;
+  background-color: black;
+  gap: 10px;
+}
+
+.heraldHud-searchPersonalNotesContainer {
+  width: 100%;
+}
+
+.heraldHud-searchPersonalNotes {
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 14px;
+  border: 2px solid gold !important;
+  border-radius: 4px;
+  color: white !important;
+  background-color: #222;
+}
+
+.heraldHud-searchPersonalNotes::placeholder {
+  color: white !important;
+  opacity: 1;
+}
+
+
+.heraldHud-buttonAddPersonalNotesContainer {
+  width: 30px;
+  height: 30px;
+  border: 2px solid gold;
+  color: gold;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  cursor: pointer;
+}
+
+.heraldHud-btnPersonalNotesTooltipParent {
+  position: relative;
+  display: inline-block;
+}
+
+.heraldHud-btnPersonalNotesTooltip {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  bottom: 140%;
+  left: -100%;
+  transform: translateX(-50%);
+  background-color: rgb(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 3px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  font-size: 10px;
+  z-index: 100;
+  transition: opacity 0.2s;
+  z-index: 20;
+}
+
+.heraldHud-btnPersonalNotesTooltipParent:hover .heraldHud-btnPersonalNotesTooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+
+.heraldHud-personalNotesPageContainer {
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.heraldHud-personalNotesPage {
+  font-size: 14px;
+  padding: 4px;
+
+}
+
+.heraldHud-personalNotesPageContainer:hover {
+  background-color: rgb(194, 194, 194, 0.3);
+}
+
+.heraldHud-arrowPersonalNotesContainer {
+  display: flex;
+  gap: 5px;
+}
+
+/* --------------------------------------------------------------------------------------
+   DIALOG PARTY NOTES
+---------------------------------------------------------------------------------------- */
+
+.heraldHud-dialog2.party_journal {
+  left: 48%;
+  width: 300px;
+  height: 350px;
+}
+
+.heraldHud-dialogListPartyJournalContainer {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.heraldHud-listPartyJournalMiddleContainer {
+  padding-bottom: 40px;
+
+}
+
+.heraldHud-partyJournalWrapperContainer {
+  color: white;
+  padding: 5px;
+  margin-bottom: 5px;
+  border: 2px solid gold;
+  border-radius: 5px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+}
+
+.heraldHud-partyJournalContainer {
+  display: flex;
+  align-items: center;
+}
+
+/* .heraldHud-partyJournalContainer:hover {
+  background-color: rgb(194, 194, 194, 0.3);
+} */
+
+
+.heraldHud-partyJournalName {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.heraldHud-partyJournalRightContainer {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.heraldHud-buttonAddPagePartyJournalContainer {
+  cursor: pointer;
+}
+
+.heraldHud-buttonEditPartyJournalContainer {
+  cursor: pointer;
+}
+
+
+.heraldHud-buttonDeletePartyJournalContainer {
+  color: red;
+  cursor: pointer;
+}
+
+
+.heraldHud-searchPartyJournalContainer {
+  width: 100%;
+}
+
+.heraldHud-searchPartyJournal {
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 14px;
+  border: 2px solid gold !important;
+  border-radius: 4px;
+  color: white !important;
+  background-color: #222;
+}
+
+.heraldHud-searchPartyJournal::placeholder {
+  color: white !important;
+  opacity: 1;
+}
+
+.heraldHud-listPartyJournalBottomContainer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 10px;
+  z-index: 14;
+  display: flex;
+  background-color: black;
+  gap: 10px;
+}
+
+
+.heraldHud-buttonAddPartyJournalContainer {
+  width: 30px;
+  height: 30px;
+  border: 2px solid gold;
+  color: gold;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  cursor: pointer;
+}
+
+.heraldHud-btnPartyJournalTooltipParent {
+  position: relative;
+  display: inline-block;
+}
+
+.heraldHud-btnPartyJournalTooltip {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  bottom: 140%;
+  left: -100%;
+  transform: translateX(-50%);
+  background-color: rgb(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 3px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  font-size: 10px;
+  z-index: 100;
+  transition: opacity 0.2s;
+  z-index: 20;
+  -webkit-transform: translateX(-50%);
+  -moz-transform: translateX(-50%);
+  -ms-transform: translateX(-50%);
+  -o-transform: translateX(-50%);
+}
+
+.heraldHud-btnPartyJournalTooltipParent:hover .heraldHud-btnPartyJournalTooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.heraldHud-partyJournalPageContainer {
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.heraldHud-partyJournalPage {
+  font-size: 14px;
+  padding: 4px;
+
+}
+
+
+
+.heraldHud-partyJournalPageContainer:hover {
+  background-color: rgb(194, 194, 194, 0.3);
+}
+
+.heraldHud-arrowPartyJournalContainer {
+  display: flex;
+  gap: 5px;
+}
+
+/* --------------------------------------------------------------------------------------
+   DIALOG QUEST
+---------------------------------------------------------------------------------------- */
+.heraldHud-dialog2.quest {
+  left: 43%;
+  width: 650px;
+  height: 450px;
+}
+
+.heraldHud-questTopContiner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin: 20px 0 20px 0;
+}
+
+
+.heraldHud-typeQuestContainer {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+}
+
+.heraldHud-typeQuestImage {
+  width: 50px;
+  height: auto;
+  object-fit: cover;
+  border: none;
+}
+
+.heraldHud-typeQuestContainer.active {
+  position: relative;
+}
+
+.heraldHud-typeQuestContainer.active::after {
+  content: "";
+  position: absolute;
+  bottom: -15%;
+  width: 100%;
+  height: 3px;
+  background: gold;
+  box-shadow: 0 0 4px gold, 0 0 8px gold;
+  border-radius: 2px;
+}
+
+
+
+.heraldHud-questMiddleContainer {
+  display: flex;
+  width: 100%;
+  gap: 10px;
+}
+
+.heraldHud-questMiddleLeftContainer {
+  flex: 0 0 40%;
+  height: 300px;
+}
+
+.heraldHud-questMiddleRightContainer {
+  flex: 0 0 57%;
+  height: 340px;
+}
+
+.heraldHud-questListContainer {
+  border: 2px solid gold;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.heraldHud-questListMiddleContainer {
+  overflow-y: auto;
+  height: 340px;
+
+}
+
+.heraldHud-questListBottomContainer {
+  padding: 5px;
+  z-index: 14;
+  display: flex;
+  gap: 10px;
+  margin-top: auto;
+}
+
+
+.heraldHud-buttonAddQuest {
+  width: 30px;
+  height: 30px;
+  border: 2px solid gold;
+  color: gold;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  cursor: pointer;
+}
+
+.heraldHud-questItemContainer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: white;
+  border: 1px gold solid;
+  border-radius: 5px;
+  padding: 5px;
+  margin: 10px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+  cursor: pointer;
+}
+
+
+
+.heraldHud-questItemType {
+  width: 50px;
+  height: 50px;
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+}
+
+.heraldHud-questItemTypeImage {
+  width: 50px;
+  height: auto;
+  object-fit: cover;
+  border: none;
+}
+
+.heraldHud-listQuestName {
+  font-size: 20px;
+  color: white;
+  font-weight: bold;
+}
+
+.heraldHud-questNameParty {
+  font-size: 12px;
+  color: #999;
+}
+
+.heraldHud-questItemRightContainer {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: 10px;
+  font-size: 16px;
+}
+
+.heraldHud-questVisibleButton {
+  cursor: pointer;
+}
+
+.heraldHud-questDetailContainer {}
+
+.heraldHud-questDetailItem {
+  color: white;
+}
+
+.heraldHud-questDetailTopContainer {
+  display: flex;
+
+  justify-content: space-between;
+}
+
+
+.heraldHud-questTitle {
+  font-size: 30px;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+}
+.heraldHud-questDetailTypeContainer{
+  cursor: pointer;
+}
+
+.heraldHud-questDetailType {
+  width: 50px;
+  height: auto;
+  object-fit: cover;
+  border: none;
+}
+
+.heraldHud-questHeaderContainer {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.heraldHud-questHeaderName {
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.heraldHud-questDetailItem {
+  color: white;
+}
+
+.heraldHud-questPageListContainer {
+  height: 250px;
+  overflow-y: auto;
+}
+
+.heraldHud-questPageContainer {
+  margin-bottom: 20px;
+}
+
+.heraldHud-questPageHeader {
+  display: flex;
+  align-items: center;
+}
+
+.heraldHud-editQuestPageContent {
+  display: flex;
+  justify-content: flex-end;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+/* --------------------------------------------------------------------------------------
+   DIALOG NPCS TARGET
+---------------------------------------------------------------------------------------- */
+
+.heraldHud-dialog2.npcs_target {
+  left: 48%;
+  width: 300px;
+  height: 350px;
+}
+
+/* --------------------------------------------------------------------------------------
+   DIALOG NPCS 
+---------------------------------------------------------------------------------------- */
+.heraldHud-dialog2.npcs {
+  left: 48%;
+  width: 300px;
+  height: 350px;
+}
+
+.heraldHud-dialogNpcsContainer {
+  height: 100%;
+  overflow-y: auto;
+  padding: 5px;
+
+}
+
+.heraldHud-npcsMiddleContainer {
+  display: flex;
+  flex-direction: column;
+  column-gap: 5px;
+  padding-bottom: 20%;
+}
+
+.heraldHud-npcsBottomContainer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 10px;
+  z-index: 14;
+  display: flex;
+  background-color: black;
+  gap: 10px;
+}
+
+.heraldHud-searchNpcsContainer {
+  width: 100%;
+}
+
+.heraldHud-searchNpcs {
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 14px;
+  border: 2px solid gold !important;
+  border-radius: 4px;
+  color: white !important;
+  background-color: #222;
+}
+
+.heraldHud-npcsPartyContainer {
+  display: flex;
+  color: white;
+  gap: 10px;
+  align-items: center;
+  padding: 3px 3px 7px 3px;
+}
+
+.heraldHud-npcsPartyContainer:hover {
+  background-color: rgb(78, 78, 78, 0.5);
+  border-radius: 5px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+}
+
+.heraldHud-npcsPartyLeft {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.heraldHud-npcsPartyImageContainer {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #363636;
+  border: 2px solid #d4af37;
+  z-index: 8;
+  cursor: pointer;
+}
+
+.heraldHud-npcsPartyImageView {
+  width: 99%;
+  height: 99%;
+  border: none;
+  object-fit: cover;
+  object-position: center;
+  z-index: 8;
+  border-radius: 50%;
+}
+
+.heraldHud-npcsPartyFavoriteButton {
+  position: absolute;
+  top: 35px;
+  left: 30px;
+  border-radius: 50%;
+  padding: 5px;
+  font-size: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  z-index: 2;
+}
+
+
+.heraldHud-npcsPartyName {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.heraldHud-npcsPartyGender {}
+
+.heraldHud-npcsPartyFaction {}
+
+.heraldHud-npcsPartyPartyname {
+  font-size: 10px;
+}
+
+
+
+.heraldHud-npcsPartyRight {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+
+.heraldHud-npcsPartyDelete {
+  color: red;
+  cursor: pointer;
+}
+
+.heraldHud-npcsPartyDeleteParent {
+  position: relative;
+  display: inline-block;
+}
+
+.heraldHud-npcsPartyDeleteTooltip {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  bottom: 140%;
+  left: -100%;
+  transform: translateX(-50%);
+  background-color: rgb(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 3px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  font-size: 10px;
+  z-index: 100;
+  transition: opacity 0.2s;
+  z-index: 20;
+}
+
+.heraldHud-npcsPartyDeleteParent:hover .heraldHud-npcsPartyDeleteTooltip {
+  visibility: visible;
+  opacity: 1;
+}
