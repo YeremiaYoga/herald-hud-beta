@@ -777,6 +777,9 @@ async function heraldHud_updateDataActor() {
   let overlayThorn = document.getElementById(
     "heraldHud-overlayThorn0hpContainer"
   );
+  let thornButton = document.getElementById(
+    "heraldHud-overlayThornButtonContainer"
+  );
   console.log(hp);
   if (hpBarDiv) {
     if (hp > 0) {
@@ -847,7 +850,11 @@ async function heraldHud_updateDataActor() {
 
       if (overlayThorn) {
         overlayThorn.innerHTML = `
-        <img src="/modules/herald-hud-beta/assets/thorn_0hp.png" class="heraldHud-overlayThorn0hpImg"/>
+        <img src="/modules/herald-hud-beta/assets/thorn_0hp.png" class="heraldHud-overlayThorn0hpImg"/>`;
+      }
+
+      if (thornButton) {
+        thornButton.innerHTML = `
         <img src="/modules/herald-hud-beta/assets/thorn_crystalButton.png" id="heraldHud-deathSaveTrigger" class="heraldHud-deathSaveTrigger"/>`;
 
         const trigger = document.getElementById("heraldHud-deathSaveTrigger");

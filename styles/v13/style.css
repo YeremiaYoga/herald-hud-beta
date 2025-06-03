@@ -289,8 +289,6 @@
 
 
 
-
-
 .heraldHud-barContainer {
     position: absolute;
     left: 40%;
@@ -310,7 +308,7 @@
     left: -100px;
     width: 200px;
     height: 200px;
-    z-index: 18;
+    z-index: 10;
 
 }
 
@@ -324,8 +322,7 @@
 
 .heraldHud-deathSaveTrigger {
     position: absolute;
-    top: 100px;
-    left: 80px;
+    left: -20px;
     width: 70px;
     border-radius: 50%;
     transform: translate(-50%, -50%);

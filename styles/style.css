@@ -324,8 +324,7 @@
 
 .heraldHud-deathSaveTrigger {
     position: absolute;
-    top: 100px;
-    left: 80px;
+    left: -20px;
     width: 70px;
     border-radius: 50%;
     transform: translate(-50%, -50%);
