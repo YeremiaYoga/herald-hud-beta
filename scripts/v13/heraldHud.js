@@ -6444,7 +6444,7 @@ async function heraldHud_renderNpcDataOther(id) {
   let listActions = ``;
 
   for (let item of actionItems) {
-     const firstActivity = item.system.activities?.values().next().value ?? null;
+    const firstActivity = item.system.activities?.values().next().value ?? null;
     let category = ``;
     if (firstActivity.activation.type.includes("legendary")) {
       category = `<i class="fa-solid fa-dragon" style="color:#0a35d1;"></i> Legendary Action |`;
@@ -6569,12 +6569,20 @@ async function heraldHud_npcGetDataPassive(id) {
   let token = tokenDocument.object;
   let npc = await fromUuid(`Actor.${tokenDocument.actorId}`);
   let passiveListDiv = document.getElementById("heraldHud-npcPassiveList");
-  let passiveItems = npc.items.filter(
-    (item) =>
-      !item.system.activation ||
-      !item.system.activation.type ||
-      item.system.activation.type === "none"
-  );
+  let passiveItems = [];
+  for (let item of npc.items) {
+    const firstActivity = item.system.activities?.values().next().value ?? null;
+    console.log(ac);
+    if (firstActivity) {
+      if (
+        !firstActivity.activation ||
+        firstActivity.activation.type !== "none" ||
+        !firstActivity.activation.type
+      ) {
+        passiveItems.push(item);
+      }
+    }
+  }
   let listPassive = ``;
 
   for (let item of passiveItems) {
