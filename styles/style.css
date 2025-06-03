@@ -305,6 +305,36 @@
     justify-content: center;
 }
 
+.heraldHud-overlayThorn0hpContainer {
+    position: absolute;
+    left: -100px;
+    width: 200px;
+    height: 200px;
+    z-index: 18;
+
+}
+
+.heraldHud-overlayThorn0hpImg {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border: none;
+
+}
+
+.heraldHud-deathSaveTrigger {
+    position: absolute;
+    top: 100px;
+    left: 80px;
+    width: 70px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    z-index: 18;
+    border: none;
+
+}
+
 .heraldHud-actorHpSvg {
     transform: rotate(110deg);
     z-index: 6;
