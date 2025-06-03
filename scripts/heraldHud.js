@@ -774,7 +774,9 @@ async function heraldHud_updateDataActor() {
   let hpBarDiv = document.getElementById("heraldHud-actorHpBar");
   let hpBarDelayDiv = document.getElementById("heraldHud-actorHpBarDelay");
   let hpGradientColor = document.getElementById("heraldHud_hpGradient");
-
+  let overlayThorn = document.getElementById(
+    "heraldHud-overlayThorn0hpContainer"
+  );
   if (hpBarDiv) {
     if (hp >= 0) {
       let strokeValue = 310 - hpPercent * 1.1;
@@ -809,6 +811,9 @@ async function heraldHud_updateDataActor() {
       if (hpValueInput) {
         hpValueInput.value = hp;
       }
+      if (overlayThorn) {
+        overlayThorn.innerHTML = ` `;
+      }
     } else {
       let temphpValue = hp;
       let negativeBlockMax = hp + totalMaxHp;
@@ -836,6 +841,23 @@ async function heraldHud_updateDataActor() {
 
       if (hpValueInput) {
         hpValueInput.value = temphpValue;
+      }
+      if (overlayThorn) {
+        overlayThorn.innerHTML = `
+        <img src="/modules/herald-hud-beta/assets/thorn_0hp.png" class="heraldHud-overlayThorn0hpImg"/>
+        <img src="/modules/herald-hud-beta/assets/thorn_crystalButton.png" id="heraldHud-deathSaveTrigger" class="heraldHud-deathSaveTrigger"/>`;
+
+        const trigger = document.getElementById("heraldHud-deathSaveTrigger");
+
+        if (trigger) {
+          trigger.addEventListener("click", () => {
+            if (actor) {
+              actor.rollDeathSave();
+            } else {
+              ui.notifications.warn("Select a token first.");
+            }
+          });
+        }
       }
     }
   }
