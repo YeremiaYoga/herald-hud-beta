@@ -796,23 +796,23 @@ async function heraldHud_updateDataActor() {
       if (hpPercent < 0) {
         hpGradientColor.innerHTML = `
         <stop offset="75%" stop-color="${hp0}" />
-        <stop offset="100%" stop-color="${heraldHud_darkHex(hp0, 40)}"/>`;
+        <stop offset="100%" stop-color="${hl.heraldHud_darkHex(hp0, 40)}"/>`;
       } else if (hpPercent <= 25) {
         hpGradientColor.innerHTML = `
         <stop offset="75%" stop-color="${hp25}" />
-        <stop offset="100%" stop-color="${heraldHud_darkHex(hp25, 40)}"/>`;
+        <stop offset="100%" stop-color="${hl.heraldHud_darkHex(hp25, 40)}"/>`;
       } else if (hpPercent <= 50) {
         hpGradientColor.innerHTML = `
         <stop offset="75%" stop-color="${hp50}" />
-        <stop offset="100%" stop-color="${heraldHud_darkHex(hp50, 40)}"/>`;
+        <stop offset="100%" stop-color="${hl.heraldHud_darkHex(hp50, 40)}"/>`;
       } else if (hpPercent <= 75) {
         hpGradientColor.innerHTML = `
         <stop offset="75%" stop-color="${hp75}" />
-        <stop offset="100%" stop-color="${heraldHud_darkHex(hp75, 40)}"/>`;
+        <stop offset="100%" stop-color="${hl.heraldHud_darkHex(hp75, 40)}"/>`;
       } else {
         hpGradientColor.innerHTML = `
         <stop offset="75%" stop-color="${hp100}" />
-        <stop offset="100%" stop-color="${heraldHud_darkHex(hp100, 40)}"/>`;
+        <stop offset="100%" stop-color="${hl.heraldHud_darkHex(hp100, 40)}"/>`;
       }
       if (hpValueInput) {
         hpValueInput.value = hp;
@@ -821,9 +821,9 @@ async function heraldHud_updateDataActor() {
       if (overlayThorn) {
         overlayThorn.innerHTML = ` `;
       }
-      //    if(thornButton){
-      //   thornButton.innerHTML = ``;
-      // }
+         if(thornButton){
+        thornButton.innerHTML = ``;
+      }
     } else {
       let temphpValue = hp;
       let negativeBlockMax = hp + totalMaxHp;
@@ -1412,14 +1412,18 @@ async function heraldHud_updateItemFavoriteActor() {
         if (foundry.utils.isNewerVersion(heraldHud_gameVersion, "3.3.1")) {
           if (item.labels.damages) {
             for (let damage of item.labels.damages) {
-              let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+              let damageIcon = hl.heraldHud_getGameIconDamage(
+                damage.damageType
+              );
               arrProperti.push(`${damage.formula} ${damageIcon}`);
             }
           }
         } else {
           if (item.labels.damage) {
             for (let damage of item.labels.derivedDamage) {
-              let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+              let damageIcon = hl.heraldHud_getGameIconDamage(
+                damage.damageType
+              );
 
               arrProperti.push(`${damage.formula} ${damageIcon}`);
             }
@@ -1601,14 +1605,18 @@ async function heraldHud_updateItemCosumablesActor() {
           if (foundry.utils.isNewerVersion(heraldHud_gameVersion, "3.3.1")) {
             if (item.labels.damages) {
               for (let damage of item.labels.damages) {
-                let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+                let damageIcon = hl.heraldHud_getGameIconDamage(
+                  damage.damageType
+                );
                 arrProperti.push(`${damage.formula} ${damageIcon}`);
               }
             }
           } else {
             if (item.labels.damage) {
               for (let damage of item.labels.derivedDamage) {
-                let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+                let damageIcon = hl.heraldHud_getGameIconDamage(
+                  damage.damageType
+                );
 
                 arrProperti.push(`${damage.formula} ${damageIcon}`);
               }
@@ -1909,14 +1917,14 @@ async function heraldHud_getDataInventory() {
     if (foundry.utils.isNewerVersion(heraldHud_gameVersion, "3.3.1")) {
       if (item.labels.damages) {
         for (let damage of item.labels.damages) {
-          let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+          let damageIcon = hl.heraldHud_getGameIconDamage(damage.damageType);
           arrProperti.push(`${damage.formula} ${damageIcon}`);
         }
       }
     } else {
       if (item.labels.damage) {
         for (let damage of item.labels.derivedDamage) {
-          let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+          let damageIcon = hl.heraldHud_getGameIconDamage(damage.damageType);
 
           arrProperti.push(`${damage.formula} ${damageIcon}`);
         }
@@ -2368,14 +2376,14 @@ async function heraldHud_getDataInventory() {
     if (foundry.utils.isNewerVersion(heraldHud_gameVersion, "3.3.1")) {
       if (item.labels.damages) {
         for (let damage of item.labels.damages) {
-          let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+          let damageIcon = hl.heraldHud_getGameIconDamage(damage.damageType);
           arrProperti.push(`${damage.formula} ${damageIcon}`);
         }
       }
     } else {
       if (item.labels.damage) {
         for (let damage of item.labels.derivedDamage) {
-          let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+          let damageIcon = hl.heraldHud_getGameIconDamage(damage.damageType);
 
           arrProperti.push(`${damage.formula} ${damageIcon}`);
         }
@@ -2866,14 +2874,14 @@ async function heraldHud_getDataFeatures() {
       if (foundry.utils.isNewerVersion(heraldHud_gameVersion, "3.3.1")) {
         if (item.labels.damages) {
           for (let damage of item.labels.damages) {
-            let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+            let damageIcon = hl.heraldHud_getGameIconDamage(damage.damageType);
             arrProperti.push(`${damage.formula} ${damageIcon}`);
           }
         }
       } else {
         if (item.labels.damage) {
           for (let damage of item.labels.derivedDamage) {
-            let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+            let damageIcon = hl.heraldHud_getGameIconDamage(damage.damageType);
 
             arrProperti.push(`${damage.formula} ${damageIcon}`);
           }
@@ -3279,14 +3287,18 @@ async function heraldHud_getDataSpellsList() {
         if (foundry.utils.isNewerVersion(heraldHud_gameVersion, "3.3.1")) {
           if (item.labels.damages) {
             for (let damage of item.labels.damages) {
-              let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+              let damageIcon = hl.heraldHud_getGameIconDamage(
+                damage.damageType
+              );
               arrProperti.push(`${damage.formula} ${damageIcon}`);
             }
           }
         } else {
           if (item.labels.damage) {
             for (let damage of item.labels.derivedDamage) {
-              let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+              let damageIcon = hl.heraldHud_getGameIconDamage(
+                damage.damageType
+              );
 
               arrProperti.push(`${damage.formula} ${damageIcon}`);
             }
@@ -3325,9 +3337,9 @@ async function heraldHud_getDataSpellsList() {
         if (item.system.uses?.max) {
           spellsUses = `| ${item.system.uses.value}/${item.system.uses.max}`;
         }
-        let spellsSchool = heraldHud_getSpellsSchoolIcon(item.system.school);
+        let spellsSchool = hl.heraldHud_getSpellsSchoolIcon(item.system.school);
 
-        let spellComponent = heraldHud_getSpellIcons(item);
+        let spellComponent = hl.heraldHud_getSpellIcons(item);
 
         let spellsRange = item.system.range?.units
           ? `| ${item.system.range.value || ""} ${
@@ -3898,14 +3910,18 @@ async function heraldHud_getDataSpellsPrep() {
         if (foundry.utils.isNewerVersion(heraldHud_gameVersion, "3.3.1")) {
           if (item.labels.damages) {
             for (let damage of item.labels.damages) {
-              let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+              let damageIcon = hl.heraldHud_getGameIconDamage(
+                damage.damageType
+              );
               arrProperti.push(`${damage.formula} ${damageIcon}`);
             }
           }
         } else {
           if (item.labels.damage) {
             for (let damage of item.labels.derivedDamage) {
-              let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+              let damageIcon = hl.heraldHud_getGameIconDamage(
+                damage.damageType
+              );
 
               arrProperti.push(`${damage.formula} ${damageIcon}`);
             }
@@ -3947,7 +3963,7 @@ async function heraldHud_getDataSpellsPrep() {
           item.system.school
         );
 
-        let spellComponent = heraldHud_getSpellIcons(item);
+        let spellComponent = hl.heraldHud_getSpellIcons(item);
 
         let spellsRange = item.system.range?.units
           ? `| ${item.system.range.value || ""} ${
@@ -5796,7 +5812,7 @@ async function heraldHud_getDataListNpc() {
   for (let id of heraldHud_npcPlayerSelected) {
     let tokenDocument = await fromUuid(id.tokenId);
     let token = tokenDocument.object;
-  
+
     let npc = await fromUuid(`Actor.${tokenDocument.actorId}`);
     const hp = npc.system.attributes.hp.value;
     const maxHp = npc.system.attributes.hp.max;
@@ -6154,14 +6170,14 @@ async function heraldHud_renderNpcDataActions(id) {
     if (foundry.utils.isNewerVersion(heraldHud_gameVersion, "3.3.1")) {
       if (item.labels.damages) {
         for (let damage of item.labels.damages) {
-          let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+          let damageIcon = hl.heraldHud_getGameIconDamage(damage.damageType);
           arrProperti.push(`${damage.formula} ${damageIcon}`);
         }
       }
     } else {
       if (item.labels.damage) {
         for (let damage of item.labels.derivedDamage) {
-          let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+          let damageIcon = hl.heraldHud_getGameIconDamage(damage.damageType);
 
           arrProperti.push(`${damage.formula} ${damageIcon}`);
         }
@@ -6265,14 +6281,14 @@ async function heraldHud_renderNpcDataBonus(id) {
     if (foundry.utils.isNewerVersion(heraldHud_gameVersion, "3.3.1")) {
       if (item.labels.damages) {
         for (let damage of item.labels.damages) {
-          let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+          let damageIcon = hl.heraldHud_getGameIconDamage(damage.damageType);
           arrProperti.push(`${damage.formula} ${damageIcon}`);
         }
       }
     } else {
       if (item.labels.damage) {
         for (let damage of item.labels.derivedDamage) {
-          let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+          let damageIcon = hl.heraldHud_getGameIconDamage(damage.damageType);
 
           arrProperti.push(`${damage.formula} ${damageIcon}`);
         }
@@ -6374,14 +6390,14 @@ async function heraldHud_renderNpcDataReaction(id) {
     if (foundry.utils.isNewerVersion(heraldHud_gameVersion, "3.3.1")) {
       if (item.labels.damages) {
         for (let damage of item.labels.damages) {
-          let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+          let damageIcon = hl.heraldHud_getGameIconDamage(damage.damageType);
           arrProperti.push(`${damage.formula} ${damageIcon}`);
         }
       }
     } else {
       if (item.labels.damage) {
         for (let damage of item.labels.derivedDamage) {
-          let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+          let damageIcon = hl.heraldHud_getGameIconDamage(damage.damageType);
 
           arrProperti.push(`${damage.formula} ${damageIcon}`);
         }
@@ -6511,14 +6527,14 @@ async function heraldHud_renderNpcDataOther(id) {
     if (foundry.utils.isNewerVersion(heraldHud_gameVersion, "3.3.1")) {
       if (item.labels.damages) {
         for (let damage of item.labels.damages) {
-          let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+          let damageIcon = hl.heraldHud_getGameIconDamage(damage.damageType);
           arrProperti.push(`${damage.formula} ${damageIcon}`);
         }
       }
     } else {
       if (item.labels.damage) {
         for (let damage of item.labels.derivedDamage) {
-          let damageIcon = heraldHud_getGameIconDamage(damage.damageType);
+          let damageIcon = hl.heraldHud_getGameIconDamage(damage.damageType);
 
           arrProperti.push(`${damage.formula} ${damageIcon}`);
         }
@@ -7007,174 +7023,6 @@ Hooks.on("updateActor", async (actor, data) => {
 
   await heraldHud_addInspirationView();
 });
-
-function heraldHud_darkHex(hex, percent) {
-  let r = parseInt(hex.substring(1, 3), 16);
-  let g = parseInt(hex.substring(3, 5), 16);
-  let b = parseInt(hex.substring(5, 7), 16);
-
-  r = Math.max(0, Math.floor(r * (1 - percent / 100)));
-  g = Math.max(0, Math.floor(g * (1 - percent / 100)));
-  b = Math.max(0, Math.floor(b * (1 - percent / 100)));
-
-  return `#${r.toString(16).padStart(2, "0")}${g
-    .toString(16)
-    .padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
-}
-
-function heraldHud_getGameIconDamage(type) {
-  const basePath = "/systems/dnd5e/icons/svg/damage/";
-  const validTypes = {
-    acid: "Acid",
-    bludgeoning: "Bludgeoning",
-    cold: "Cold",
-    fire: "Fire",
-    force: "Force",
-    lightning: "Lightning",
-    necrotic: "Necrotic",
-    piercing: "Piercing",
-    poison: "Poison",
-    psychic: "Psychic",
-    radiant: "Radiant",
-    slashing: "Slashing",
-    thunder: "Thunder",
-    healing: "Healing",
-    temphp: "Temporary HP",
-  };
-
-  let iconType = validTypes[type] ? type : "";
-  let tooltipText = validTypes[type] || "Unknown";
-
-  return `
-    <div class="heraldHud-damageIconContainer">
-      <img src="${basePath}${iconType}.svg" width="13" height="13" style="border:none; filter:invert(1);">
-      <div class="heraldHud-damageTooltip">${tooltipText}</div>
-    </div>
-  `;
-}
-
-function heraldHud_getSpellIcons(item) {
-  if (!item.system || !item.system.properties) return "";
-
-  let icons = [];
-  let properties = Array.from(item.system.properties);
-
-  let spellIcons = {
-    vocal: { label: "Verbal", symbol: "V" },
-    somatic: { label: "Somatic", symbol: "S" },
-    material: { label: "Material", symbol: "M" },
-    concentration: {
-      label: "Concentration",
-      icon: "systems/dnd5e/icons/svg/statuses/concentrating.svg",
-    },
-    ritual: {
-      label: "Ritual",
-      icon: "systems/dnd5e/icons/svg/items/spell.svg",
-    },
-  };
-
-  properties.forEach((prop) => {
-    if (spellIcons[prop]) {
-      if (spellIcons[prop].symbol) {
-        icons.push(`
-          <div class="heraldHud-spellComponentContainer">
-            <span class="heraldHud-spellComponentName">${spellIcons[prop].symbol}</span>
-            <div class="heraldHud-spellsComponentTooltip">${spellIcons[prop].label}</div>
-          </div>
-        `);
-      } else if (spellIcons[prop].icon) {
-        icons.push(`
-          <div class="heraldHud-spellComponentContainer">
-            <img src="${spellIcons[prop].icon}" class="heraldHud-spellComponentIcon">
-            <div class="heraldHud-spellsComponentTooltip">${spellIcons[prop].label}</div>
-          </div>
-        `);
-      }
-    }
-  });
-
-  return icons.join(" ");
-}
-
-function heraldHud_getSpellsSchoolIcon(schoolCode) {
-  const spellSchoolMap = {
-    abj: {
-      name: "Abjuration",
-      icon: "abjuration",
-      color: "#00AEEF",
-      filter:
-        "invert(57%) sepia(88%) saturate(3986%) hue-rotate(170deg) brightness(97%) contrast(101%)",
-    },
-    con: {
-      name: "Conjuration",
-      icon: "conjuration",
-      color: "#F68D2E",
-      filter:
-        "invert(67%) sepia(91%) saturate(1096%) hue-rotate(359deg) brightness(102%) contrast(100%)",
-    },
-    div: {
-      name: "Divination",
-      icon: "divination",
-      color: "#A65EFF",
-      filter:
-        "invert(58%) sepia(47%) saturate(2539%) hue-rotate(244deg) brightness(103%) contrast(98%)",
-    },
-    enc: {
-      name: "Enchantment",
-      icon: "enchantment",
-      color: "#FF4ECC",
-      filter:
-        "invert(53%) sepia(78%) saturate(2177%) hue-rotate(295deg) brightness(102%) contrast(98%)",
-    },
-    evo: {
-      name: "Evocation",
-      icon: "evocation",
-      color: "#ED1C24",
-      filter:
-        "invert(20%) sepia(92%) saturate(4372%) hue-rotate(355deg) brightness(98%) contrast(107%)",
-    },
-    ill: {
-      name: "Illusion",
-      icon: "illusion",
-      color: "#FFDD00",
-      filter:
-        "invert(84%) sepia(49%) saturate(576%) hue-rotate(357deg) brightness(108%) contrast(103%)",
-    },
-    nec: {
-      name: "Necromancy",
-      icon: "necromancy",
-      color: "#008A5E",
-      filter:
-        "invert(22%) sepia(92%) saturate(738%) hue-rotate(138deg) brightness(99%) contrast(102%)",
-    },
-    trs: {
-      name: "Transmutation",
-      icon: "transmutation",
-      color: "#00B3B3",
-      filter:
-        "invert(42%) sepia(94%) saturate(1418%) hue-rotate(148deg) brightness(100%) contrast(99%)",
-    },
-  };
-
-  let spellSchool = spellSchoolMap[schoolCode] || {
-    name: "Unknown",
-    icon: "unknown",
-    color: "#888888",
-    filter:
-      "invert(50%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%)",
-  };
-
-  let iconPath = `/systems/dnd5e/icons/svg/schools/${spellSchool.icon}.svg`;
-
-  return `
-    <div class="heraldHud-spellSchoolContainer" style="border-color: ${spellSchool.color};">
-      <img src="${iconPath}" class="heraldHud-spellSchoolIcon" alt="${spellSchool.name}" style="filter: ${spellSchool.filter};">
-      <div class="heraldHud-spellsSchoolTooltip" style="">
-        ${spellSchool.name}
-      </div>
-    </div>
-  `;
-}
 
 Hooks.on("updateItem", async (item, changes, options, userId) => {
   if (heraldHud_displayChargeTracker == false) {

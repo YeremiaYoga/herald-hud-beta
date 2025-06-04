@@ -29,8 +29,8 @@
 
 
 .heraldHud-journalingTooltip {
+  text-align: center;
   position: absolute;
-  bottom: -100%;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(0, 0, 0, 0.8);
