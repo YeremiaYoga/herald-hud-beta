@@ -861,10 +861,12 @@ async function heraldHud_updateDataActor() {
 
         if (trigger) {
           trigger.addEventListener("click", () => {
+            let timeout;
             if (actor) {
-              actor.rollDeathSave();
-            } else {
-              ui.notifications.warn("Select a token first.");
+              clearTimeout(timeout);
+              timeout = setTimeout(() => {
+                actor.rollDeathSave();
+              }, 1000);
             }
           });
         }
@@ -3599,15 +3601,6 @@ async function heraldHud_getDataStats() {
 
   let listAbilities = ``;
 
-  const abilitiesNames = {
-    str: "Strength",
-    dex: "Dexterity",
-    con: "Constitution",
-    int: "Intelligence",
-    wis: "Wisdom",
-    cha: "Charisma",
-  };
-
   for (let [key, abilityData] of Object.entries(abilitiesData)) {
     let abilityMod =
       abilityData.mod >= 0 ? `+${abilityData.mod}` : abilityData.mod;
@@ -5782,7 +5775,11 @@ async function heraldHud_getDataListNpc() {
   for (let id of heraldHud_npcPlayerSelected) {
     let tokenDocument = await fromUuid(id.tokenId);
     let token = tokenDocument.object;
-    let npc = await fromUuid(`Actor.${tokenDocument.actorId}`);
+      let npc = tokenDocument.actor;
+    console.log(tokenDocument);
+    console.log(npc);
+    // let npc = await fromUuid(`Actor.${tokenDocument.actorId}`);
+
     const hp = npc.system.attributes.hp.value;
     const maxHp = npc.system.attributes.hp.max;
     let tempHp = npc.system.attributes.hp.temp || 0;

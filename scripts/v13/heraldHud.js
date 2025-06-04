@@ -701,7 +701,9 @@ Hooks.on("deleteCombat", () => {
 
 async function heraldHud_updateDataActor() {
   let actor = heraldHud_actorSelected;
-
+  if (!actor) {
+    return;
+  }
   let hpValueInput = document.getElementById("heraldHud-hpValueInput");
   let tempHpValueInput = document.getElementById("heraldHud-tempHpValueInput");
   function updateHpValue() {
@@ -5794,6 +5796,7 @@ async function heraldHud_getDataListNpc() {
   for (let id of heraldHud_npcPlayerSelected) {
     let tokenDocument = await fromUuid(id.tokenId);
     let token = tokenDocument.object;
+  
     let npc = await fromUuid(`Actor.${tokenDocument.actorId}`);
     const hp = npc.system.attributes.hp.value;
     const maxHp = npc.system.attributes.hp.max;
