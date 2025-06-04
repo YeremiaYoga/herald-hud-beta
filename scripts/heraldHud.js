@@ -817,6 +817,9 @@ async function heraldHud_updateDataActor() {
       if (overlayThorn) {
         overlayThorn.innerHTML = ` `;
       }
+      if (thornButton) {
+        thornButton.innerHTML = ``;
+      }
     } else {
       let temphpValue = hp;
       let negativeBlockMax = hp + totalMaxHp;
