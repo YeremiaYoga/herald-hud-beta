@@ -550,6 +550,12 @@
   margin: 20px 0 20px 0;
 }
 
+.heraldHud-typeQuestWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
 
 .heraldHud-typeQuestContainer {
   width: 50px;
@@ -567,10 +573,11 @@
   border: none;
 }
 
-.heraldHud-typeQuestContainer.active {
-  position: relative;
-}
 
+.heraldHud-typeQuestContainer {
+  position: relative;
+  cursor: pointer;
+}
 .heraldHud-typeQuestContainer.active::after {
   content: "";
   position: absolute;
@@ -582,7 +589,42 @@
   border-radius: 2px;
 }
 
+.heraldHud-typeQuestContainer:hover .heraldHud-typeQuestTooltip {
+  visibility: visible;
+  opacity: 1;
+}
 
+.heraldHud-typeQuestTooltip {
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #222;
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+.heraldHud-typeQuestLabel {
+  font-weight: bold;
+  font-size: 12px;
+  color: white;
+  text-align: center;
+  height: 16px;
+  margin-bottom: 2px;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.heraldHud-typeQuestLabel.visible {
+  opacity: 1;
+}
 
 .heraldHud-questMiddleContainer {
   display: flex;

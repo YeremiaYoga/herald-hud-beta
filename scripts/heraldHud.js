@@ -226,7 +226,8 @@ async function heraldHud_renderHeraldHud() {
     await heraldHud_renderActorData();
     await heraldHud_updateDataActor();
     await heraldHud_updateMovementsActor();
-    await heraldHud_universalChecker();
+    // await heraldHud_universalChecker();
+    await heraldHud_updateEffectActor();
     await heraldHud_updateItemFavoriteActor();
     await heraldHud_updateItemCosumablesActor();
     await heraldHud_updateShorcutButton();
@@ -387,8 +388,7 @@ async function heraldHud_renderActorData() {
 
     let tooltip = document.createElement("span");
     tooltip.className = "heraldHud-actionTooltipText";
-   tooltip.innerHTML = `<img src="/systems/dnd5e/icons/svg/mouse-left.svg" class="heraldHud-leftClickIcon" alt="Left Click" />`;
-
+    tooltip.innerHTML = `<img src="/systems/dnd5e/icons/svg/mouse-left.svg" class="heraldHud-leftClickIcon" alt="Left Click" />`;
 
     wrapper.appendChild(button);
     wrapper.appendChild(tooltip);
@@ -560,23 +560,27 @@ async function heraldHud_renderActorData() {
     }
   }
 
-const summonContainer = document.getElementById("heraldHud-addSummonContainer");
+  const summonContainer = document.getElementById(
+    "heraldHud-addSummonContainer"
+  );
 
-if (summonContainer) {
-  summonContainer.innerHTML = `
+  if (summonContainer) {
+    summonContainer.innerHTML = `
     <div id="heraldHud-addSummonerButton" class="heraldHud-addSummonerButton heraldHud-addSummonWrapper">
       <i class="fa-solid fa-plus"></i>
       <div class="heraldHud-addSummonTooltip">Summon <br /> <img src="/systems/dnd5e/icons/svg/mouse-left.svg" class="heraldHud-leftClickIcon" alt="Left Click" /></div>
     </div>
   `;
 
-  let addSummonerButton = document.getElementById("heraldHud-addSummonerButton");
-  if (addSummonerButton) {
-    addSummonerButton.addEventListener("click", async () => {
-      await heraldHud_showDialogAddSummon();
-    });
+    let addSummonerButton = document.getElementById(
+      "heraldHud-addSummonerButton"
+    );
+    if (addSummonerButton) {
+      addSummonerButton.addEventListener("click", async () => {
+        await heraldHud_showDialogAddSummon();
+      });
+    }
   }
-}
 }
 
 async function heraldHud_renderWeaponMasteryButton() {
@@ -669,7 +673,9 @@ async function heraldHud_updateShorcutButton() {
      
     </div>
     <div class="heraldHud-shortcutButtonTooltip">${
-      isActorTurn ? "End turn <br /> <img src='/systems/dnd5e/icons/svg/mouse-left.svg' class='heraldHud-leftClickIcon' alt='Left Click' />" : "Roll Initiative <br /> <img src='/systems/dnd5e/icons/svg/mouse-left.svg' class='heraldHud-leftClickIcon' alt='Left Click' />"
+      isActorTurn
+        ? "End turn <br /> <img src='/systems/dnd5e/icons/svg/mouse-left.svg' class='heraldHud-leftClickIcon' alt='Left Click' />"
+        : "Roll Initiative <br /> <img src='/systems/dnd5e/icons/svg/mouse-left.svg' class='heraldHud-leftClickIcon' alt='Left Click' />"
     }</div>
   `;
 
@@ -691,9 +697,10 @@ async function heraldHud_updateShorcutButton() {
 }
 
 // Hooks untuk memperbarui tombol saat status combat berubah
-Hooks.on("updateCombat", () => {
+Hooks.on("updateCombat", async () => {
   heraldHud_updateShorcutButton();
   heraldHud_npcInitiativeEndturn();
+  await heraldHud_updateEffectActor();
 });
 
 Hooks.on("createCombat", () => {
@@ -1028,6 +1035,24 @@ async function heraldHud_universalChecker() {
     await heraldHud_updateItemCosumablesActor();
   }, 1000);
 }
+
+Hooks.on("midi-qol.RollComplete", async (workflow) => {
+  await heraldHud_updateItemCosumablesActor();
+});
+
+
+Hooks.on("createActiveEffect", async (effect) => {
+  await heraldHud_updateEffectActor();
+});
+
+Hooks.on("updateEffect", async (effect, changes, options, userId) => {
+  await heraldHud_updateEffectActor();
+});
+
+Hooks.on("deleteActiveEffect", async (effect) => {
+  await heraldHud_updateEffectActor();
+});
+
 async function heraldHud_updateEffectActor() {
   let actor = heraldHud_actorSelected;
   let effectlist = ``;
@@ -1059,12 +1084,18 @@ async function heraldHud_updateEffectActor() {
         stackDiv = `<div class="heraldHud-stackEffect">${number}</div>`;
       }
     }
-    console.log(effect);
     let durationDiv = "";
-    if (effect.duration.rounds > 0) {
+    if (effect.duration.remaining > 0) {
+      let totalSeconds = effect.duration.remaining || 0;
+      let rounds = Math.floor(totalSeconds / 6);
+      let secondsLeft = totalSeconds % 6;
+      let secondText = ``;
+      if (secondsLeft > 0) {
+        secondText = `(${secondsLeft} Second)`;
+      }
       durationDiv = `
             <div class="heraldHud-detailEffectDuration">
-              ${effect.duration.rounds} rounds
+              (${rounds} Round)${secondText}
             </div>`;
     }
     let effectDisabled = "";
@@ -1887,7 +1918,7 @@ async function heraldHud_getDataInventory() {
   }
 
   let favoritesActor = actor.system?.favorites || [];
-  filteredWeapon.forEach((item) => {
+  for (const item of filteredWeapon) {
     if (
       heraldHud_arrFilterItem.length > 0 &&
       !heraldHud_arrFilterItem.includes(item.system.activation?.type)
@@ -1903,11 +1934,18 @@ async function heraldHud_getDataInventory() {
       : "";
     let isEquipped = item.system.equipped ? "equipped" : "";
     let htmlDescription = ``;
+
     if (item.system?.identified === false) {
       htmlDescription = item.system.unidentified.description;
     } else {
       htmlDescription = item.system.description.value;
     }
+    const enriched = await TextEditor.enrichHTML(htmlDescription, {
+      async: true,
+      secrets: true,
+      documents: true,
+    });
+
     let arrProperti = [];
     let labelProperti = "";
 
@@ -2078,13 +2116,13 @@ async function heraldHud_getDataInventory() {
         <div  class="heraldHud-dialogWeaponTooltip">
           <div class="heraldHud-weaponTooltipTop">${item.name}  
           <hr style=" border: 1px solid grey; margin-top: 5px;"></div>
-          <div class="heraldHud-weaponTooltipMiddle">${htmlDescription} 
+          <div class="heraldHud-weaponTooltipMiddle">${enriched} 
           <hr style=" border: 1px solid grey; margin-top: 5px;"></div>
           <div class="heraldHud-weaponTooltipBottom">${labelPropertiTooltip}</div>
         </div>
       </div>
       `;
-  });
+  }
 
   if (heraldHud_listWeaponDiv) {
     heraldHud_listWeaponDiv.innerHTML = listWeapons;
@@ -2181,7 +2219,7 @@ async function heraldHud_getDataInventory() {
     filteredTool = toolsItem;
   }
 
-  filteredTool.forEach((item) => {
+  for (const item of filteredTool) {
     if (
       heraldHud_arrFilterItem.length > 0 &&
       !heraldHud_arrFilterItem.includes(item.system.activation?.type)
@@ -2202,6 +2240,12 @@ async function heraldHud_getDataInventory() {
     } else {
       htmlDescription = item.system.description.value;
     }
+    const enriched = await TextEditor.enrichHTML(htmlDescription, {
+      async: true,
+      secrets: true,
+      documents: true,
+    });
+
     let arrToolCategory = [];
     let toolItemUses = "";
 
@@ -2246,14 +2290,14 @@ async function heraldHud_getDataInventory() {
         <hr style=" border: 1px solid grey; margin-top: 5px;">
         </div>
         <div class="heraldHud-toolTooltipMiddle">
-        ${htmlDescription}
+        ${enriched}
         <hr style=" border: 1px solid grey; margin-top: 5px;">
         </div>
         <div class="heraldHud-toolTooltipBottom"></div>
       </div>
     </div>
     `;
-  });
+  }
 
   if (listTools == "") {
     listTools = `
@@ -2346,7 +2390,7 @@ async function heraldHud_getDataInventory() {
     filteredConsumable = consumablesItem;
   }
 
-  filteredConsumable.forEach((item) => {
+  for (const item of filteredConsumable) {
     if (
       heraldHud_arrFilterItem.length > 0 &&
       !heraldHud_arrFilterItem.includes(item.system.activation?.type)
@@ -2359,6 +2403,12 @@ async function heraldHud_getDataInventory() {
     } else {
       htmlDescription = item.system.description.value;
     }
+
+    const enriched = await TextEditor.enrichHTML(htmlDescription, {
+      async: true,
+      secrets: true,
+      documents: true,
+    });
 
     let consumableItemUses = "";
 
@@ -2420,14 +2470,14 @@ async function heraldHud_getDataInventory() {
         <hr style=" border: 1px solid grey; margin-top: 5px;">
         </div>
         <div class="heraldHud-consumableTooltipMiddle">
-        ${htmlDescription}
+        ${enriched}
         <hr style=" border: 1px solid grey; margin-top: 5px;">
         </div>
         <div class="heraldHud-consumableTooltipBottom"></div>
       </div>
     </div>
     `;
-  });
+  }
 
   if (heraldHud_listConsumableDiv) {
     heraldHud_listConsumableDiv.innerHTML = listConsumables;
@@ -2810,7 +2860,7 @@ async function heraldHud_getDataFeatures() {
   let listFeaturesPassive = ``;
   let favoritesActor = actor.system?.favorites || [];
 
-  filteredFeatures.forEach((item) => {
+  for (const item of filteredFeatures) {
     if (
       heraldHud_arrFilterItem.length > 0 &&
       !heraldHud_arrFilterItem.includes(item.system.activation?.type)
@@ -2818,6 +2868,11 @@ async function heraldHud_getDataFeatures() {
       return;
     }
     let htmlDescription = item.system.description.value;
+    const enriched = await TextEditor.enrichHTML(htmlDescription, {
+      async: true,
+      secrets: true,
+      documents: true,
+    });
     let rawItemId = `.Item.${item.id}`;
     let isFavorited = favoritesActor.some(
       (favorite) => favorite.id === rawItemId
@@ -2917,7 +2972,7 @@ async function heraldHud_getDataFeatures() {
           <div id="heraldHud-dialogFeaturesTooltip" class="heraldHud-dialogFeaturesTooltip">
             <div class="heraldHud-featuresTooltipTop">${item.name}  
             <hr style=" border: 1px solid grey; margin-top: 5px;"></div>
-            <div class="heraldHud-weaponTooltipMiddle">${htmlDescription} 
+            <div class="heraldHud-weaponTooltipMiddle">${enriched} 
             <hr style=" border: 1px solid grey; margin-top: 5px;"></div>
             <div class="heraldHud-featuresTooltipBottom"></div>
           </div>
@@ -2942,14 +2997,14 @@ async function heraldHud_getDataFeatures() {
           <div id="heraldHud-dialogFeaturesTooltip" class="heraldHud-dialogFeaturesTooltip">
             <div class="heraldHud-featuresTooltipTop">${item.name}  
             <hr style=" border: 1px solid grey; margin-top: 5px;"></div>
-            <div class="heraldHud-weaponTooltipMiddle">${htmlDescription} 
+            <div class="heraldHud-weaponTooltipMiddle">${enriched} 
             <hr style=" border: 1px solid grey; margin-top: 5px;"></div>
             <div class="heraldHud-featuresTooltipBottom"></div>
           </div>
         </div>
       `;
     }
-  });
+  }
 
   if (featuresActiveDiv) {
     featuresActiveDiv.innerHTML = listFeaturesActive;
@@ -3235,7 +3290,7 @@ async function heraldHud_getDataSpellsList() {
       }
     }
   });
-  [
+  let arrSpells = [
     "atWill",
     "innate",
     "cantrip",
@@ -3250,7 +3305,8 @@ async function heraldHud_getDataSpellsList() {
     "8",
     "9",
     "ritual",
-  ].forEach((key) => {
+  ];
+  for (const key of arrSpells) {
     let { title, spells } = spellCategories[key];
     if (spells.length > 0) {
       let spellSlotDisplay = ``;
@@ -3265,7 +3321,7 @@ async function heraldHud_getDataSpellsList() {
         <div class="heraldHud-spellLevelTitle">${title}</div>
         <div class="heraldHud-spellLevelSlot" data-level="${key}">${spellSlotDisplay}</div>
       </div>`;
-      spells.forEach((item) => {
+      for (const item of spells) {
         let rawItemId = `.Item.${item.id}`;
         let isFavorited = favoritesActor.some(
           (favorite) => favorite.id === rawItemId
@@ -3358,6 +3414,11 @@ async function heraldHud_getDataSpellsList() {
         let displayRange = spellsRange ? `${spellsRange} ${target}`.trim() : "";
 
         let htmlDescription = item.system.description.value;
+        const enriched = await TextEditor.enrichHTML(htmlDescription, {
+          async: true,
+          secrets: true,
+          documents: true,
+        });
         let arrPropertiTooltip = [];
         let labelPropertiTooltip = "";
         if (key) {
@@ -3423,9 +3484,9 @@ async function heraldHud_getDataSpellsList() {
               </div>
           </div>
         `;
-      });
+      }
     }
-  });
+  }
 
   if (spellListDiv) {
     spellListDiv.innerHTML = listSpells;
@@ -5316,7 +5377,9 @@ async function heraldHud_renderChargeTracker() {
         <div id="heraldHud-chargeValue-${
           item.id
         }" class="heraldHud-chargeValue" >${charges}/${maxCharges}</div>
-        <div class="heraldHud-chargeTrackerTooltip">${item.name} <br /> <img src="/systems/dnd5e/icons/svg/mouse-left.svg" class="heraldHud-leftClickIcon" alt="Left Click" /></div>
+        <div class="heraldHud-chargeTrackerTooltip">${
+          item.name
+        } <br /> <img src="/systems/dnd5e/icons/svg/mouse-left.svg" class="heraldHud-leftClickIcon" alt="Left Click" /></div>
          ${
            isFavorite
              ? '<div class="heraldHud-chargeFavoriteIcon"><i class="fa-solid fa-sparkle"></i></div>'
@@ -5799,8 +5862,6 @@ async function heraldHud_getDataListNpc() {
     let tokenDocument = await fromUuid(id.tokenId);
     let token = tokenDocument.object;
     let npc = tokenDocument.actor;
-    console.log(tokenDocument);
-    console.log(npc);
     // let npc = await fromUuid(`Actor.${tokenDocument.actorId}`);
 
     const hp = npc.system.attributes.hp.value;
@@ -6961,7 +7022,9 @@ Hooks.on("updateItem", async (item, changes, options, userId) => {
   if (heraldHud_displayChargeTracker == false) {
     await heraldHud_getActorData();
     await heraldHud_renderChargeTracker();
+    
   }
+   await heraldHud_updateItemCosumablesActor();
 });
 
 export { heraldHud_renderHtml, heraldHud_renderHeraldHud };

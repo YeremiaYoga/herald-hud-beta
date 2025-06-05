@@ -2028,14 +2028,19 @@ async function heraldHud_getViewQuest() {
   let listTypeQuest = "";
   for (let quest of typeQuest) {
     listTypeQuest += `
-    <div class="heraldHud-typeQuestContainer" data-name="${quest.name}">
-       <img
-            src="${quest.src}"
-            alt="${quest.name}"
-            class="heraldHud-typeQuestImage"
-          />
-    </div>
-    `;
+    
+    <div class="heraldHud-typeQuestWrapper">
+     <div class="heraldHud-typeQuestLabel"> ${quest.name}</div>
+      <div class="heraldHud-typeQuestContainer" data-name="${quest.name}">
+        <img
+          src="${quest.src}"
+          alt="${quest.name}"
+          class="heraldHud-typeQuestImage"
+        />
+        <div class="heraldHud-typeQuestTooltip">${quest.name}</div>
+      </div>
+     
+    </div>`;
   }
   if (heraldHud_dialog2Div) {
     heraldHud_dialog2Div.innerHTML = `
@@ -2056,13 +2061,15 @@ async function heraldHud_getViewQuest() {
       el.addEventListener("click", async function () {
         const isActive = this.classList.contains("active");
 
-        document
-          .querySelectorAll(".heraldHud-typeQuestContainer")
-          .forEach((el) => el.classList.remove("active"));
+       document.querySelectorAll(".heraldHud-typeQuestContainer").forEach((el) => {
+      el.classList.remove("active");
+      el.parentElement.querySelector(".heraldHud-typeQuestLabel").classList.remove("visible");
+    });
 
-        if (!isActive) {
-          this.classList.add("active");
-        }
+    if (!isActive) {
+      this.classList.add("active");
+      this.parentElement.querySelector(".heraldHud-typeQuestLabel").classList.add("visible");
+    }
         await heraldHud_renderListQuest();
       });
     });

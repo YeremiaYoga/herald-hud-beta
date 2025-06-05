@@ -68,6 +68,7 @@
 .heraldHud-detailEffectBottom {
     display: flex;
     gap: 5px;
+    font-size: 10px;
 }
 
 .heraldHud-detailEffectType {
@@ -93,6 +94,7 @@
 }
 
 .heraldHud-detailEffectDuration {
+   
     padding: 4px;
     display: inline-block;
     background-color: rgba(255, 51, 0, 0.5);
