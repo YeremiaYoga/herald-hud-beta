@@ -2231,7 +2231,6 @@ async function heraldHud_renderListQuest() {
         src = t.src;
       }
     }
-    console.log(quest);
     // const matchType = typeQuest.find(
     //   (t) => t.name === quest.flags["herald-hud"].type
     // );

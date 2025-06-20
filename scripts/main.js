@@ -30,10 +30,12 @@ Hooks.once("init", () => {
     ? [
         "modules/herald-hud-beta/styles/v13/style.css",
         "modules/herald-hud-beta/styles/v13/journaling.css",
+        "modules/herald-hud-beta/styles/playlist.css",
       ]
     : [
         "modules/herald-hud-beta/styles/style.css",
         "modules/herald-hud-beta/styles/menuDetail.css",
+        "modules/herald-hud-beta/styles/playlist.css",
       ];
 
   for (const cssFile of cssFiles) {

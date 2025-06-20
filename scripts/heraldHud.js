@@ -1,5 +1,6 @@
 import * as md from "./journaling.js";
 import * as hl from "./helper.js";
+import * as pl from "./playlist.js";
 
 let heraldHud_actorSelected = null;
 let heraldHud_npcPlayerOwned = [];
@@ -1032,14 +1033,13 @@ async function heraldHud_universalChecker() {
   await heraldHud_updateEffectActor();
   heraldHud_checkerValue = setInterval(async () => {
     await heraldHud_updateEffectActor();
-    await heraldHud_updateItemCosumablesActor();
-  }, 1000);
+    // await heraldHud_updateItemCosumablesActor();
+  }, 6000);
 }
 
 Hooks.on("midi-qol.RollComplete", async (workflow) => {
   await heraldHud_updateItemCosumablesActor();
 });
-
 
 Hooks.on("createActiveEffect", async (effect) => {
   await heraldHud_updateEffectActor();
@@ -1702,6 +1702,7 @@ async function heraldHud_showDialog(kategori) {
     await heraldHud_renderDialog(kategori);
     heraldHud_showDialogValue = true;
   }
+  await heraldHud_updateEffectActor();
   if (kategori == "inventory") {
     await heraldHud_renderItemInventory();
   } else if (kategori == "loot") {
@@ -4307,6 +4308,13 @@ async function heraldHud_openSettingHudDialog() {
           </div>
         </div>
       </fieldset>
+      <fieldset style="border-radius:5px; padding:10px;">
+       <button id="heraldHud-playlistAccessButton" type="button" style="background-color: transparent;
+          color: white;border: 1px solid white;padding: 4px 8px;border-radius: 4px;cursor: pointer;">
+          Access Playlist
+        </button>
+      </fieldset>
+
     </div>
   `;
 
@@ -4540,6 +4548,11 @@ async function heraldHud_openSettingHudDialog() {
         await heraldHud_previewHudFrame(selectedValue);
       });
 
+    document
+      .getElementById("heraldHud-playlistAccessButton")
+      .addEventListener("click", () => {
+        pl.heraldPlaylist_dialogPlaylist();
+      });
     const dialogElement = app.element[0];
 
     const contentElement = dialogElement.querySelector(".window-content");
@@ -7022,9 +7035,8 @@ Hooks.on("updateItem", async (item, changes, options, userId) => {
   if (heraldHud_displayChargeTracker == false) {
     await heraldHud_getActorData();
     await heraldHud_renderChargeTracker();
-    
   }
-   await heraldHud_updateItemCosumablesActor();
+  await heraldHud_updateItemCosumablesActor();
 });
 
 export { heraldHud_renderHtml, heraldHud_renderHeraldHud };

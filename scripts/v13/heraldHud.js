@@ -821,7 +821,7 @@ async function heraldHud_updateDataActor() {
       if (overlayThorn) {
         overlayThorn.innerHTML = ` `;
       }
-         if(thornButton){
+      if (thornButton) {
         thornButton.innerHTML = ``;
       }
     } else {
@@ -4260,6 +4260,11 @@ async function heraldHud_openSettingHudDialog() {
           </div>
         </div>
       </fieldset>
+      <fieldset style="border-radius:5px; padding:10px;">
+       <button id="heraldHud-playlistAccessButton" type="button">
+          Access Playlist
+        </button>
+      </fieldset>
     </div>
   `;
 
@@ -4491,6 +4496,12 @@ async function heraldHud_openSettingHudDialog() {
       .addEventListener("change", async (event) => {
         const selectedValue = event.target.value;
         await heraldHud_previewHudFrame(selectedValue);
+      });
+
+    document
+      .getElementById("heraldHud-playlistAccessButton")
+      .addEventListener("click", () => {
+        pl.heraldPlaylist_dialogPlaylist();
       });
 
     const dialogElement = app.element[0];

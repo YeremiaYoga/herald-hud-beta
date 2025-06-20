@@ -2061,15 +2061,21 @@ async function heraldHud_getViewQuest() {
       el.addEventListener("click", async function () {
         const isActive = this.classList.contains("active");
 
-       document.querySelectorAll(".heraldHud-typeQuestContainer").forEach((el) => {
-      el.classList.remove("active");
-      el.parentElement.querySelector(".heraldHud-typeQuestLabel").classList.remove("visible");
-    });
+        document
+          .querySelectorAll(".heraldHud-typeQuestContainer")
+          .forEach((el) => {
+            el.classList.remove("active");
+            el.parentElement
+              .querySelector(".heraldHud-typeQuestLabel")
+              .classList.remove("visible");
+          });
 
-    if (!isActive) {
-      this.classList.add("active");
-      this.parentElement.querySelector(".heraldHud-typeQuestLabel").classList.add("visible");
-    }
+        if (!isActive) {
+          this.classList.add("active");
+          this.parentElement
+            .querySelector(".heraldHud-typeQuestLabel")
+            .classList.add("visible");
+        }
         await heraldHud_renderListQuest();
       });
     });
