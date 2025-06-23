@@ -1,3 +1,8 @@
-2025/06/19-19:40:23.424 1860 Recovering log #215
-2025/06/19-19:40:23.428 1860 Delete type=0 #215
-2025/06/19-19:40:23.428 1860 Delete type=3 #214
+2025/06/23-09:22:16.492 68e0 Recovering log #221
+2025/06/23-09:22:16.499 68e0 Delete type=0 #221
+2025/06/23-09:22:16.499 68e0 Delete type=3 #220
+2025/06/23-09:36:27.950 b9c Level-0 table #225: started
+2025/06/23-09:36:27.950 b9c Level-0 table #225: 0 bytes OK
+2025/06/23-09:36:27.952 b9c Delete type=0 #223
+2025/06/23-09:36:27.957 b9c Manual compaction at level-0 from '!folders!24YSYYEaIhIDBe65' @ 72057594037927935 : 1 .. '!journal.pages!aKowIu4tawahYHb4.bfhSl2quyQlYxEUf' @ 0 : 0; will stop at (end)
+2025/06/23-09:36:27.957 b9c Manual compaction at level-1 from '!folders!24YSYYEaIhIDBe65' @ 72057594037927935 : 1 .. '!journal.pages!aKowIu4tawahYHb4.bfhSl2quyQlYxEUf' @ 0 : 0; will stop at (end)

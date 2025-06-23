@@ -291,7 +291,7 @@ async function heraldHud_getActorData() {
   let selectedActor = user.character;
 
   let sceneListActor = game.scenes.viewed.tokens
-    .filter((t) => t.actor.type === "character")
+    .filter((t) => t.actor?.type === "character" && t.actor?.system?.dl)
     .map((t) => t.actor);
 
   if (selectedActor) {
