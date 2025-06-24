@@ -1726,7 +1726,9 @@ async function heraldHud_renderListPartyJournalMiddleContainer() {
             },
             cancel: {
               label: "Cancel",
-              callback: () => {},
+              callback: () => {
+                
+              },
             },
           },
           default: "save",

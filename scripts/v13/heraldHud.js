@@ -1,6 +1,7 @@
 import * as md from "./journaling.js";
 import * as hl from "../helper.js";
 
+
 let heraldHud_actorSelected = null;
 let heraldHud_npcPlayerOwned = [];
 let heraldHud_npcPlayerSelected = [];

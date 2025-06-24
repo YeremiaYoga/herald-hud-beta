@@ -1072,10 +1072,9 @@ async function heraldHud_updateEffectActor() {
   let activeEffect = ``;
   let disableEffect = ``;
 
-  arrEffect.forEach((effect) => {
-    if (effect.target !== actor) {
-      return;
-    }
+  for (const effect of arrEffect) {
+    if (effect.target !== actor) continue;
+
     let stackDiv = "";
     if (/\(\d+\)/.test(effect.name)) {
       const match = effect.name.match(/\((\d+)\)/);
@@ -1084,78 +1083,67 @@ async function heraldHud_updateEffectActor() {
         stackDiv = `<div class="heraldHud-stackEffect">${number}</div>`;
       }
     }
+
     let durationDiv = "";
     if (effect.duration.remaining > 0) {
       let totalSeconds = effect.duration.remaining || 0;
       let rounds = Math.floor(totalSeconds / 6);
       let secondsLeft = totalSeconds % 6;
-      let secondText = ``;
-      if (secondsLeft > 0) {
-        secondText = `(${secondsLeft} Second)`;
-      }
-      durationDiv = `
-            <div class="heraldHud-detailEffectDuration">
-              (${rounds} Round)${secondText}
-            </div>`;
+      let secondText = secondsLeft > 0 ? `(${secondsLeft} Second)` : "";
+      durationDiv = `<div class="heraldHud-detailEffectDuration">(${rounds} Round)${secondText}</div>`;
     }
-    let effectDisabled = "";
 
-    if (effect.disabled) {
-      effectDisabled = `<div class="heraldHud-detailEffectDisable">Disabled</div>`;
-    }
+    let effectDisabled = effect.disabled
+      ? `<div class="heraldHud-detailEffectDisable">Disabled</div>`
+      : "";
+
+    const enrichedDescription = await TextEditor.enrichHTML(
+      effect.description ?? "",
+      {
+        async: true,
+        secrets: true,
+        documents: true,
+      }
+    );
 
     const effectDetailDiv = `
-      <div class="heraldHud-effectTooltip" style="display: none;">
-        <h3>${effect.name}</h3>
-        <div>
-          <div>${effect.description}</div>
+    <div class="heraldHud-effectTooltip" style="display: none;">
+      <h3>${effect.name}</h3>
+      <div>${enrichedDescription}</div>
+      <div id="heraldHud-detailEffectBottom" class="heraldHud-detailEffectBottom">
+        <div id="heraldHud-detailEffectType" class="heraldHud-detailEffectType">
+          ${effect.isTemporary ? "Temporary" : "Passive"}
         </div>
-        <div id="heraldHud-detailEffectBottom" class="heraldHud-detailEffectBottom">
-          <div id="heraldHud-detailEffectType" class="heraldHud-detailEffectType">
-            ${effect.isTemporary ? "Temporary" : "Passive"}
-          </div>
-          ${durationDiv}
-          ${effectDisabled}
-        </div>
-      </div>`;
+        ${durationDiv}
+        ${effectDisabled}
+      </div>
+    </div>`;
+
+    const effectHTML = `
+    <div id="heraldHud-effectContainer" data-effect-id="${
+      effect.id
+    }" class="heraldHud-effectContainer">
+      <div class="heraldHud-effectItem">
+        <img src="${effect.img}" alt="${
+      effect.name
+    }" class="heraldHud-playerEffect"
+        ${
+          effect.disabled
+            ? 'style="filter: brightness(85%); opacity: 0.7;"'
+            : ""
+        } />
+        ${stackDiv}
+      </div>
+      ${effectDetailDiv}
+    </div>`;
 
     if (!effect.disabled) {
-      activeEffect += `
-         <div id="heraldHud-effectContainer" data-effect-id="${
-           effect.id
-         }" class="heraldHud-effectContainer">
-          <div class="heraldHud-effectItem">
-            <img src="${effect.img}" alt="${effect.name}" 
-            class="heraldHud-playerEffect" ${
-              effect.disabled
-                ? 'style="filter: brightness(85%); opacity: 0.7;"'
-                : ""
-            } />
-            ${stackDiv}
-          </div>
-          ${effectDetailDiv}
-        </div>`;
+      activeEffect += effectHTML;
     } else {
-      disableEffect += `
-        <div id="heraldHud-effectContainer" data-effect-id="${
-          effect.id
-        }" class="heraldHud-effectContainer">
-          <div class="heraldHud-effectItem">
-            <img src="${effect.img}" alt="${effect.name}" 
-            class="heraldHud-playerEffect" ${
-              effect.disabled
-                ? 'style="filter: brightness(85%); opacity: 0.7;"'
-                : ""
-            } />
-            ${stackDiv}
-          </div>
-          ${effectDetailDiv}
-        </div>
-      `;
+      disableEffect += effectHTML;
     }
-  });
+  }
   effectlist = activeEffect + disableEffect;
-
   if (effectlist == ``) {
     effectlist = `
       <div>
