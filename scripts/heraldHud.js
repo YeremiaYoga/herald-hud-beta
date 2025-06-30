@@ -1033,6 +1033,7 @@ async function heraldHud_universalChecker() {
   await heraldHud_updateEffectActor();
   heraldHud_checkerValue = setInterval(async () => {
     await heraldHud_updateEffectActor();
+
     // await heraldHud_updateItemCosumablesActor();
   }, 6000);
 }
@@ -1691,6 +1692,7 @@ async function heraldHud_showDialog(kategori) {
     heraldHud_showDialogValue = true;
   }
   await heraldHud_updateEffectActor();
+  await heraldHud_updateDataActor();
   if (kategori == "inventory") {
     await heraldHud_renderItemInventory();
   } else if (kategori == "loot") {

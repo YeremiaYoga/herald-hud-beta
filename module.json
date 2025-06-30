@@ -1,7 +1,7 @@
 {
   "title": "Herald HUD Beta",
   "description": "Herald Beta Testing",
-  "version": "1.0.61",
+  "version": "1.0.62",
   "manifest": "https://raw.githubusercontent.com/YeremiaYoga/herald-hud-beta/main/module.json",
   "download": "https://github.com/YeremiaYoga/herald-hud-beta/archive/refs/heads/main.zip",
   "esmodules": ["scripts/main.js"],
