@@ -5427,7 +5427,7 @@ async function heraldHud_renderChargeTracker() {
 
 async function heraldHud_showDialogAddSummon() {
   let sceneListActor = game.scenes.viewed.tokens
-    .filter((t) => t.actor.type === "npc")
+    .filter((t) => t.actor?.type === "npc")
     .map((t) => t.actor);
   const user = game.user;
   heraldHud_npcPlayerOwned = [];
