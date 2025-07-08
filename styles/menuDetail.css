@@ -245,6 +245,7 @@
 .heraldHud-personalNotesName {
   font-size: 16px;
   font-weight: bold;
+  cursor: pointer;
 }
 
 .heraldHud-personalNotesRightContainer {
@@ -408,6 +409,7 @@
 .heraldHud-partyJournalName {
   font-size: 16px;
   font-weight: bold;
+  cursor: pointer;
 }
 
 .heraldHud-partyJournalRightContainer {

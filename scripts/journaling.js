@@ -700,7 +700,7 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
       <div id="heraldHud-personalNotesWrapperContainer" class="heraldHud-personalNotesWrapperContainer">
         <div id="heraldHud-personalNotesContainer" class="heraldHud-personalNotesContainer" data-id="${journal.id}">
           <div id="heraldHud-personalNotesLeftContainer" class="heraldHud-personalNotesLeftContainer">
-            <div id="heraldHud-personalNotesName" class="heraldHud-personalNotesName">${journalName}</div>
+            <div id="heraldHud-personalNotesName" class="heraldHud-personalNotesName" data-id="${journal.id}">${journalName}</div>
           </div>
           <div id="heraldHud-personalNotesMiddleContainer" class="heraldHud-personalNotesMiddleContainer">
           </div>
@@ -730,7 +730,7 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
         <div id="heraldHud-personalNotesWrapperContainer" class="heraldHud-personalNotesWrapperContainer">
           <div id="heraldHud-personalNotesContainer" class="heraldHud-personalNotesContainer" data-id="${journal.id}">
             <div id="heraldHud-personalNotesLeftContainer" class="heraldHud-personalNotesLeftContainer">
-              <div id="heraldHud-personalNotesName" class="heraldHud-personalNotesName">${journalName}</div>
+              <div id="heraldHud-personalNotesName" class="heraldHud-personalNotesName" data-id="${journal.id}">${journalName}</div>
             </div>
             <div id="heraldHud-personalNotesMiddleContainer" class="heraldHud-personalNotesMiddleContainer">
             </div>
@@ -794,6 +794,19 @@ async function heraldHud_renderListPersonalNotesMiddleContainer() {
       container.addEventListener("click", async (event) => {
         const journalId = container.getAttribute("data-id");
         await heraldHud_addPagePersonalNotes(journalId);
+      });
+    });
+
+    const journalNames = dialogMiddle.querySelectorAll(
+      ".heraldHud-personalNotesName"
+    );
+
+    journalNames.forEach((nameEl) => {
+      nameEl.addEventListener("click", async (event) => {
+        const journalId = nameEl.getAttribute("data-id");
+        const journal = game.journal.get(journalId);
+        if (!journal) return;
+        await journal.sheet.render(true);
       });
     });
 
@@ -1557,7 +1570,7 @@ async function heraldHud_renderListPartyJournalMiddleContainer() {
         <div id="heraldHud-partyJournalWrapperContainer" class="heraldHud-partyJournalWrapperContainer">
           <div id="heraldHud-partyJournalContainer" class="heraldHud-partyJournalContainer" data-id="${journal.id}">
             <div id="heraldHud-partyJournalLeftContainer" class="heraldHud-partyJournalLeftContainer">
-              <div id="heraldHud-partyJournalName" class="heraldHud-partyJournalName">${journalName}</div>
+              <div id="heraldHud-partyJournalName" class="heraldHud-partyJournalName" data-id="${journal.id}">${journalName}</div>
             </div>
             <div id="heraldHud-partyJournalMiddleContainer" class="heraldHud-partyJournalMiddleContainer">
             </div>
@@ -1612,6 +1625,19 @@ async function heraldHud_renderListPartyJournalMiddleContainer() {
       container.addEventListener("click", async (event) => {
         const journalId = container.getAttribute("data-id");
         await heraldHud_addPagePartyJournal(journalId);
+      });
+    });
+
+      const journalNames = dialogMiddle.querySelectorAll(
+      ".heraldHud-partyJournalName"
+    );
+
+    journalNames.forEach((nameEl) => {
+      nameEl.addEventListener("click", async (event) => {
+        const journalId = nameEl.getAttribute("data-id");
+        const journal = game.journal.get(journalId);
+        if (!journal) return;
+        await journal.sheet.render(true);
       });
     });
 
@@ -1726,9 +1752,7 @@ async function heraldHud_renderListPartyJournalMiddleContainer() {
             },
             cancel: {
               label: "Cancel",
-              callback: () => {
-                
-              },
+              callback: () => {},
             },
           },
           default: "save",
